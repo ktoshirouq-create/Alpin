@@ -161,7 +161,29 @@ button.chip::after{display:none}
 .cbtn:disabled{opacity:.3;border-color:var(--rule);color:var(--muted)}
 .tot{font-size:13px;color:var(--muted);margin-left:2px}
 .muted{color:var(--muted);font-weight:400}
-.fanum.work{color:var(--acc)}
+/* phase colours */
+:root{--rest:#1E8E5A;--readyc:var(--ink);--wash-work:rgba(184,53,42,.16);--wash-rest:rgba(30,142,90,.16)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rest:#4CC38A;--readyc:#FFFFFF;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18)}}
+:root[data-theme="dark"]{--rest:#4CC38A;--readyc:#FFFFFF;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18)}
+#fa{transition:background-color .3s}
+#fa.ph-work{background:linear-gradient(to top,var(--wash-work),var(--bg) 75%) var(--bg)}
+#fa.ph-rest{background:linear-gradient(to top,var(--wash-rest),var(--bg) 75%) var(--bg)}
+#fa.ph-ready .fanum{color:var(--readyc)}
+#fa.ph-work .fanum{color:var(--acc)}
+#fa.ph-rest .fanum{color:var(--rest)}
+#fa.ph-ready .falbl{color:var(--readyc)}
+#fa.ph-work .falbl{color:var(--acc)}
+#fa.ph-rest .falbl{color:var(--rest)}
+/* running view: the number takes over */
+#fa.running .fabody .frames,#fa.running .fabody .cue,#fa.running .fabody .sub{display:none}
+#fa.running .fabody{flex:0 0 auto}
+#fa.running .fatimer{flex:1;display:flex;flex-direction:column;justify-content:center}
+#fa.running .fanum{font-size:min(42vw,200px)}
+#fa.running .falbl{font-size:20px}
+.slotnote{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.slotbox{border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.slothead{margin:0;font-weight:600;font-size:14px;color:var(--acc)}
+.ready-chip b{color:var(--ink)}
 .falv{margin:0 0 12px}
 /* errors + diagnostics */
 #err{position:fixed;left:10px;right:10px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:50;background:#B8352A;color:#fff;
@@ -187,7 +209,11 @@ button.chip::after{display:none}
     <option value="iv">Intervals (work / rest)</option><option value="text">Just a description</option></select></label>
   <label class="chk customonly"><input type="checkbox" name="sides"> Timed holds: do each side</label>
   <label>What to watch for<textarea name="cue" rows="2"></textarea></label>
-  <label class="customonly">Levels <span class="hint">optional, easiest first, one per line, up to 5</span><textarea name="levels" rows="4" placeholder="Bodyweight&#10;Hold 5 kg&#10;Hold 10 kg"></textarea></label>
+  <div class="slotbox slotonly"><p class="slothead" id="slotHead">Slot 1</p>
+    <label>Slot name<input name="slotname" autocomplete="off"></label>
+    <label>Slot note <span class="hint">optional, e.g. which tools or weights</span><input name="slotnote" autocomplete="off"></label>
+    <button type="button" class="link" id="slotReset">Reset this slot to default</button></div>
+  <label class="customonly newonly">Slot names <span class="hint">optional, easiest first, one per line, up to 5</span><textarea name="levels" rows="4" placeholder="Bodyweight&#10;Hold 5 kg&#10;Hold 10 kg"></textarea></label>
   <label>Group<select name="tier"><option value="e">Essential, do every time</option><option value="x">Extra, when there's time</option></select></label>
   <label class="customonly">Picture<select name="pic"></select></label>
   <p class="hint customonly">Set the numbers afterwards with "Adjust numbers" on the card.</p>
@@ -607,8 +633,8 @@ const PROGS=[
   {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','hills','z2'],extra:['z2']}]},
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
   {title:'Tools and grip',sub:'Twice a week, never on back-to-back days.',items:['toolhang','lockoff'],extra:['lockoff']},
-  {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank','kneewall'],extra:['calf','plank','kneewall']}]},
- {id:'daily',chip:'Daily stretch',title:'Daily stretch',lede:'About 10 minutes. Slow and easy, breathe out into each stretch.',routine:true,sections:[
+  {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
+ {id:'daily',chip:'Stretch',title:'Stretch',lede:'About 10 minutes. Slow and easy, breathe out into each stretch.',routine:true,sections:[
   {title:'Routine',items:['catcow','child','hipflex','hamstring','calfstretch','kneewall','squathold'],extra:['catcow','child','hamstring','kneewall']}]},
  {id:'prerun',chip:'Pre-run',title:'Pre-run',lede:'A few minutes of dynamic moves before you head out. Keep it loose, no long holds.',routine:true,sections:[
   {title:'Routine',items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']}]},
@@ -620,10 +646,12 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10}});
+const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=10;
   if(!Array.isArray(S0.hidden))S0.hidden=[];
   // built-in edits keep only name and cue; numbers now live in levels and tuning
   Object.keys(S0.edits).forEach(id=>{const e=S0.edits[id]||{};const k={};
@@ -631,6 +659,13 @@ function clean(raw){
     if(Object.keys(k).length)S0.edits[id]=k;else delete S0.edits[id]});
   Object.keys(S0.levels).forEach(id=>{const v=parseInt(S0.levels[id],10);
     if(!(v>=0&&v<=4))delete S0.levels[id];else S0.levels[id]=v});
+  // older versions kept per-level tweaks in tune["id@N"]: move them into that slot
+  Object.keys(S0.tune).forEach(k=>{const m=k.match(/^([^:@]+)@([0-4])$/);if(!m)return;
+    const sl=S0.slots[m[1]]=S0.slots[m[1]]||{};const o=sl[m[2]]=sl[m[2]]||{};
+    o.p={...(S0.tune[k]||{}),...(o.p||{})};delete S0.tune[k]});
+  Object.keys(S0.slots).forEach(id=>{const sl=S0.slots[id];if(!sl||typeof sl!=='object'){delete S0.slots[id];return}
+    Object.keys(sl).forEach(i=>{if(!/^[0-4]$/.test(i)||!sl[i]||typeof sl[i]!=='object')delete sl[i]});
+    if(!Object.keys(sl).length)delete S0.slots[id]});
   return S0;
 }
 let S=blank();
@@ -661,17 +696,17 @@ function phasesOf(e){
   if(e.kind==='iv'){
     for(let st=1;st<=p.sets;st++){
       for(let r=1;r<=p.reps;r++){
-        ph.push({t:p.work,l:`Rep ${r} of ${p.reps}${p.sets>1?` · set ${st} of ${p.sets}`:''}`,work:true});
-        if(r<p.reps&&p.rest)ph.push({t:p.rest,l:'Rest',work:false});
+        ph.push({t:p.work,l:`Rep ${r} of ${p.reps}${p.sets>1?` · set ${st} of ${p.sets}`:''}`,work:true,kind:'work'});
+        if(r<p.reps&&p.rest)ph.push({t:p.rest,l:'Rest',work:false,kind:'rest'});
       }
-      if(st<p.sets&&p.setRest)ph.push({t:p.setRest,l:`Rest before set ${st+1}`,work:false});
+      if(st<p.sets&&p.setRest)ph.push({t:p.setRest,l:`Rest before set ${st+1}`,work:false,kind:'rest'});
     }
   }else if(e.kind==='hold'){
     for(let st=1;st<=p.sets;st++){
       const lab=p.sets>1?`Set ${st} of ${p.sets}`:'Hold';
-      if(p.sides){ph.push({t:p.time,l:lab+' · first side',work:true});ph.push({t:5,l:'Switch sides',work:false});ph.push({t:p.time,l:lab+' · second side',work:true})}
-      else ph.push({t:p.time,l:lab,work:true});
-      if(st<p.sets&&p.rest)ph.push({t:p.rest,l:'Rest',work:false});
+      if(p.sides){ph.push({t:p.time,l:lab+' · first side',work:true,kind:'work'});ph.push({t:5,l:'Switch sides',work:false,kind:'ready'});ph.push({t:p.time,l:lab+' · second side',work:true,kind:'work'})}
+      else ph.push({t:p.time,l:lab,work:true,kind:'work'});
+      if(st<p.sets&&p.rest)ph.push({t:p.rest,l:'Rest',work:false,kind:'rest'});
     }
   }
   return ph.length?ph:null;
@@ -684,7 +719,7 @@ function baseOf(id){
   if(c){
     const kind=DEF[c.kind]?c.kind:'reps';
     const P={...DEF[kind],...(c.P||{})};if(kind==='hold')P.sides=!!c.sides;
-    const L=(c.levels||[]).length?c.levels.map(v=>({v,p:{}})):null;
+    const names=(c.levels||[]).slice(0,5);const L=[0,1,2,3,4].map(i=>({v:names[i]||('Slot '+(i+1)),p:{}}));
     return {name:c.name,cue:c.cue||'',frames:c.pic&&EX[c.pic]?EX[c.pic].frames:[],kind,P,L,custom:true};
   }
   const b=EX[id];if(!b)return null;
@@ -698,10 +733,13 @@ function resolve(item,pid){
   const lvl=L?Math.min(S.levels[it.id]||0,L.length-1):-1;
   const key=warm?`${pid}:${it.id}@w`:(L?`${it.id}@${lvl}`:`${it.id}@x`);
   const preset=warm?{...(b.P||{}),...it.warm}:{...(b.P||{}),...(L?L[lvl].p:{})};
-  const tune=S.tune[key]||{};
-  const p={...preset,...tune};
+  let p,tuned,slotName='',slotNote='',slotEdited=false;
+  if(L){const o=((S.slots[it.id]||{})[lvl])||{};
+    p={...preset,...(o.p||{})};tuned=!!(o.p&&Object.keys(o.p).length);
+    slotName=o.name||L[lvl].v;slotNote=o.note||'';slotEdited=tuned||!!o.name||!!o.note}
+  else{const tune=S.tune[key]||{};p={...preset,...tune};tuned=Object.keys(tune).length>0}
   return {id:it.id,pid,name:b.name,cue:b.cue,frames:b.frames||[],kind:b.kind,P:preset,p,L,lvl,key,warm,
-    tuned:Object.keys(tune).length>0,version:L?L[lvl].v:'',dose:doseOf(b.kind,p),
+    tuned,slotEdited,note:slotNote,version:slotName,defName:L?L[lvl].v:'',dose:doseOf(b.kind,p),
     timed:b.kind==='hold'||b.kind==='iv',custom:!!b.custom,edited:!!S.edits[it.id]};
 }
 function sectionItems(p,si){
@@ -735,6 +773,10 @@ function paramsFor(e){
 }
 const showVal=(k,v)=>(k==='sets'||k==='reps')?String(v):fmtS(v);
 let openChip=null;
+function readyChip(){const v=S.settings.ready,txt=v?`<b>${v} s</b> get ready`:'<b>No</b> countdown';
+  if(openChip!=='__ready')return `<button class="chip ready-chip" data-act="tsel" data-chip="__ready">${txt}</button>`;
+  const i=READY_OPTS.indexOf(v);
+  return `<span class="chip on ready-chip"><button class="cbtn" data-act="rstep" data-d="-1" aria-label="Shorter countdown"${i<=0?' disabled':''}>−</button>${txt}<button class="cbtn" data-act="rstep" data-d="1" aria-label="Longer countdown"${i>=READY_OPTS.length-1?' disabled':''}>+</button></span>`}
 function stepOf(k,v,d){const o=OPTS[k];let i=o.indexOf(v);
   if(i<0){i=o.findIndex(x=>x>v);if(i<0)i=o.length;if(d<0)i--;else i=i;return o[Math.max(0,Math.min(o.length-1,i))]}
   return o[Math.max(0,Math.min(o.length-1,i+d))]}
@@ -749,7 +791,7 @@ function chipsHTML(e){
 }
 function dotsHTML(e,scope){
   const name=`lv-${scope}-${e.pid}-${e.sec??'x'}-${e.id}`;
-  return `<div class="dots" role="radiogroup" aria-label="Level">${e.L.map((l,i)=>`<label class="dot${i<e.lvl?' past':''}" title="${esc(l.v)}"><input type="radio" name="${esc(name)}" value="${i}" data-lv="${esc(e.id)}"${i===e.lvl?' checked':''}><span>${i+1}</span></label>`).join('')}</div>`;
+  return `<div class="dots" role="radiogroup" aria-label="Slot">${e.L.map((l,i)=>`<label class="dot${i<e.lvl?' past':''}" title="${esc(l.v)}"><input type="radio" name="${esc(name)}" value="${i}" data-lv="${esc(e.id)}"${i===e.lvl?' checked':''}><span>${i+1}</span></label>`).join('')}</div>`;
 }
 
 /* ---------- render ---------- */
@@ -762,11 +804,11 @@ function card(e){
    <div class="exhead"><h3>${esc(e.name)}${e.custom?'<span class="tag">yours</span>':''}</h3><span class="dose">${esc(e.dose)}</span></div>
    ${framesHTML(e.frames)}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
-   ${e.L?`<div class="lv"><div class="lvtxt"><span class="lvn">Level ${e.lvl+1}</span>${esc(e.version)}</div>${dotsHTML(e,'c')}</div>`:''}
-   ${e.warm?`<p class="warmnote">Warm-up dose, not tied to a level</p>`:''}
-   ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>adjusted</em>':''}</summary>
+   ${e.L?`<div class="lv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'c')}</div>`:''}
+   ${e.warm?`<p class="warmnote">Warm-up dose, separate from your slots</p>`:''}
+   ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>edited</em>':''}</summary>
       <div class="chips">${chipsHTML(e)}${e.timed?`<span class="tot">≈${Math.max(1,Math.round(totalOf(e)/60))} min</span>`:''}</div>
-      ${e.tuned?`<button class="link" data-act="untune" data-key="${esc(e.key)}">Back to ${e.L?'level '+(e.lvl+1):'the standard'} numbers</button>`:''}</details>`:''}
+      ${e.tuned?`<button class="link" data-act="untune" data-key="${esc(e.key)}">Reset ${e.L?'slot '+(e.lvl+1):'to the standard'} numbers</button>`:''}</details>`:''}
    <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
   </article>`;
 }
@@ -811,14 +853,24 @@ function setLevel(id,v){
   if(!n||!(v>=0&&v<n))return;
   S.levels[id]=v;save();refresh();
 }
+function slotObj(id,i,create){const sl=S.slots[id]||(create?(S.slots[id]={}):null);if(!sl)return null;
+  return sl[i]||(create?(sl[i]={}):null)}
+function pruneSlot(id,i){const sl=S.slots[id];if(!sl||!sl[i])return;const o=sl[i];
+  if(o.p&&!Object.keys(o.p).length)delete o.p;if(!o.name)delete o.name;if(!o.note)delete o.note;
+  if(!Object.keys(o).length)delete sl[i];if(!Object.keys(sl).length)delete S.slots[id]}
 function setTune(key,k,v){
-  log(`setTune ${key} ${k}=${v}`);
   const e=findByKey(key);if(!e)return;
-  const t={...(S.tune[key]||{})};
-  if(e.P[k]===v)delete t[k];else t[k]=v;
-  if(Object.keys(t).length)S.tune[key]=t;else delete S.tune[key];
+  if(e.L&&!e.warm){const o=slotObj(e.id,e.lvl,true);o.p={...(o.p||{})};
+    if(e.P[k]===v)delete o.p[k];else o.p[k]=v;pruneSlot(e.id,e.lvl)}
+  else{const t={...(S.tune[key]||{})};
+    if(e.P[k]===v)delete t[k];else t[k]=v;
+    if(Object.keys(t).length)S.tune[key]=t;else delete S.tune[key]}
   save();refresh();
 }
+function resetNumbers(key){const e=findByKey(key);if(!e)return;
+  if(e.L&&!e.warm){const o=slotObj(e.id,e.lvl,false);if(o){delete o.p;pruneSlot(e.id,e.lvl)}}
+  else delete S.tune[key];
+  openChip=null;save();refresh()}
 function findByKey(key){
   if(F.open&&F.src[F.i]){const e=resolveSrc(F.src[F.i]);if(e&&e.key===key)return e}
   const p=prog();for(let si=0;si<p.sections.length;si++){const e=sectionItems(p,si).find(x=>x.key===key);if(e)return e}
@@ -853,7 +905,9 @@ function onAct(b){
   if(act==='unhide'){S.hidden=S.hidden.filter(h=>!h.startsWith(p.id+':'));save();refresh();return}
   if(act==='export'){exportData();return}
   if(act==='import'){importData();return}
-  if(act==='untune'){delete S.tune[b.dataset.key];openChip=null;save();refresh();return}
+  if(act==='untune'){resetNumbers(b.dataset.key);return}
+  if(act==='rstep'){const i=READY_OPTS.indexOf(S.settings.ready);const ni=Math.max(0,Math.min(READY_OPTS.length-1,i+(+b.dataset.d)));
+    S.settings.ready=READY_OPTS[ni];save();F.shown='';if(F.open&&!F.run&&!started())setEx(true);else drawFA();return}
   if(act==='tsel'){openChip=openChip===b.dataset.chip?null:b.dataset.chip;F.shown='';refresh();return}
   if(act==='tstep'){const e=findByKey(b.dataset.key);if(!e)return;const k=b.dataset.k;
     const nv=stepOf(k,e.p[k],+b.dataset.d);if(nv!==e.p[k])setTune(b.dataset.key,k,nv);return}
@@ -880,16 +934,29 @@ function openDlg(id,sec){
   frm.pic.innerHTML='<option value="">No picture</option>'+Object.entries(EX).filter(([,x])=>x.frames.length).map(([k,x])=>`<option value="${k}">${esc(x.name)}</option>`).join('');
   frm.pic.value=c?c.pic||'':'';
   document.querySelectorAll('.customonly').forEach(n=>n.style.display=isCustom?'':'none');
+  document.querySelectorAll('.newonly').forEach(n=>n.style.display=id?'none':'');
+  const hasSlot=!!(e&&e.L&&!e.warm);
+  document.querySelectorAll('.slotonly').forEach(n=>n.style.display=hasSlot?'':'none');
+  if(hasSlot){document.getElementById('slotHead').textContent='Slot '+(e.lvl+1)+' (the one selected on the card)';
+    frm.slotname.value=e.version;frm.slotname.placeholder=e.defName;frm.slotnote.value=e.note||'';
+    document.getElementById('slotReset').style.display=e.slotEdited?'':'none'}
+  editing.slot=hasSlot?e.lvl:null;editing.defName=hasSlot?e.defName:'';
   const del=document.getElementById('dlgDel');
   if(!id)del.style.display='none';
   else if(isCustom){del.style.display='';del.textContent='Delete'}
   else{const k=p.id+':'+id;del.style.display=(S.edits[id]||S.tiers[k])?'':'none';del.textContent='Reset to original'}
   dlg.returnValue='';dlg.showModal();
 }
+document.getElementById('slotReset').addEventListener('click',()=>{
+  const {id,slot}=editing;if(slot==null)return;
+  if(!confirm('Reset slot '+(slot+1)+' name, note and numbers to the default?'))return;
+  const sl=S.slots[id];if(sl){delete sl[slot];if(!Object.keys(sl).length)delete S.slots[id]}
+  save();dlg.close('done');refresh();
+});
 document.getElementById('dlgDel').addEventListener('click',()=>{
   const {id}=editing,p=prog();
   if(S.custom[id]){if(!confirm('Delete this exercise?'))return;
-    delete S.custom[id];delete S.levels[id];Object.keys(S.tune).forEach(k=>{if(k.startsWith(id+'@'))delete S.tune[k]})}
+    delete S.custom[id];delete S.levels[id];delete S.slots[id];Object.keys(S.tune).forEach(k=>{if(k.startsWith(id+'@'))delete S.tune[k]})}
   else{delete S.edits[id];delete S.tiers[p.id+':'+id]}
   save();dlg.close('done');refresh();
 });
@@ -897,12 +964,15 @@ frm.addEventListener('submit',ev=>{
   if(!ev.submitter||ev.submitter.value!=='save')return;
   const name=frm.name.value.trim();if(!name)return;
   const {id,sec}=editing,p=prog(),tier=frm.tier.value,cue=frm.cue.value.trim();
+  if(editing.slot!=null){const o=slotObj(id,editing.slot,true);
+    const sn=frm.slotname.value.trim(),nt=frm.slotnote.value.trim();
+    o.name=sn&&sn!==editing.defName?sn:'';o.note=nt;pruneSlot(id,editing.slot)}
   if(!id||S.custom[id]){
-    const levels=frm.levels.value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,5);
-    const v={name,cue,tier,kind:frm.kind.value,sides:frm.sides.checked,levels,pic:frm.pic.value};
-    if(!id){const nid='c'+Date.now().toString(36);S.custom[nid]={...v,prog:p.id,sec,created:Date.now()}}
-    else{const old=S.custom[id];if(old.kind!==v.kind)Object.keys(S.tune).forEach(k=>{if(k.startsWith(id+'@'))delete S.tune[k]});
-      Object.assign(old,v);if(S.levels[id]>=Math.max(1,levels.length))delete S.levels[id]}
+    const v={name,cue,tier,kind:frm.kind.value,sides:frm.sides.checked,pic:frm.pic.value};
+    if(!id){v.levels=frm.levels.value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,5);
+      const nid='c'+Date.now().toString(36);S.custom[nid]={...v,prog:p.id,sec,created:Date.now()}}
+    else{const old=S.custom[id];if(old.kind!==v.kind){delete S.slots[id];Object.keys(S.tune).forEach(k=>{if(k.startsWith(id+'@'))delete S.tune[k]})}
+      Object.assign(old,v)}
   }else{
     const b=EX[id],ed={};
     if(name!==b.name)ed.name=name;if(cue!==b.cue)ed.cue=cue;
@@ -935,10 +1005,18 @@ function importData(){
 const fa=document.getElementById('fa');
 const F={open:false,src:[],i:0,title:'',ph:null,p:0,left:0,run:false,done:false,timer:null,last:0,lock:null,shown:''};
 let actx=null;
-function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();
-  o.frequency.value=880;g.gain.setValueAtTime(.2,actx.currentTime);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+.35);
-  o.connect(g).connect(actx.destination);o.start();o.stop(actx.currentTime+.35)}catch(e){}
-  try{navigator.vibrate&&navigator.vibrate(200)}catch(e){}}
+function tone(freq,dur,delay=0,vol=.22){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const t0=actx.currentTime+delay,o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=freq;
+  g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g).connect(actx.destination);o.start(t0);o.stop(t0+dur+.02)}catch(e){}}
+const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+const SOUND={
+  tick:()=>{tone(660,.12);buzz(40)},
+  work:()=>{tone(1046,.5,0,.3);buzz(350)},
+  rest:()=>{tone(523,.22);tone(392,.4,.2);buzz([120,80,120])},
+  ready:()=>{tone(784,.3);buzz(150)},
+  done:()=>{tone(784,.18);tone(988,.18,.18);tone(1318,.5,.36,.3);buzz([200,100,200,100,400])}};
+function beep(){SOUND.work()}
 const srcOf=e=>({it:e.warm?{id:e.id,warm:PROGS.find(x=>x.id===e.pid).sections[e.sec].items.find(x=>typeof x!=='string'&&x.id===e.id).warm}:e.id,pid:e.pid,sec:e.sec,tier:e.tier});
 function resolveSrc(s){const e=resolve(s.it,s.pid);if(e){e.sec=s.sec;e.tier=s.tier}return e}
 const curEx=()=>resolveSrc(F.src[F.i]);
@@ -948,56 +1026,61 @@ async function openFA(list,title){
   fa.classList.add('open');document.body.style.overflow='hidden';
   try{F.lock=await navigator.wakeLock?.request('screen')}catch(e){}
 }
-function closeFA(){stop();F.open=false;fa.classList.remove('open');document.body.style.overflow='';try{F.lock&&F.lock.release()}catch(e){}F.lock=null}
+function closeFA(){stop();F.open=false;fa.classList.remove('open','running','ph-ready','ph-work','ph-rest','ph-done');document.body.style.overflow='';try{F.lock&&F.lock.release()}catch(e){}F.lock=null}
 function stop(){F.run=false;clearInterval(F.timer);F.timer=null}
-function setEx(){stop();openChip=null;const e=curEx();F.ph=e?phasesOf(e):null;F.p=0;F.left=F.ph?F.ph[0].t:0;F.done=false;F.shown='';drawFA()}
-function reloadFA(){if(!F.run&&!started()){const oc=openChip;setEx();openChip=oc;F.shown='';drawFA()}else drawFA()}
+function setEx(keepChip){stop();if(!keepChip)openChip=null;const e=curEx();F.ph=e?phasesOf(e):null;
+  if(F.ph&&S.settings.ready>0){const first=F.ph[0].l;F.ph.unshift({t:S.settings.ready,l:'Get ready · '+first,work:false,kind:'ready'})}
+  F.p=0;F.left=F.ph?F.ph[0].t:0;F.done=false;F.shown='';drawFA()}
+function reloadFA(){if(!F.run&&!started())setEx(true);else drawFA()}
 const started=()=>F.ph&&(F.p>0||F.left<F.ph[0].t);
 function drawFA(){
   const e=curEx();if(!e)return;const n=F.src.length;
   document.getElementById('faStep').textContent=`${F.title}: ${F.i+1} of ${n}`;
   document.getElementById('faProg').innerHTML=F.src.map((_,i)=>`<i class="${i<=F.i?'on':''}"></i>`).join('');
   const ready=!F.run&&!F.done&&!started();
-  const sig=[F.i,ready,e.key,e.dose,e.lvl,e.tuned,openChip].join('|');
+  const sig=[F.i,ready,e.key,e.dose,e.lvl,e.tuned,e.version,e.note,openChip,S.settings.ready].join('|');
   if(sig!==F.shown){F.shown=sig;
     const total=e.timed?totalOf(e):0;
     document.getElementById('faBody').innerHTML=`<h3 class="faname">${esc(e.name)}</h3>
       <p class="dose fadose">${esc(e.dose)}${total?` <span class="muted">· ≈${Math.max(1,Math.round(total/60))} min</span>`:''}</p>
-      ${ready&&e.L?`<div class="lv falv"><div class="lvtxt"><span class="lvn">Level ${e.lvl+1}</span>${esc(e.version)}</div>${dotsHTML(e,'f')}</div>`:(e.L?`<p class="sub">Level ${e.lvl+1} · ${esc(e.version)}</p>`:'')}
-      ${ready&&paramsFor(e).length?`<div class="chips">${chipsHTML(e)}</div>`:''}
+      ${ready&&e.L?`<div class="lv falv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'f')}</div>`:(e.L?`<p class="sub">Slot ${e.lvl+1} · ${esc(e.version)}${e.note?' · '+esc(e.note):''}</p>`:'')}
+      ${ready&&(paramsFor(e).length||e.timed)?`<div class="chips">${e.timed?readyChip():''}${chipsHTML(e)}</div>`:''}
       ${framesHTML(e.frames)}
       ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}`;
   }
   const num=document.getElementById('faNum'),lbl=document.getElementById('faLbl'),go=document.getElementById('faGo'),skip=document.getElementById('faSkip');
   if(F.ph){
     num.textContent=fmtClock(F.left);
-    num.classList.toggle('work',!F.done&&F.ph[F.p].work&&(F.run||started()));
+    const kind=F.done?'done':F.ph[F.p].kind||'work',live=F.run||started();
+    ['ready','work','rest','done'].forEach(k=>fa.classList.toggle('ph-'+k,live&&k===kind||F.done&&k==='done'));
+    fa.classList.toggle('running',F.run);
     lbl.textContent=F.done?'Done':F.ph[F.p].l;
     go.textContent=F.done?'Again':F.run?'Pause':(started()?'Resume':'Start');
     go.style.display='';
     skip.style.display=!F.done&&(F.run||started())?'':'none';
-    skip.textContent=!F.done&&!F.ph[F.p].work?'Skip rest':'Skip';
-  }else{num.textContent='';num.classList.remove('work');lbl.textContent='Tap Next when you\u2019re done';go.style.display='none';skip.style.display='none'}
+    skip.textContent=F.done?'':F.ph[F.p].kind==='ready'?'Skip countdown':F.ph[F.p].kind==='rest'?'Skip rest':'Skip';
+  }else{num.textContent='';['ready','work','rest','done','running'].forEach(k=>fa.classList.remove(k==='running'?k:'ph-'+k));lbl.textContent='Tap Next when you\u2019re done';go.style.display='none';skip.style.display='none'}
   document.getElementById('faPrev').disabled=F.i===0;
   document.getElementById('faNext').textContent=F.i===n-1?'Finish':'Next';
 }
 function tick(){const k=Math.max(1,Math.round((Date.now()-F.last)/1000));F.last+=k*1000;for(let j=0;j<k&&F.run;j++)step();drawFA()}
 function step(){
   F.left--;
-  if(F.left<=0){beep();
-    if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t}
-    else{stop();F.done=true;F.left=0}}
+  if(F.left>0&&F.left<=3){SOUND.tick();return}
+  if(F.left<=0){
+    if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)()}
+    else{stop();F.done=true;F.left=0;SOUND.done()}}
 }
 document.getElementById('faGo').addEventListener('click',()=>{
   if(!F.ph)return;
   if(F.done){setEx()}
   if(F.run){stop();drawFA();return}
-  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)()}catch(_){}
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume()}catch(_){}
   F.run=true;F.last=Date.now();F.timer=setInterval(tick,1000);drawFA();
 });
 document.getElementById('faSkip').addEventListener('click',()=>{
   if(!F.ph||F.done)return;
-  if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;F.last=Date.now()}else{stop();F.done=true;F.left=0}
+  if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;F.last=Date.now();if(F.run)(SOUND[F.ph[F.p].kind]||SOUND.work)()}else{stop();F.done=true;F.left=0}
   drawFA();
 });
 document.getElementById('faNext').addEventListener('click',()=>{if(F.i<F.src.length-1){F.i++;setEx();document.getElementById('faBody').scrollTop=0}else closeFA()});
