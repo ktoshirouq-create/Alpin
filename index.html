@@ -150,6 +150,36 @@ body.has-resume .wrap{padding-bottom:110px}
 .syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
 .syncextra{display:flex;gap:18px;flex-wrap:wrap}
 .warn{color:var(--acc)}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px}
+.calhead h2{font-size:26px;text-transform:capitalize}
+.cnav{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.calgrid>b{text-align:center;font-size:12px;color:var(--muted);font-weight:600;padding:4px 0}
+.cd{aspect-ratio:1/1.05;min-height:44px;border:0;border-radius:10px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px 7px;font-weight:600;font-size:15px}
+.cd.out{opacity:.35}
+.cd.today span{color:var(--acc)}
+.cd.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.cd em{display:flex;gap:3px;min-height:7px}
+.cd em i,.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.cd em i.ring,.legend i.ring{background:none!important;border:1.5px solid var(--muted);width:7px;height:7px;box-sizing:border-box}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.prow{display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;border-radius:12px;background:var(--panel);border-left:4px solid var(--tc)}
+.pmain{flex:1;min-width:0}.pmain b{display:block;font-size:16px}.pmain span{font-size:13px;color:var(--muted)}
+.pmain small{display:block;margin-top:6px;font-size:13px;line-height:1.45;color:var(--ink)}
+.pmain em.ok{color:var(--rest);font-style:normal;font-weight:600}
+.pside{display:flex;align-items:center;gap:6px}
+.tdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle}
+.upc{display:block;width:100%;text-align:left;background:none;border:0;border-left:4px solid var(--tc);padding:8px 12px;margin:6px 0}
+.upc b{display:block;font-size:14px}.upc span{font-size:13px;color:var(--muted)}
+#plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
+#plandlg input[type=date],#plandlg input[type=time]{font-size:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.planopts{display:flex;flex-direction:column;gap:10px;max-height:40vh;overflow:auto;border:1.5px solid var(--rule);border-radius:12px;padding:10px 12px}
+.pgrp h4{margin:4px 0 4px;font:700 18px/1.1 "Barlow Condensed",sans-serif;border-left:4px solid var(--tc);padding-left:8px}
+label.popt{flex-direction:row;align-items:center;gap:10px;font-weight:400;font-size:15px;padding:7px 0}
+label.popt input{width:20px;height:20px;accent-color:var(--acc)}
+label.popt span{flex:1}label.popt em{font-style:normal;color:var(--muted);font-size:13px}
 .weekbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 6px}
 .weekbox div{background:var(--panel);border-radius:12px;padding:12px;text-align:center}
 .weekbox b{display:block;font:700 30px/1 "Barlow Condensed",sans-serif}.weekbox span{font-size:12px;color:var(--muted)}
@@ -278,6 +308,16 @@ button.chip::after{display:none}
   <p class="syncmsg" id="syncMsg" role="status"></p>
   <div class="syncextra"><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Close</button><button class="btn pri" type="button" id="syncTest">Test and save</button></div>
+</form></dialog>
+
+<dialog id="plandlg"><form method="dialog" id="planfrm">
+  <h2>Plan a session</h2>
+  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
+  <div id="planOpts" class="planopts"></div>
+  <div class="row2"><label>Minutes<input name="minutes" type="number" min="5" max="600" inputmode="numeric" required></label><span></span></div>
+  <label>Title in your calendar<input name="title" autocomplete="off" required></label>
+  <p class="syncmsg" id="planMsg" role="status"></p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
 </form></dialog>
 
 <dialog id="ask" aria-labelledby="askT"><div class="askin">
@@ -804,7 +844,7 @@ const W=(p)=>({warm:p});
 const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
   items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
   extra:['armcircle','squathold','catcow']};
-const HISTORY={id:'history',chip:'History',title:'History',lede:'',sections:[]};
+const HISTORY={id:'history',chip:'Calendar',title:'Calendar',lede:'',sections:[]};
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Sep 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
@@ -827,11 +867,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=10;
   if(!Array.isArray(S0.hidden))S0.hidden=[];
   // built-in edits keep only name and cue; numbers now live in levels and tuning
@@ -855,6 +895,7 @@ const OLDTAB={prerun:'warmup',prework:'warmup',preclimb:'warmup'};
 const tabId=x=>{x=OLDTAB[x]||x;return PROGS.some(p=>p.id===x)?x:null};
 let cur='nepal';try{const c=tabId(localStorage.getItem('tpg:prog'));if(c)cur=c}catch(e){}
 if(location.hash&&tabId(location.hash.slice(1)))cur=tabId(location.hash.slice(1));
+let linkPlan=null;{const m=location.hash.match(/^#plan=([\w-]+)/);if(m){cur='history';linkPlan=m[1]}}
 
 
 function save(){
@@ -897,7 +938,9 @@ async function flushQueue(){
       else{const op=q[0];batch=[op];
         if(op.op==='update')await api({action:'update',id:op.id,fields:op.fields});
         else if(op.op==='unlog')await api({action:'unlog',id:op.id});
-        else if(op.op==='state')await api({action:'saveState',state:op.state})}
+        else if(op.op==='state')await api({action:'saveState',state:op.state})
+        else if(op.op==='plan'){await api({action:'plan',plan:op.plan});setPlans(plansCache().map(x=>x.id===op.plan.id?{...x,pending:false}:x))}
+        else if(op.op==='unplan')await api({action:'unplan',id:op.id})}
       const sent=new Set(batch.map(o=>o.qid));
       lsSet(QKEY,lsGet(QKEY,[]).filter(o=>!sent.has(o.qid)));   // anything added meanwhile stays queued
     }
@@ -951,26 +994,109 @@ function syncLine(){const c=syncCfg(),q=lsGet(QKEY,[]).filter(o=>o.op!=='state')
 function updateSyncLine(){const n=document.getElementById('syncline');if(n)n.innerHTML=syncLine()}
 
 const FEELS=[['easy','Easy'],['good','Good'],['hard','Hard']];
+const TABCOL={'Nepal':'#3B6FC4','Ice':'#3FA7D6','Climbing':'#E2685A','Stretch':'#3DAE74','Warm up':'#E1B12C'};
+const TABICON={'Nepal':'🏔','Ice':'🧊','Climbing':'🧗','Stretch':'🧘','Warm up':'🔥'};
+const PKEY='tpg:plans';
+const plansCache=()=>lsGet(PKEY,[]);
+const setPlans=l=>lsSet(PKEY,l);
+let calMonth=null,calSel=null;
+const monthStart=d=>new Date(d.getFullYear(),d.getMonth(),1);
+async function pullPlans(){
+  if(!connected())return;
+  const m=calMonth||monthStart(new Date());
+  const from=dayOf(new Date(m.getFullYear(),m.getMonth(),-6)),to=dayOf(new Date(m.getFullYear(),m.getMonth()+1,7));
+  try{await flushQueue();const j=await api({action:'plans',from,to});
+    const keep=plansCache().filter(p=>p.pending||p.date<from||p.date>to);
+    setPlans(keep.concat(j.plans||[]));setSync({last:Date.now(),error:''})}
+  catch(e){setSync({error:e.message})}
+  if(linkPlan){const p=plansCache().find(x=>x.id===linkPlan);if(p){calSel=p.date;calMonth=monthStart(new Date(p.date+'T12:00'))}linkPlan=null}
+  if(cur==='history')render();
+}
+/* sessions you can plan: every section, essentials and full */
+function sessionOptions(){
+  const out=[],seen=new Set();
+  PROGS.forEach(p=>{if(p.id==='history')return;p.sections.forEach((s,si)=>{
+    const k=s.pid||p.id+':'+si;if(seen.has(k))return;seen.add(k);
+    const items=sectionItems(p,si);if(!items.length)return;
+    const ess=items.filter(e=>e.tier==='e'),name=p.sections.length>1?s.title:p.title;
+    if(ess.length&&ess.length<items.length)out.push({key:`${p.id}|${si}|e`,tab:p.chip,name,label:name+' · essentials',min:estimate(ess)});
+    out.push({key:`${p.id}|${si}|all`,tab:p.chip,name,label:ess.length&&ess.length<items.length?name+' · full':name,min:estimate(items)});
+  })});
+  return out;
+}
+function refsToList(refs){
+  const list=[];(refs||[]).forEach(k=>{const [pid,si,mode]=k.split('|'),p=PROGS.find(x=>x.id===pid);if(!p||!p.sections[+si])return;
+    const it=sectionItems(p,+si);(mode==='e'?it.filter(e=>e.tier==='e'):it).forEach(e=>list.push(e))});
+  return list;
+}
+const niceDay=(d,long)=>new Date(d+'T12:00:00').toLocaleDateString(undefined,long?{weekday:'long',day:'numeric',month:'long'}:{weekday:'short',day:'numeric',month:'short'});
 function renderHistory(){
-  const all=localLog(),byDay={};all.forEach(r=>{(byDay[r.date]=byDay[r.date]||[]).push(r)});
-  const days=Object.keys(byDay).sort().reverse();
-  const today=new Date(),wk=new Date(today);wk.setDate(today.getDate()-((today.getDay()+6)%7));const wkStart=dayOf(wk);
-  const week=all.filter(r=>r.date>=wkStart);
-  const secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
-  const nice=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})};
-  document.getElementById('plede').textContent='Everything you finish with the timer or mark ✓ Done.';
+  const now=new Date(),todayS=dayOf(now);
+  calMonth=calMonth||monthStart(now);calSel=calSel||todayS;
+  const all=localLog(),plans=plansCache(),logBy={},planBy={};
+  all.forEach(r=>{(logBy[r.date]=logBy[r.date]||[]).push(r)});
+  plans.forEach(p=>{(planBy[p.date]=planBy[p.date]||[]).push(p)});
+  const y=calMonth.getFullYear(),m=calMonth.getMonth(),lead=(new Date(y,m,1).getDay()+6)%7,nd=new Date(y,m+1,0).getDate(),weeks=Math.ceil((lead+nd)/7);
+  const wd=[...Array(7)].map((_,i)=>new Date(2024,0,1+i).toLocaleDateString(undefined,{weekday:'narrow'}));
+  let cells='';
+  for(let i=0;i<weeks*7;i++){
+    const d=new Date(y,m,1-lead+i),ds=dayOf(d),inM=d.getMonth()===m;
+    const doneTabs=[...new Set((logBy[ds]||[]).filter(r=>r.result!=='skipped').map(r=>r.tab))];
+    const planTabs=[...new Set((planBy[ds]||[]).map(p=>p.tab))].filter(t=>!doneTabs.includes(t));
+    const dots=doneTabs.slice(0,4).map(t=>`<i style="background:${TABCOL[t]||'var(--muted)'}"></i>`).join('')
+      +planTabs.slice(0,4-Math.min(4,doneTabs.length)).map(t=>`<i class="ring" style="border-color:${TABCOL[t]||'var(--muted)'}"></i>`).join('');
+    cells+=`<button type="button" class="cd${inM?'':' out'}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
+  }
+  const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));const wkStart=dayOf(wk);
+  const week=all.filter(r=>r.date>=wkStart&&r.result!=='skipped'),secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
+  const upcoming=plans.filter(p=>p.date>=todayS).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+  const dayPlans=(planBy[calSel]||[]).sort((a,b)=>a.start.localeCompare(b.start)),dayLog=(logBy[calSel]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+  const doneDay=dayLog.some(r=>r.result==='done');
+  const planRow=p=>`<div class="prow" style="--tc:${TABCOL[p.tab]||'var(--muted)'}"><div class="pmain"><b>${esc(p.title)}</b>
+      <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(p.status==='done'||(doneDay&&p.date<=todayS))?' · <em class="ok">✓ done</em>':''}</span>
+      ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}</div>
+      <div class="pside">${p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`:''}<button class="link hx" data-act="pdel" data-id="${esc(p.id)}" aria-label="Remove plan">✕</button></div></div>`;
+  const logRow=r=>`<div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b><i class="tdot" style="background:${TABCOL[r.tab]||'var(--muted)'}"></i>${esc(r.exercise)}</b>
+      <span>${esc(r.dose||'')}${r.slot?` · slot ${esc(r.slot)}`:''}${r.result==='partial'?` · <em>stopped at ${esc(r.completed)}</em>`:''}${r.result==='skipped'?' · <em>skipped</em>':''}</span></div>
+      <div class="hside"><span class="htime">${esc(r.time)}</span>${r.feel?`<span class="feel f-${esc(r.feel)}">${esc(r.feel)}</span>`:''}
+      <button class="link hx" data-act="hdel" data-id="${esc(r.id)}" aria-label="Remove">✕</button></div></div>`;
+  document.getElementById('plede').textContent='Plan ahead and see what you did.';
   document.getElementById('main').innerHTML=`
    <section><p class="sub" id="syncline">${syncLine()}</p>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
       <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
-    ${days.length?days.map(d=>`<div class="hday"><h3>${esc(nice(d))}</h3>${byDay[d].map(r=>`
-      <div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b>${esc(r.exercise)}</b>
-        <span>${esc(r.dose||'')}${r.slot?` · slot ${esc(r.slot)}`:''}${r.result==='partial'?` · <em>stopped at ${esc(r.completed)}</em>`:''}</span></div>
-        <div class="hside"><span class="htime">${esc(r.time)}</span>${r.feel?`<span class="feel f-${esc(r.feel)}">${esc(r.feel)}</span>`:''}
-        <button class="link hx" data-act="hdel" data-id="${esc(r.id)}" aria-label="Remove">✕</button></div></div>`).join('')}</div>`).join('')
-      :'<p class="empty">Nothing logged yet. Finish an exercise with the timer or tap ✓ Done on a card and it shows up here.</p>'}
+    <div class="calhead"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
+      <h2>${esc(calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
+      <button class="cnav" data-act="calnext" aria-label="Next month">›</button></div>
+    <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
+    <div class="legend">${Object.keys(TABCOL).map(t=>`<span><i style="background:${TABCOL[t]}"></i>${t}</span>`).join('')}<span><i class="ring"></i>planned</span></div>
+    <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
+      ${dayPlans.map(planRow).join('')}
+      ${dayLog.map(logRow).join('')}
+      ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
+      ${calSel>=todayS?`<button class="add" data-act="plannew">+ Plan a session${calSel===todayS?' today':' on '+esc(niceDay(calSel))}</button>`:''}
+    </div>
+    ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${TABCOL[p.tab]||'var(--muted)'}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(p.title)}</span></button>`).join('')}</div>`:''}
    </section>`;
   document.getElementById('foot').innerHTML='';
+}
+function openPlan(){
+  if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
+  const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),opts=sessionOptions();
+  f.date.value=calSel||dayOf(new Date());f.date.min=dayOf(new Date());
+  if(!f.start.value)f.start.value='17:00';
+  f.title.value='';f.title.dataset.auto='1';f.minutes.value='';
+  const byTab={};opts.forEach(o=>{(byTab[o.tab]=byTab[o.tab]||[]).push(o)});
+  document.getElementById('planOpts').innerHTML=Object.keys(byTab).map(t=>`<div class="pgrp"><h4 style="--tc:${TABCOL[t]}">${TABICON[t]||''} ${esc(t)}</h4>
+    ${byTab[t].map(o=>`<label class="popt"><input type="checkbox" value="${esc(o.key)}" data-tab="${esc(t)}" data-name="${esc(o.name)}" data-label="${esc(o.label)}" data-min="${o.min}"><span>${esc(o.label)}</span><em>≈${o.min} min</em></label>`).join('')}</div>`).join('');
+  document.getElementById('planMsg').textContent='';
+  d.showModal();
+}
+function planAuto(){
+  const f=document.getElementById('planfrm'),ch=[...f.querySelectorAll('#planOpts input:checked')];
+  const min=ch.reduce((a,x)=>a+(+x.dataset.min||0),0);f.minutes.value=ch.length?Math.max(5,Math.round(min/5)*5):'';
+  if(f.title.dataset.auto==='1'){const tabs=[...new Set(ch.map(x=>x.dataset.tab))];
+    f.title.value=ch.length?`${tabs.map(t=>TABICON[t]||'').join('')} ${tabs.join(' + ')}: ${[...new Set(ch.map(x=>x.dataset.name))].join(' + ')}`:''}
 }
 function openSync(){
   const c=syncCfg(),d=document.getElementById('syncdlg');
@@ -1212,7 +1338,7 @@ document.getElementById('progs').addEventListener('click',e=>{
   const b=e.target.closest('[data-prog]');if(!b)return;
   cur=b.dataset.prog;try{localStorage.setItem('tpg:prog',cur)}catch(_){}
   try{history.replaceState(null,'','#'+cur)}catch(_){}
-  refresh();window.scrollTo(0,0);if(cur==='history')pullHistory();
+  refresh();window.scrollTo(0,0);if(cur==='history'){pullHistory();pullPlans()}
 });
 document.body.addEventListener('click',e=>{
   const b=e.target.closest('button[data-act]');if(!b||b.closest('#progs'))return;
@@ -1234,6 +1360,20 @@ function onAct(b){
   if(act==='unhide'){const kps=kpsOf(p);S.hidden=S.hidden.filter(h=>!kps.some(k=>h.startsWith(k+':')));save();refresh();return}
   if(act==='export'){exportData();return}
   if(act==='syncsetup'){openSync();return}
+  if(act==='calprev'||act==='calnext'){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(act==='calnext'?1:-1),1);render();pullPlans();return}
+  if(act==='calday'){calSel=b.dataset.d;const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
+  if(act==='plannew'){openPlan();return}
+  if(act==='pstart'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
+    const list=refsToList(S.planRefs[pl.id]);
+    if(list.length){openFA(list,pl.title.replace(/^[^A-Za-z0-9]+/,''))}
+    else{const t=PROGS.find(x=>x.chip===pl.tab);if(t){cur=t.id;refresh();window.scrollTo(0,0)}}
+    return}
+  if(act==='pdel'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
+    ask('Remove this plan?',pl.title+' on '+niceDay(pl.date)+' is removed from your Training calendar.','Remove',true).then(ok=>{if(!ok)return;
+      setPlans(plansCache().filter(x=>x.id!==pl.id));delete S.planRefs[pl.id];save();
+      const q=lsGet(QKEY,[]),qi=q.findIndex(o=>o.op==='plan'&&o.plan.id===pl.id);
+      if(qi>=0&&!flushing){q.splice(qi,1);lsSet(QKEY,q)}else enqueue({op:'unplan',id:pl.id});
+      scheduleFlush(300);render()});return}
   if(act==='hdel'){const id=b.dataset.id,row=localLog().find(x=>x.id===id);if(!row)return;
     ask('Remove '+row.exercise+'?','It is removed from your history'+(connected()?' and the Sheet.':'.'),'Remove',true).then(ok=>{if(ok){removeEntry(id);render()}});return}
   if(act==='import'){importData();return}
@@ -1363,6 +1503,26 @@ function importData(){
     catch(e){msg.textContent='Could not load: '+e.message;msg.className='syncmsg bad'}
   });
   d.addEventListener('close',()=>{if(cur==='history')render();else updateSyncLine()});
+})();
+/* ---------- plan dialog ---------- */
+(function(){
+  const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),msg=document.getElementById('planMsg');
+  f.addEventListener('change',ev=>{if(ev.target.matches('#planOpts input'))planAuto()});
+  f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
+  f.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    const ch=[...f.querySelectorAll('#planOpts input:checked')];
+    if(!ch.length){ev.preventDefault();msg.textContent='Pick at least one session.';msg.className='syncmsg bad';return}
+    const id=uid(),tabs=[...new Set(ch.map(x=>x.dataset.tab))];
+    const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(600,parseInt(f.minutes.value,10)||45)),
+      title:f.title.value.trim()||tabs.join(' + '),tab:tabs[0],items:ch.map(x=>`${x.dataset.label} (≈${x.dataset.min} min)`),
+      link:location.origin+location.pathname+'#plan='+id};
+    S.planRefs[id]=ch.map(x=>x.value);save();
+    setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
+    enqueue({op:'plan',plan});scheduleFlush(300);
+    calSel=plan.date;calMonth=monthStart(new Date(plan.date+'T12:00'));
+    if(cur!=='history'){cur='history'}refresh();
+  });
 })();
 /* ---------- in-app confirm ---------- */
 function ask(title,body,yes,danger){
@@ -1523,6 +1683,9 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
 })();
 
 refresh();
+if(cur==='history'){pullHistory();pullPlans()}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&cur==='history'&&!F.open)pullPlans()});
+if(connected())scheduleFlush(1500);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))
   addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
