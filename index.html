@@ -118,7 +118,12 @@ dialog .chk input{width:20px;height:20px}
 .fatop .x{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--ink);background:none;font-size:20px}
 .fastep{color:var(--muted);font-weight:600}
 .faprog{display:flex;gap:3px;max-width:760px;width:100%;margin:10px auto 0}
-.faprog i{flex:1;height:4px;border-radius:2px;background:var(--prop)}
+.faprog .seg{flex:1;background:none;border:0;padding:10px 0;margin:-10px 0}
+.faprog i{display:block;height:4px;border-radius:2px;background:var(--prop)}
+.faprog .seg.on i{background:var(--acc)}
+.faprog .seg.cur i{background:var(--acc);height:6px;margin-top:-1px}
+.fastep{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skipex{white-space:nowrap;flex:0 0 auto;margin-left:auto;margin-right:12px;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 4px}
 .faprog i.on{background:var(--acc)}
 .fabody{flex:1;overflow:auto;max-width:760px;width:100%;margin:0 auto;padding-top:14px}
 .faname{font:600 32px/1.05 "Barlow Condensed",sans-serif;margin:0}
@@ -141,6 +146,24 @@ body.has-resume .wrap{padding-bottom:110px}
   display:none;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;background:var(--ink);color:var(--bg);box-shadow:0 8px 28px rgba(0,0,0,.35)}
 #undobar.show{display:flex}#undobar span{flex:1;font-weight:600}
 #undobar .link{color:var(--bg);font-weight:700;font-size:15px;text-decoration:none;padding:6px 4px}
+#syncdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
+.syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
+.syncextra{display:flex;gap:18px;flex-wrap:wrap}
+.warn{color:var(--acc)}
+.weekbox{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 6px}
+.weekbox div{background:var(--panel);border-radius:12px;padding:12px;text-align:center}
+.weekbox b{display:block;font:700 30px/1 "Barlow Condensed",sans-serif}.weekbox span{font-size:12px;color:var(--muted)}
+.hday{margin-top:22px}.hday h3{font-size:20px;margin:0 0 6px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+.hrow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule)}
+.hmain{flex:1;min-width:0}.hmain b{display:block;font-weight:600}.hmain span{font-size:13px;color:var(--muted)}
+.hmain em{font-style:normal;color:var(--acc)}
+.hside{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.hx{text-decoration:none;font-size:14px;padding:6px}
+.feel{border-radius:999px;padding:2px 8px;font-weight:600;font-size:12px}
+.f-easy{background:var(--wash-rest);color:var(--rest)}.f-good{background:var(--prop);color:var(--ink)}.f-hard{background:var(--wash-work);color:var(--acc)}
+.empty{color:var(--muted);margin-top:24px}
+.feelrow{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px;font-size:14px;color:var(--muted)}
+.feelrow .chip{cursor:pointer}.feelrow .chip.on{border-color:var(--acc);color:var(--ink)}
 #resumebar>div{flex:1;min-width:0;font-size:15px;line-height:1.3}
 #resumebar span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .fabody h3{font-size:34px}
@@ -247,17 +270,27 @@ button.chip::after{display:none}
     <button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
 </form></dialog>
 
+<dialog id="syncdlg"><form method="dialog" id="syncfrm">
+  <h2>Google Sheet sync</h2>
+  <p class="hint">Paste the web app URL from Apps Script and the same token you set in Code.gs. Your history, slots and plans then live in your Sheet, and nothing is lost if the phone is.</p>
+  <label>Web app URL<input name="url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec"></label>
+  <label>Token<input name="token" autocomplete="off"></label>
+  <p class="syncmsg" id="syncMsg" role="status"></p>
+  <div class="syncextra"><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Close</button><button class="btn pri" type="button" id="syncTest">Test and save</button></div>
+</form></dialog>
+
 <dialog id="ask" aria-labelledby="askT"><div class="askin">
   <h2 id="askT"></h2><p id="askB"></p>
   <div class="askbtns"><button class="btn" id="askNo" type="button">Cancel</button><button class="btn pri" id="askYes" type="button">OK</button></div>
 </div></dialog>
 
 <div id="fa" role="dialog" aria-modal="true" aria-label="Follow along">
-  <div class="fatop"><span class="fastep" id="faStep"></span><button class="x" id="faX" aria-label="Close">✕</button></div>
+  <div class="fatop"><span class="fastep" id="faStep"></span><button class="link skipex" id="faSkipEx" type="button">Skip exercise ›</button><button class="x" id="faX" aria-label="Close">✕</button></div>
   <div class="faprog" id="faProg"></div>
   <div class="fabody" id="faBody"></div>
   <div class="fatimer"><div class="fanum" id="faNum"></div><div class="falbl" id="faLbl"></div>
-    <button class="link" id="faSkip" style="display:none">Skip</button></div>
+    <button class="link" id="faSkip" style="display:none">Skip</button><div class="feelrow" id="faFeel" style="display:none"></div></div>
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
@@ -771,6 +804,7 @@ const W=(p)=>({warm:p});
 const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
   items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
   extra:['armcircle','squathold','catcow']};
+const HISTORY={id:'history',chip:'History',title:'History',lede:'',sections:[]};
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Sep 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
@@ -787,7 +821,8 @@ const PROGS=[
  {id:'warmup',chip:'Warm up',title:'Warm up',lede:'Pick the one for today\u2019s session. The essentials take a few minutes.',sections:[
   {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']},
   {pid:'prework',title:'Pre-workout',sub:'Wake up the hips, core and shoulders before strength work.',routine:true,items:[{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})},{id:'squat',...W({sets:1,reps:10,unit:''})},{id:'bridge',...W({sets:1,reps:10,unit:''})},'armcircle',{id:'plank',...W({sets:1,time:30,rest:0,sides:false})},{id:'bandwalk',...W({sets:1,reps:10,unit:' steps each way'})}],extra:['armcircle','plank','bandwalk']},
-  PRECLIMB]}
+  PRECLIMB]},
+ HISTORY
 ];
 
 /* ---------- state ---------- */
@@ -825,7 +860,126 @@ if(location.hash&&tabId(location.hash.slice(1)))cur=tabId(location.hash.slice(1)
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S))}
   catch(e){showErr('Could not save on this device: '+e.message)}
+  queueState();
 }
+
+/* ---------- history + Google Sheet sync ---------- */
+const LKEY='tpg:log',QKEY='tpg:queue',SYKEY='tpg:sync';
+const lsGet=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v}catch(e){return d}};
+const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const syncCfg=()=>{const c=lsGet(SYKEY,{});return {url:c.url||'',token:c.token||'',last:c.last||0,error:c.error||''}};
+const connected=()=>!!syncCfg().url;
+function setSync(patch){lsSet(SYKEY,{...syncCfg(),...patch})}
+async function api(payload){
+  const c=syncCfg();if(!c.url)throw new Error('Not connected');
+  const r=await fetch(c.url,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:c.token,...payload})});
+  let j;try{j=await r.json()}catch(e){throw new Error('The Sheet did not answer. Check the web app URL and that it is deployed for Anyone.')}
+  if(!j.ok)throw new Error(j.error||'Request failed');return j;
+}
+const pad2=n=>String(n).padStart(2,'0');
+const dayOf=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function localLog(){return lsGet(LKEY,[])}
+function setLocalLog(l){l.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));lsSet(LKEY,l.slice(0,2000))}
+function enqueue(op){op.qid=uid();const q=lsGet(QKEY,[]);q.push(op);lsSet(QKEY,q);scheduleFlush();setTimeout(updateSyncLine,0)}
+let flushT=null,flushing=false;
+function scheduleFlush(ms){clearTimeout(flushT);flushT=setTimeout(flushQueue,ms==null?8000:ms)}
+async function flushQueue(){
+  if(flushing||!connected()||!navigator.onLine)return;
+  if(!lsGet(QKEY,[]).length)return;
+  flushing=true;
+  try{
+    for(let guard=0;guard<60;guard++){
+      const q=lsGet(QKEY,[]);if(!q.length)break;
+      let batch;
+      if(q[0].op==='log'){const n=q.findIndex(o=>o.op!=='log');batch=q.slice(0,n<0?q.length:n);
+        await api({action:'log',rows:batch.map(o=>o.row)})}
+      else{const op=q[0];batch=[op];
+        if(op.op==='update')await api({action:'update',id:op.id,fields:op.fields});
+        else if(op.op==='unlog')await api({action:'unlog',id:op.id});
+        else if(op.op==='state')await api({action:'saveState',state:op.state})}
+      const sent=new Set(batch.map(o=>o.qid));
+      lsSet(QKEY,lsGet(QKEY,[]).filter(o=>!sent.has(o.qid)));   // anything added meanwhile stays queued
+    }
+    setSync({last:Date.now(),error:''});
+  }catch(e){setSync({error:e.message})}
+  finally{flushing=false;if(cur==='history')render();else updateSyncLine()}
+}
+addEventListener('online',()=>scheduleFlush(500));
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushQueue()});
+setInterval(()=>{if(lsGet(QKEY,[]).length)flushQueue()},60000);
+let stateT=null;
+function queueState(){if(!connected())return;clearTimeout(stateT);stateT=setTimeout(()=>{
+  const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q);scheduleFlush(3000)},4000)}
+
+function logEntry(e,result,extra){
+  const now=new Date(),p=PROGS.find(x=>x.sections.some((sc,i)=>(sc.pid||x.id)===e.pid))||prog();
+  const sec=p.sections.find((sc,i)=>(sc.pid||p.id)===e.pid&&(sc.pid||i===e.sec));
+  const row={id:uid(),date:dayOf(now),time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,
+    tab:p.chip,section:sec?sec.title:'',exercise_id:e.id,exercise:e.name,slot:e.L?String(e.lvl+1):'',slot_name:e.L?e.version:'',
+    dose:e.dose,result,completed:'',seconds:'',feel:'',note:'',...(extra||{})};
+  const l=localLog();l.push(row);setLocalLog(l);
+  if(connected())enqueue({op:'log',row});
+  return row.id;
+}
+function updateEntry(id,fields){
+  const l=localLog();const r=l.find(x=>x.id===id);if(r)Object.assign(r,fields);setLocalLog(l);
+  if(!connected())return;
+  const q=lsGet(QKEY,[]);const pending=q.find(o=>o.op==='log'&&o.row.id===id);
+  if(pending&&!flushing){Object.assign(pending.row,fields);lsSet(QKEY,q);scheduleFlush()}else enqueue({op:'update',id,fields});
+}
+function removeEntry(id){
+  setLocalLog(localLog().filter(x=>x.id!==id));
+  if(!connected())return;
+  const q=lsGet(QKEY,[]);const i=q.findIndex(o=>o.op==='log'&&o.row.id===id);
+  if(i>=0&&!flushing){q.splice(i,1);lsSet(QKEY,q)}else enqueue({op:'unlog',id});
+}
+async function pullHistory(){
+  if(!connected())return;
+  const from=dayOf(new Date(Date.now()-120*864e5));
+  try{await flushQueue();const j=await api({action:'history',from});const l=localLog(),ids=new Set(l.map(x=>x.id));
+    j.rows.forEach(r=>{if(!ids.has(r.id))l.push(r)});setLocalLog(l);setSync({last:Date.now(),error:''})}
+  catch(e){setSync({error:e.message})}
+  if(cur==='history')render();
+}
+function syncLine(){const c=syncCfg(),q=lsGet(QKEY,[]).filter(o=>o.op!=='state').length;
+  if(!c.url)return 'History is saved on this phone. <button class="link" data-act="syncsetup">Connect a Google Sheet</button>';
+  const ago=c.last?Math.max(0,Math.round((Date.now()-c.last)/60000)):null;
+  return (c.error?`<span class="warn">Sync problem: ${esc(c.error)}</span> `:'')
+    +(q?`${q} waiting to sync. `:'')+(ago==null?'Connected to your Sheet. ':`Synced ${ago<1?'just now':ago+' min ago'}. `)
+    +'<button class="link" data-act="syncsetup">Sync settings</button>';}
+function updateSyncLine(){const n=document.getElementById('syncline');if(n)n.innerHTML=syncLine()}
+
+const FEELS=[['easy','Easy'],['good','Good'],['hard','Hard']];
+function renderHistory(){
+  const all=localLog(),byDay={};all.forEach(r=>{(byDay[r.date]=byDay[r.date]||[]).push(r)});
+  const days=Object.keys(byDay).sort().reverse();
+  const today=new Date(),wk=new Date(today);wk.setDate(today.getDate()-((today.getDay()+6)%7));const wkStart=dayOf(wk);
+  const week=all.filter(r=>r.date>=wkStart);
+  const secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
+  const nice=d=>{const x=new Date(d+'T12:00:00');return x.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})};
+  document.getElementById('plede').textContent='Everything you finish with the timer or mark ✓ Done.';
+  document.getElementById('main').innerHTML=`
+   <section><p class="sub" id="syncline">${syncLine()}</p>
+    <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
+      <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
+    ${days.length?days.map(d=>`<div class="hday"><h3>${esc(nice(d))}</h3>${byDay[d].map(r=>`
+      <div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b>${esc(r.exercise)}</b>
+        <span>${esc(r.dose||'')}${r.slot?` · slot ${esc(r.slot)}`:''}${r.result==='partial'?` · <em>stopped at ${esc(r.completed)}</em>`:''}</span></div>
+        <div class="hside"><span class="htime">${esc(r.time)}</span>${r.feel?`<span class="feel f-${esc(r.feel)}">${esc(r.feel)}</span>`:''}
+        <button class="link hx" data-act="hdel" data-id="${esc(r.id)}" aria-label="Remove">✕</button></div></div>`).join('')}</div>`).join('')
+      :'<p class="empty">Nothing logged yet. Finish an exercise with the timer or tap ✓ Done on a card and it shows up here.</p>'}
+   </section>`;
+  document.getElementById('foot').innerHTML='';
+}
+function openSync(){
+  const c=syncCfg(),d=document.getElementById('syncdlg');
+  d.querySelector('[name=url]').value=c.url;d.querySelector('[name=token]').value=c.token;
+  const m=document.getElementById('syncMsg');m.textContent='';m.className='syncmsg';
+  document.getElementById('syncOff').style.display=c.url?'':'none';
+  d.showModal();
+}
+
 
 /* ---------- helpers ---------- */
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -960,7 +1114,7 @@ function card(e){
    ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>edited</em>':''}</summary>
       <div class="chips">${chipsHTML(e)}${e.timed?`<span class="tot">≈${Math.max(1,Math.round(totalOf(e)/60))} min</span>`:''}</div>
       ${e.tuned?`<button class="link" data-act="untune" data-key="${esc(e.key)}">Reset ${e.L?'slot '+(e.lvl+1):'to the standard'} numbers</button>`:''}</details>`:''}
-   <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
+   <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="go sm alt" data-act="logdone">✓ Done</button><button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
   </article>`;
 }
 function render(){
@@ -969,6 +1123,7 @@ function render(){
   document.getElementById('plede').textContent=p.lede;
   document.title=p.title;
   document.getElementById('progs').innerHTML=PROGS.map(x=>`<button data-prog="${x.id}" aria-pressed="${x.id===cur}">${x.chip}</button>`).join('');
+  if(p.id==='history'){renderHistory();return}
   document.getElementById('main').innerHTML=p.sections.map((s,si)=>{
     let items;try{items=sectionItems(p,si)}catch(err){showErr('Could not build '+s.title+': '+err.message);items=[]}
     const ess=items.filter(e=>e.tier==='e'),ext=items.filter(e=>e.tier!=='e');
@@ -991,7 +1146,7 @@ function render(){
   document.body.classList.toggle('has-resume',!!sess);
   const kps=kpsOf(p);const hid=S.hidden.filter(h=>kps.some(k=>h.startsWith(k+':'))).length;
   document.getElementById('foot').innerHTML=(hid?`<button class="link" data-act="unhide">Show ${hid} hidden exercise${hid>1?'s':''}</button><br>`:'')
-    +'Your levels and changes are saved on this phone. '
+    +'<span id="syncline">'+syncLine()+'</span><br>'
     +'<button class="link" data-act="export">Back up</button> · <button class="link" data-act="import">Restore</button>';
 }
 function refresh(){try{render()}catch(err){showErr('Page error: '+err.message)}if(fa.classList.contains('open'))reloadFA()}
@@ -1057,7 +1212,7 @@ document.getElementById('progs').addEventListener('click',e=>{
   const b=e.target.closest('[data-prog]');if(!b)return;
   cur=b.dataset.prog;try{localStorage.setItem('tpg:prog',cur)}catch(_){}
   try{history.replaceState(null,'','#'+cur)}catch(_){}
-  refresh();window.scrollTo(0,0);
+  refresh();window.scrollTo(0,0);if(cur==='history')pullHistory();
 });
 document.body.addEventListener('click',e=>{
   const b=e.target.closest('button[data-act]');if(!b||b.closest('#progs'))return;
@@ -1071,10 +1226,16 @@ function onAct(b){
   if(act==='add'){openDlg(null,+b.dataset.sec);return}
   if(act==='resume'){resumeSession();return}
   if(act==='discard'){let raw=null;try{raw=localStorage.getItem(SKEY)}catch(e){}
+    const j=loadSession();let lid=null;
+    if(j&&!j.done&&!(j.logged||{})[j.i]&&j.ph&&(j.p>0||j.left<j.ph[0].t)){const e=resolveSrc(j.src[j.i]);
+      if(e){const where=(j.ph[j.p]||{}).l||'';lid=logEntry(e,'partial',{completed:where.replace(/^Get ready · /,'')})}}
     clearSession();refresh();
-    undoBar('Session discarded',()=>{try{if(raw)localStorage.setItem(SKEY,raw)}catch(e){}refresh()});return}
+    undoBar('Session discarded',()=>{try{if(raw)localStorage.setItem(SKEY,raw)}catch(e){}if(lid)removeEntry(lid);refresh()});return}
   if(act==='unhide'){const kps=kpsOf(p);S.hidden=S.hidden.filter(h=>!kps.some(k=>h.startsWith(k+':')));save();refresh();return}
   if(act==='export'){exportData();return}
+  if(act==='syncsetup'){openSync();return}
+  if(act==='hdel'){const id=b.dataset.id,row=localLog().find(x=>x.id===id);if(!row)return;
+    ask('Remove '+row.exercise+'?','It is removed from your history'+(connected()?' and the Sheet.':'.'),'Remove',true).then(ok=>{if(ok){removeEntry(id);render()}});return}
   if(act==='import'){importData();return}
   if(act==='untune'){resetNumbers(b.dataset.key);return}
   if(act==='rstep'){const i=READY_OPTS.indexOf(S.settings.ready);const ni=Math.max(0,Math.min(READY_OPTS.length-1,i+(+b.dataset.d)));
@@ -1086,6 +1247,8 @@ function onAct(b){
   const id=art.dataset.id,sec=+art.dataset.sec;
   if(act==='one'){const e=sectionItems(p,sec).find(x=>x.id===id);if(e)openFA([e],e.name);return}
   if(act==='hide'){S.hidden.push(kpOf(p,sec)+':'+id);save();refresh();return}
+  if(act==='logdone'){const e=sectionItems(p,sec).find(x=>x.id===id);if(!e)return;const lid=logEntry(e,'done',{completed:'all'});
+    undoBar('Logged '+e.name+(e.dose?' · '+e.dose:''),()=>{removeEntry(lid);refresh()});return}
   if(act==='edit'){openDlg(id,sec);return}
 }
 
@@ -1174,6 +1337,33 @@ function importData(){
   inp.click();
 }
 
+/* ---------- sync dialog ---------- */
+(function(){
+  const d=document.getElementById('syncdlg'),msg=document.getElementById('syncMsg');
+  document.getElementById('syncTest').addEventListener('click',async()=>{
+    const url=d.querySelector('[name=url]').value.trim(),token=d.querySelector('[name=token]').value.trim();
+    if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)){msg.textContent='That does not look like an Apps Script web app URL.';msg.className='syncmsg bad';return}
+    msg.textContent='Testing…';msg.className='syncmsg';
+    const old=syncCfg();lsSet(SYKEY,{...old,url,token,error:''});
+    try{const j=await api({action:'ping'});msg.textContent='Connected to "'+j.sheet+'". Sending your history…';msg.className='syncmsg good';
+      const have=new Set(lsGet(QKEY,[]).filter(o=>o.op==='log').map(o=>o.row.id));
+      localLog().forEach(r=>{if(!have.has(r.id))enqueue({op:'log',row:r})});
+      clearTimeout(stateT);{const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q)}
+      await flushQueue();await pullHistory();msg.textContent='Connected to "'+j.sheet+'". Everything is synced.';
+      document.getElementById('syncOff').style.display=''}
+    catch(e){lsSet(SYKEY,old);msg.textContent='Could not connect: '+e.message;msg.className='syncmsg bad'}
+  });
+  document.getElementById('syncOff').addEventListener('click',()=>{ask('Disconnect the Sheet?','Your history stays on this phone and in the Sheet. New entries stay on this phone.','Disconnect',true)
+    .then(ok=>{if(!ok)return;lsSet(SYKEY,{});lsSet(QKEY,[]);d.close();refresh()})});
+  document.getElementById('syncPull').addEventListener('click',async()=>{
+    if(!connected()){msg.textContent='Test and save first.';msg.className='syncmsg bad';return}
+    try{const j=await api({action:'loadState'});if(!j.state){msg.textContent='Nothing saved in the Sheet yet.';return}
+      const ok=await ask('Load slots from the Sheet?','Slots, levels and your own exercises on this phone are replaced with the Sheet copy.','Load',true);
+      if(!ok)return;S=clean(j.state);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}refresh();msg.textContent='Loaded from the Sheet.';msg.className='syncmsg good'}
+    catch(e){msg.textContent='Could not load: '+e.message;msg.className='syncmsg bad'}
+  });
+  d.addEventListener('close',()=>{if(cur==='history')render();else updateSyncLine()});
+})();
 /* ---------- in-app confirm ---------- */
 function ask(title,body,yes,danger){
   return new Promise(res=>{const d=document.getElementById('ask');
@@ -1205,6 +1395,10 @@ const SOUND={
   done:()=>{tone(784,.18);tone(988,.18,.18);tone(1318,.5,.36,.3);buzz([200,100,200,100,400])}};
 function beep(){SOUND.work()}
 const srcOf=e=>({it:e.warm?{id:e.id,warm:e.warmP}:e.id,pid:e.pid,sec:e.sec,tier:e.tier});
+function faElapsed(){if(!F.ph)return 0;if(F.done)return F.ph.reduce((a,x)=>a+(x.kind==='ready'?0:x.t),0);let t=0;for(let i=0;i<F.ph.length;i++){if(F.ph[i].kind==='ready')continue;if(i<F.p)t+=F.ph[i].t;else if(i===F.p)t+=F.ph[i].t-F.left}return t}
+function logFA(result){F.logged=F.logged||{};if(F.logged[F.i])return;const e=curEx();if(!e)return;
+  const where=F.ph&&F.ph[F.p]?F.ph[F.p].l.replace(/^Get ready · /,''):'';
+  F.logged[F.i]=logEntry(e,result,{completed:result==='done'?'all':where,seconds:F.ph?String(faElapsed()):''});F.shown='';saveSession()}
 function resolveSrc(s){const e=resolve(s.it,s.pid);if(e){e.sec=s.sec;e.tier=s.tier}return e}
 const curEx=()=>resolveSrc(F.src[F.i]);
 /* ---------- sessions: never lose progress ---------- */
@@ -1215,17 +1409,17 @@ function loadSession(){try{const j=JSON.parse(localStorage.getItem(SKEY)||'null'
   if(!j.src.every(x=>resolveSrc(x)))return null;return j}catch(e){return null}}
 const hasProgress=()=>F.i>0||F.done||!!(F.ph&&started());
 function saveSession(){if(!F.open||!hasProgress())return;
-  try{localStorage.setItem(SKEY,JSON.stringify({sid:F.sid,src:F.src,i:F.i,p:F.p,left:F.left,ph:F.ph,done:F.done,title:F.title,at:Date.now()}))}catch(e){}}
+  try{localStorage.setItem(SKEY,JSON.stringify({sid:F.sid,src:F.src,i:F.i,p:F.p,left:F.left,ph:F.ph,done:F.done,title:F.title,logged:F.logged||{},at:Date.now()}))}catch(e){}}
 function clearSession(sid){try{const j=loadSession();if(!sid||!j||j.sid===sid)localStorage.removeItem(SKEY)}catch(e){}}
 function showFA(){fa.classList.add('open');document.body.style.overflow='hidden';
   if(!histPushed){try{history.pushState({fa:1},'');histPushed=true}catch(e){}}
   (async()=>{try{F.lock=await navigator.wakeLock?.request('screen')}catch(e){}})()}
 function openFA(list,title){
   if(!list.length)return;
-  F.src=list.map(srcOf);F.i=0;F.title=title;F.sid=Date.now().toString(36);F.open=true;setEx();showFA();
+  F.src=list.map(srcOf);F.i=0;F.title=title;F.sid=Date.now().toString(36);F.logged={};F.open=true;setEx();showFA();
 }
 function resumeSession(){const j=loadSession();if(!j){clearSession();refresh();return}
-  F.src=j.src;F.i=Math.min(j.i,j.src.length-1);F.title=j.title;F.sid=j.sid;F.open=true;setEx();
+  F.src=j.src;F.i=Math.min(j.i,j.src.length-1);F.title=j.title;F.sid=j.sid;F.open=true;setEx();F.logged=j.logged||{};
   if(Array.isArray(j.ph)&&j.ph.length&&F.ph){F.ph=j.ph;F.p=Math.min(j.p,j.ph.length-1);F.left=Math.max(1,j.left|0);F.done=!!j.done;if(F.done)F.left=0}
   F.shown='';drawFA();showFA();
 }
@@ -1249,7 +1443,8 @@ const started=()=>F.ph&&(F.p>0||F.left<F.ph[0].t);
 function drawFA(){
   const e=curEx();if(!e)return;const n=F.src.length;
   document.getElementById('faStep').textContent=`${F.title}: ${F.i+1} of ${n}`;
-  document.getElementById('faProg').innerHTML=F.src.map((_,i)=>`<i class="${i<=F.i?'on':''}"></i>`).join('');
+  document.getElementById('faProg').innerHTML=F.src.map((x,i)=>`<button type="button" class="seg${i<F.i?' on':''}${i===F.i?' cur':''}" data-jump="${i}" aria-label="Go to exercise ${i+1}"><i></i></button>`).join('');
+  const se=document.getElementById('faSkipEx');se.style.display=n>1?'':'none';se.textContent=F.i===n-1?'Skip & finish ›':'Skip ›';
   const ready=!F.run&&!F.done&&!started();
   const sig=[F.i,ready,e.key,e.dose,e.lvl,e.tuned,e.version,e.note,openChip,S.settings.ready].join('|');
   if(sig!==F.shown){F.shown=sig;
@@ -1272,9 +1467,15 @@ function drawFA(){
     go.style.display='';
     skip.style.display=!F.done&&(F.run||started())?'':'none';
     skip.textContent=F.done?'':F.ph[F.p].kind==='ready'?'Skip countdown':F.ph[F.p].kind==='rest'?'Skip rest':'Skip';
-  }else{num.textContent='';['ready','work','rest','done','running'].forEach(k=>fa.classList.remove(k==='running'?k:'ph-'+k));lbl.textContent='Tap Next when you\u2019re done';go.style.display='none';skip.style.display='none'}
+  }else{num.textContent='';['ready','work','rest','done','running'].forEach(k=>fa.classList.remove(k==='running'?k:'ph-'+k));lbl.textContent='Tap Done when you\u2019ve finished';go.style.display='none';skip.style.display='none'}
+  const fb=document.getElementById('faFeel'),lid=F.logged&&F.logged[F.i];
+  if(lid&&(F.done||!F.ph)){const cf=(localLog().find(x=>x.id===lid)||{}).feel||'';
+    fb.innerHTML='<span>How was it?</span>'+FEELS.map(([k,t])=>`<button type="button" class="chip${cf===k?' on':''}" data-feel="${k}">${t}</button>`).join('');fb.style.display=''}
+  else fb.style.display='none';
   const pb=document.getElementById('faPrev');pb.disabled=false;pb.textContent=F.i===0?'Exit':'Back';
-  document.getElementById('faNext').textContent=F.i===n-1?'Finish':'Next';
+  const nb=document.getElementById('faNext'),fin=F.done||!F.ph;
+  nb.textContent=fin?(F.i===n-1?'Finish':'Done'):(F.i===n-1?'Finish':'Next');
+  nb.classList.toggle('pri',!!fin&&!F.ph);
 }
 function tick(){const k=Math.max(1,Math.round((Date.now()-F.last)/1000));F.last+=k*1000;for(let j=0;j<k&&F.run;j++)step();drawFA();saveSession()}
 function step(){
@@ -1282,7 +1483,7 @@ function step(){
   if(F.left>0&&F.left<=3){SOUND.tick();return}
   if(F.left<=0){
     if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)()}
-    else{stop();F.done=true;F.left=0;SOUND.done()}}
+    else{stop();F.done=true;F.left=0;SOUND.done();logFA('done')}}
 }
 document.getElementById('faGo').addEventListener('click',()=>{
   if(!F.ph)return;
@@ -1296,9 +1497,17 @@ document.getElementById('faSkip').addEventListener('click',()=>{
   if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;F.last=Date.now();if(F.run)(SOUND[F.ph[F.p].kind]||SOUND.work)()}else{stop();F.done=true;F.left=0}
   drawFA();
 });
-document.getElementById('faNext').addEventListener('click',()=>{if(F.i<F.src.length-1){F.i++;setEx();saveSession();document.getElementById('faBody').scrollTop=0}else closeFA('finish')});
+document.getElementById('faNext').addEventListener('click',()=>{
+  if(!F.ph)logFA('done');else if(!F.done&&started())logFA('partial');
+  if(F.i<F.src.length-1){F.i++;setEx();saveSession();document.getElementById('faBody').scrollTop=0}else closeFA('finish')});
 document.getElementById('faPrev').addEventListener('click',()=>{if(F.i>0){F.i--;setEx();saveSession()}else closeFA('exit')});
 document.getElementById('faX').addEventListener('click',()=>closeFA('exit'));
+document.getElementById('faSkipEx').addEventListener('click',()=>{F.skipped=F.skipped||{};F.skipped[F.i]=true;if(F.ph&&!F.done&&started())logFA('partial');
+  if(F.i<F.src.length-1){F.i++;setEx();saveSession();document.getElementById('faBody').scrollTop=0}else closeFA('finish')});
+document.getElementById('faFeel').addEventListener('click',ev=>{const b=ev.target.closest('[data-feel]');if(!b)return;
+  const lid=F.logged&&F.logged[F.i];if(lid){updateEntry(lid,{feel:b.dataset.feel});drawFA()}});
+document.getElementById('faProg').addEventListener('click',ev=>{const b=ev.target.closest('[data-jump]');if(!b)return;
+  const i=+b.dataset.jump;if(i===F.i)return;F.i=i;setEx();saveSession();document.getElementById('faBody').scrollTop=0});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&F.open)closeFA('exit')});
 document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&F.open&&!F.lock){try{F.lock=await navigator.wakeLock?.request('screen')}catch(e){}}});
 /* ---------- flags ---------- */
