@@ -77,6 +77,13 @@ h3{font:600 25px/1.1 "Barlow Condensed",sans-serif;margin:0}
 .add{width:100%;margin-top:14px;padding:14px;border:1.5px dashed var(--muted);border-radius:12px;background:none;font-weight:600;color:var(--muted)}
 .tag{font-size:12px;font-weight:600;color:var(--muted);border:1px solid var(--rule);border-radius:4px;padding:0 5px;margin-left:6px;vertical-align:middle}
 footer{margin-top:28px;color:var(--muted);font-size:14px}
+.ink.thin{stroke-width:3.5}
+.inkf{fill:var(--ink)}
+.hbl{stroke:var(--bg);stroke-width:1.6;fill:var(--bg)}
+.holdc{fill:var(--acc);opacity:.85}
+.plate{fill:var(--far)}
+.platehole{fill:var(--bg)}
+.lbl{fill:var(--muted);font:600 10px Barlow,sans-serif}
 .ink{fill:none;stroke:var(--ink);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
 .far{fill:none;stroke:var(--far);stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
 .head{fill:var(--ink)}
@@ -274,15 +281,17 @@ function side(p){
   s+=poly(leg(p.near,p.nearKnee,p.nearFoot),'ink');
   s+=`<circle class="head" cx="${head[0].toFixed(1)}" cy="${head[1].toFixed(1)}" r="8"/>`;
   s+=poly(nh,'ink');
+  if(p.tip){const h=nh[2];s+=poly([h,[h[0]+p.tip[0],h[1]+p.tip[1]]],'ink thin')}
   if(p.db){const h=nh[2];s+=`<rect class="dbl" x="${h[0]-8}" y="${h[1]-1.5}" width="16" height="3" rx="1.5"/><rect class="dbl" x="${h[0]-10}" y="${h[1]-5}" width="5" height="10" rx="1.5"/><rect class="dbl" x="${h[0]+5}" y="${h[1]-5}" width="5" height="10" rx="1.5"/>`}
   return s;
 }
 function front(p){
   const hip=p.hip,hl=[hip[0]-7,hip[1]],hr=[hip[0]+7,hip[1]];
-  const sc=[hip[0],hip[1]-T],sl=[sc[0]-11,sc[1]],sr=[sc[0]+11,sc[1]],head=[sc[0],sc[1]-13];
-  const rl=ik(hl,p.L,L1,L2,'back'),rr=ik(hr,p.R,L1,L2,'fwd');
+  const tl=p.tl||T,sc=[hip[0],hip[1]-tl],sl=[sc[0]-11,sc[1]],sr=[sc[0]+11,sc[1]],head=[sc[0],sc[1]-13];
+  const rl=p.kL?{k:p.kL,end:p.L}:ik(hl,p.L,L1,L2,'back'),rr=p.kR?{k:p.kR,end:p.R}:ik(hr,p.R,L1,L2,'fwd');
   const hs=p.hands||[[hip[0]-9,hip[1]-3],[hip[0]+9,hip[1]-3]];
-  const al=ik(sl,hs[0],UA,FA,p.hands?'up':'back'),ar=ik(sr,hs[1],UA,FA,p.hands?'up':'fwd');
+  const hr_=p.handRules||(p.hands?['up','up']:['back','fwd']);
+  const al=p.elbows?{k:p.elbows[0],end:hs[0]}:ik(sl,hs[0],UA,FA,hr_[0]),ar=p.elbows?{k:p.elbows[1],end:hs[1]}:ik(sr,hs[1],UA,FA,hr_[1]);
   let s='';
   s+=poly([hl,rl.k,rl.end,[rl.end[0]-7,rl.end[1]+1]],'ink');
   s+=poly([hr,rr.k,rr.end,[rr.end[0]+7,rr.end[1]+1]],'ink');
@@ -291,6 +300,7 @@ function front(p){
   s+=`<circle class="head" cx="${head[0]}" cy="${head[1]}" r="8"/>`;
   if(p.band){const a=[rl.k[0]+1,rl.k[1]+4],b=[rr.k[0]-1,rr.k[1]+4];
     s+=`<line class="band" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`}
+  if(p.bandHands){const a=al.end,b=ar.end;s+=`<line class="band" x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}"/>`}
   if(p.circles){[al.end,ar.end].forEach(h=>{s+=`<circle class="acc" cx="${h[0].toFixed(1)}" cy="${h[1].toFixed(1)}" r="11" stroke-dasharray="52 18"/>`+`<polygon class="accf" points="${f1([h[0]+11,h[1]-9])} ${f1([h[0]+4,h[1]-14])} ${f1([h[0]+13,h[1]-17])}"/>`})}
   return s;
 }
@@ -304,7 +314,8 @@ function arrow(x1,y1,x2,y2){
 }
 function frameSVG(fr){
   let s=(fr.nofloor?'':`<line class="floor" x1="0" y1="145.5" x2="160" y2="145.5"/>`)+(fr.props||[]).join('');
-  s+=fr.front?front(fr.pose):side(fr.pose);
+  s+=fr.raw?fr.raw:fr.front?front(fr.pose):side(fr.pose);
+  s+=(fr.over||[]).join('');
   (fr.arrows||[]).forEach(a=>s+=arrow(...a));
   return `<svg viewBox="0 0 160 160" role="img" aria-label="${esc(fr.cap)}">${s}</svg>`;
 }
@@ -632,6 +643,100 @@ EX.sideplank.name='Side plank';
 EX.sideplank.frames=[OLD.plank.frames[1]];
 EX.sideplank.cue='Stack the feet, hips high, one straight line from feet to head.';
 const OVERHANG='<path class="prop" d="M148,146 L118,4 L160,4 L160,146 Z"/>';
+/* ---------- climbing, pre-climb and new stretches ---------- */
+const HANGBOARD='<rect class="prop" x="36" y="4" width="88" height="15" rx="4"/><line class="hbl" x1="42" y1="12" x2="118" y2="12"/><circle class="hbl" cx="52" cy="8" r="2"/><circle class="hbl" cx="108" cy="8" r="2"/>';
+const HOLD=(x,y,w=9)=>`<rect class="holdc" x="${x-w/2}" y="${y-3}" width="${w}" height="7" rx="3.5"/>`;
+const VWALL='<rect class="prop" x="130" y="4" width="30" height="141"/>';
+const POST=x=>`<rect class="prop" x="${x}" y="4" width="8" height="141" rx="1"/>`;
+const WIDE_HANG={hip:[80,98],torso:0,near:[80,150],far:[78,150],nearFoot:70,farFoot:70,hand:[74,19],hand2:[86,19],elbow:'back',elbow2:'back'};
+function pinchClose(w,label){
+  const L=80-w/2,R=80+w/2,fing=[0,1,2,3].map(i=>`<rect class="inkf" x="${R}" y="${62+i*11}" width="13" height="9" rx="4.5"/>`).join('');
+  return `<line class="far" x1="80" y1="112" x2="80" y2="124" stroke-width="3"/>
+   <circle class="plate" cx="80" cy="138" r="15"/><circle class="platehole" cx="80" cy="138" r="3"/>
+   <rect class="prop" x="${L}" y="60" width="${w}" height="52" rx="5"/>
+   <line class="acc" x1="${L+3}" y1="120" x2="${R-3}" y2="120" stroke-dasharray="3 3"/>
+   <path class="ink" d="M80,0 L80,40" stroke-width="18"/>
+   <path class="ink" d="M${L-6},66 Q80,34 ${R+7},60" stroke-width="11"/>
+   <rect class="inkf" x="${L-11}" y="60" width="11" height="34" rx="5.5"/>${fing}`;
+}
+Object.assign(EX,{
+ pulse:{name:'Pulse raiser',kind:'hold',P:{sets:1,time:180,rest:0,sides:false},
+  cue:'Skipping, a light jog or jumping jacks. You want to feel warm and breathing a little harder, not tired.',
+  frames:[
+   {cap:'Feet together, arms down',front:true,pose:{hip:[80,86],L:[76,142],R:[84,142],hands:[[62,86],[98,86]],handRules:['back','fwd']}},
+   {cap:'Jump out, arms overhead, and back',front:true,pose:{hip:[80,82],L:[58,140],R:[102,140],hands:[[48,14],[112,14]],handRules:['back','fwd']},arrows:[[40,150,20,150],[120,150,140,150]]}]},
+ bandshoulder:{name:'Band pull-aparts and rotations',kind:'reps',P:{sets:2,reps:10,unit:''},
+  cue:'Pull-aparts: arms straight, squeeze the shoulder blades together. Rotations: elbows glued to your sides, turn the forearms out. Light band, slow and controlled.',
+  frames:[
+   {cap:'Start with the arms forward, hands shoulder-width',front:true,pose:{hip:[80,90],L:[72,142],R:[88,142],hands:[[62,62],[98,62]],elbows:[[62,57],[98,57]],bandHands:true}},
+   {cap:'Pull apart, squeeze the shoulder blades',front:true,pose:{hip:[80,90],L:[72,142],R:[88,142],hands:[[33,52],[127,52]],handRules:['up','up'],bandHands:true},arrows:[[46,36,26,36],[114,36,134,36]]},
+   {cap:'Elbows at your sides, rotate out',front:true,pose:{hip:[80,90],L:[72,142],R:[88,142],hands:[[46,72],[114,72]],elbows:[[66,72],[94,72]],bandHands:true},arrows:[[44,84,30,84],[116,84,130,84]]}]},
+ proghang:{name:'Progressive warm-up hangs',kind:'iv',P:{reps:4,work:10,rest:60,sets:1,setRest:0},
+  cue:'Big, comfortable edge. First hangs with feet on the ground taking weight, then build to about 85% effort on the last one. Never to failure.',
+  frames:[
+   {cap:'Feet on, take part of your weight',nofloor:false,props:[HANGBOARD,box(56,122,50)],pose:{hip:[76,96],torso:-6,near:[92,119],far:[88,119],nearKnee:'fwd',farKnee:'fwd',hand:[74,19],hand2:[86,19],elbow:'back',elbow2:'back'}},
+   {cap:'Build up, the last hang near-full weight',nofloor:true,props:[HANGBOARD],pose:{...WIDE_HANG,near:[88,138],far:[84,140],nearKnee:'back',farKnee:'back',nearFoot:80,farFoot:80},arrows:[[118,110,118,86]]}]},
+ hangboard:{name:'Hangboard',kind:'iv',
+  cue:'Half crimp or open hand, shoulders engaged, slight bend in the elbows. Every hang should end with 2\u20133 seconds still in the tank. Stop the session if a finger feels tweaky.',
+  P:{reps:5,work:10,rest:50,sets:1,setRest:0},
+  L:[{v:'Your routine: 5 hangs, 50 s rest',p:{}},
+     {v:'Your routine with added weight',p:{}},
+     {v:'7-53: three 7 s hangs per set',p:{reps:3,work:7,rest:53,sets:3,setRest:180}},
+     {v:'7-53, five sets',p:{reps:3,work:7,rest:53,sets:5,setRest:240}},
+     {v:'MaxHangs: 10 s near-max, full rest',p:{reps:5,work:10,rest:180}}],
+  frames:[
+   {cap:'Hang, shoulders set, elbows soft',nofloor:true,props:[HANGBOARD],pose:{...WIDE_HANG,near:[86,144],far:[82,146],nearKnee:'back',farKnee:'back',nearFoot:80,farFoot:80}},
+   {cap:'Drop off and shake out between hangs',props:[HANGBOARD],pose:{hip:[80,88],torso:0,near:[82,142],far:[78,142],hand:[92,108],hand2:[70,110],elbow:'back',elbow2:'fwd'},over:['<path class="acc" d="M96,114 q4,4 0,8 q-4,4 0,8"/><path class="acc" d="M66,116 q-4,4 0,8 q4,4 0,8"/>']}]},
+ pinch:{name:'Pinch block lifts',kind:'reps',P:{sets:8,reps:5,unit:' per grip'},
+  cue:'Rotate through your grip widths: wide, medium and narrow. Thumb pushes as hard as the fingers. Lift the weight off the floor, hold a moment, lower under control. Both hands.',
+  L:[{v:'10 kg, all widths',p:{}},{v:'12.5 kg',p:{}},{v:'15 kg',p:{}},{v:'17.5 kg',p:{}},{v:'20 kg',p:{}}],
+  frames:[
+   {cap:'Lift it off the floor',props:[],pose:{hip:[76,86],torso:2,near:[78,142],far:[74,142],hand:[80,122],elbow:'back'},over:['<rect class="prop" x="70" y="114" width="20" height="17" rx="2.5"/><line class="far" x1="80" y1="131" x2="80" y2="134" stroke-width="2.5"/><circle class="plate" cx="80" cy="135" r="9"/><circle class="platehole" cx="80" cy="135" r="2"/>']},
+   {cap:'Wide pinch',nofloor:true,raw:pinchClose(58,'wide')},
+   {cap:'Narrow pinch',nofloor:true,raw:pinchClose(26,'narrow')}]},
+ pullup:{name:'Pull-ups',kind:'reps',P:{sets:5,reps:5,unit:''},
+  cue:'3\u20135 reps depending on the day. Start every rep from a dead hang with the shoulders set, chin over the bar, lower under control. Stop a rep before failure.',
+  L:[{v:'Bodyweight, 3\u20135 reps',p:{}},{v:'5 kg added',p:{}},{v:'10 kg added',p:{}},{v:'15 kg added',p:{reps:3}},{v:'Typewriters or uneven grip',p:{reps:3}}],
+  frames:[
+   {cap:'Dead hang, shoulders set',nofloor:true,props:[bar],pose:{hip:[80,90],torso:0,near:[74,138],far:[72,141],nearKnee:'back',farKnee:'back',nearFoot:80,farFoot:80,hand:[78,8],hand2:[84,8],elbow:'back',elbow2:'back'}},
+   {cap:'Chin over the bar, lower slowly',nofloor:true,props:[bar],pose:{hip:[80,62],torso:4,near:[70,110],far:[68,113],nearKnee:'back',farKnee:'back',nearFoot:80,farFoot:80,hand:[78,8],hand2:[84,8],elbow:'fwd',elbow2:'fwd'},arrows:[[122,96,122,70]]}]},
+ easyclimb:{name:'Easy climbing',kind:'hold',P:{sets:1,time:600,rest:0,sides:false},
+  cue:'Start 3\u20134 grades below your limit on big holds, then gradually smaller and steeper. Quiet feet, relaxed grip. You should finish warm, not pumped.',
+  frames:[
+   {cap:'Big holds, quiet feet',props:[VWALL,HOLD(127,28),HOLD(127,56),HOLD(127,98,8),HOLD(127,124,8),HOLD(127,138,8)],pose:{hip:[104,92],torso:8,near:[126,122],far:[126,136],hand:[124,28],hand2:[124,56],elbow:'down',elbow2:'down'}},
+   {cap:'Then smaller holds and steeper',props:[OVERHANG,HOLD(121,20,7),HOLD(126,46,7),HOLD(138,112,7),HOLD(141,128,7)],pose:{hip:[90,100],torso:22,near:[136,112],far:[139,128],hand:[119,22],hand2:[124,47],elbow:'down',elbow2:'down'}}]},
+ butterfly:{name:'Butterfly and frog stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
+  cue:'Opens the hips for bridging, drop-knees and turned-out feet. Keep the back long and let the knees sink, don\u2019t force them down.',
+  L:[{v:'Sit tall, soles together',p:{sets:1}},{v:'Hinge forward from the hips',p:{}},{v:'Feet closer, longer holds',p:{time:45}},{v:'Frog stretch on the forearms',p:{time:45}},{v:'Frog, knees wider',p:{time:60}}],
+  frames:[
+   {cap:'Soles together, sit tall',front:true,pose:{hip:[80,136],L:[76,142],R:[84,142],kL:[46,126],kR:[114,126],hands:[[54,124],[106,124]],handRules:['down','down']}},
+   {cap:'Hinge forward, knees sink',front:true,pose:{hip:[80,136],tl:26,L:[76,142],R:[84,142],kL:[44,130],kR:[116,130],hands:[[60,132],[100,132]],handRules:['down','down']},arrows:[[34,112,34,124],[126,112,126,124]]}]},
+ latstretch:{name:'Wall lat stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
+  cue:'Hands on a wall or post, thumbs up. Walk back and hinge at the hips, then let the chest sink between the arms. Feel it along the sides of the back.',
+  L:[{v:'Hands on a table, hinge',p:{}},{v:'Hands on a wall at hip height',p:{}},{v:'Longer holds',p:{time:45}},{v:'One arm on a post, lean away',p:{sides:true}},{v:'One arm, longer holds',p:{sides:true,time:45}}],
+  frames:[
+   {cap:'Hands on the wall, walk back and hinge',props:[wall(142)],pose:{hip:[60,92],torso:84,headAng:25,near:[64,142],far:[60,142],hand:[140,80],hand2:[140,84],elbow:'down',elbow2:'down'}},
+   {cap:'Let the chest sink between the arms',props:[wall(142)],pose:{hip:[58,90],torso:86,bend:-6,headAng:30,near:[64,142],far:[60,142],hand:[140,82],hand2:[140,86],elbow:'down',elbow2:'down'},arrows:[[96,64,96,82]]}]},
+ pecdoor:{name:'Doorway chest stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:true},
+  cue:'Forearm flat on the door frame, then step through until the front of the shoulder and chest open up. No pinching in the shoulder joint.',
+  L:[{v:'Arm at 90\u00b0, gentle',p:{sets:1}},{v:'Step through further',p:{}},{v:'Arm higher for the upper chest',p:{}},{v:'Both heights',p:{time:45}},{v:'Both heights, longer holds',p:{time:60}}],
+  frames:[
+   {cap:'Forearm on the frame, elbow at shoulder height',front:true,props:[POST(38)],pose:{hip:[80,86],L:[74,142],R:[86,142],hands:[[46,26],[89,83]],elbows:[[46,48],[92,66]]}},
+   {cap:'Slide the arm higher for the upper chest',front:true,props:[POST(38)],pose:{hip:[80,86],L:[74,142],R:[86,142],hands:[[44,6],[89,83]],elbows:[[48,32],[92,66]]}}]},
+ threadneedle:{name:'Thread the needle',kind:'reps',P:{sets:1,reps:8,unit:' per side'},
+  cue:'Upper-back rotation. Move slowly, follow the hand with your eyes and breathe out as you reach.',
+  L:[{v:'Small range',p:{reps:6}},{v:'Full reach under',p:{}},{v:'2 s pause at each end',p:{}},{v:'Hips back towards the heels',p:{reps:10}},{v:'Slow, 3 s each way',p:{reps:10}}],
+  frames:[
+   {cap:'Reach under, rotating the upper back',pose:{hip:[52,117],torso:80,headAng:40,near:[24,140],nearKnee:'down',nearFoot:180,far:[26,140],farKnee:'down',farFoot:180,hand:[58,140],elbow:'down',hand2:[90,144],elbow2:'back'}},
+   {cap:'Open up, reach to the ceiling',pose:{hip:[52,117],torso:75,headAng:-40,near:[24,140],nearKnee:'down',nearFoot:180,far:[26,140],farKnee:'down',farFoot:180,hand:[92,48],elbow:'fwd',hand2:[89,144],elbow2:'back'},arrows:[[112,96,112,64]]}]},
+ forearmstretch:{name:'Forearm stretch',kind:'hold',P:{sets:1,time:20,rest:0,sides:true},
+  cue:'Gentle. Arm straight, palm away, ease the fingers back. Then palm down, fingers to the floor. Your fingers work hard enough already.',
+  L:[{v:'Palm away, gentle',p:{}},{v:'Palm away, then palm down',p:{sets:2}},{v:'Longer holds',p:{sets:2,time:30}},{v:'Add wrist circles between',p:{sets:2,time:30}},{v:'Three rounds',p:{sets:3,time:30}}],
+  frames:[
+   {cap:'Palm away, ease the fingers back',pose:{hip:[70,86],torso:0,near:[72,142],far:[68,142],hand:[106,50],elbow:'down',tip:[2,-14],hand2:[110,40],elbow2:'down'}},
+   {cap:'Then palm down, fingers to the floor',pose:{hip:[70,86],torso:0,near:[72,142],far:[68,142],hand:[106,50],elbow:'down',tip:[2,14],hand2:[110,60],elbow2:'down'}}]}
+});
+
 EX.tooltraverse={name:'Ice tool traverse',kind:'hold',
   cue:'Quiet, precise placements and straight arms. Move the feet first, then reach for the next placement. Shake out on straight arms; stop the set before your grip fails.',
   P:{sets:3,time:60,rest:120,sides:false},
@@ -645,6 +750,9 @@ EX.tooltraverse={name:'Ice tool traverse',kind:'hold',
    {cap:'Straight arms, move the feet, then the next tool',props:[OVERHANG,tool(118,40),tool(110,52,true)],pose:{hip:[80,112],torso:16,near:[138,124],far:[100,140],farKnee:'fwd',hand:[118,40],elbow:'down',hand2:[110,52],elbow2:'down'},arrows:[[102,128,124,112]]}]};
 
 const W=(p)=>({warm:p});
+const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
+  items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
+  extra:['armcircle','squathold','catcow']};
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Sep 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
@@ -652,12 +760,16 @@ const PROGS=[
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
   {title:'Tools and grip',sub:'Twice a week, never on back-to-back days.',items:['toolhang','tooltraverse','lockoff'],extra:['lockoff']},
   {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
- {id:'daily',chip:'Stretch',title:'Stretch',lede:'About 10 minutes. Slow and easy, breathe out into each stretch.',routine:true,sections:[
-  {title:'Routine',items:['catcow','child','hipflex','hamstring','calfstretch','kneewall','squathold'],extra:['catcow','child','hamstring','kneewall']}]},
+ {id:'climb',chip:'Climbing',title:'Climbing',lede:'Finger strength and pulling. Always start with the pre-climb warm-up.',sections:[
+  PRECLIMB,
+  {title:'Fingers',sub:'Twice a week, not the day before a hard climbing day. Rest at least 48 hours between finger sessions.',items:['hangboard','pinch'],extra:[]},
+  {title:'Pull',sub:'After the finger work or on its own day.',items:['pullup','scap'],extra:[]}]},
+ {id:'daily',chip:'Stretch',title:'Stretch',lede:'About 10 minutes, daily if you can, in the evening or after training. Slow and easy, breathe out into each stretch.',routine:true,sections:[
+  {title:'Routine',items:['hipflex','calfstretch','squathold','butterfly','latstretch','pecdoor','threadneedle','hamstring','kneewall','catcow','child','forearmstretch'],extra:['threadneedle','hamstring','kneewall','catcow','child','forearmstretch']}]},
  {id:'warmup',chip:'Warm up',title:'Warm up',lede:'Pick the one for today\u2019s session. The essentials take a few minutes.',sections:[
   {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']},
   {pid:'prework',title:'Pre-workout',sub:'Wake up the hips, core and shoulders before strength work.',routine:true,items:[{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})},{id:'squat',...W({sets:1,reps:10,unit:''})},{id:'bridge',...W({sets:1,reps:10,unit:''})},'armcircle',{id:'plank',...W({sets:1,time:30,rest:0,sides:false})},{id:'bandwalk',...W({sets:1,reps:10,unit:' steps each way'})}],extra:['armcircle','plank','bandwalk']},
-  {pid:'preclimb',title:'Pre-climb',sub:'Shoulders, fingers and hips before you pull on. Finish with easy climbing.',routine:true,items:['armcircle','fingers',{id:'scap',...W({sets:2,reps:8,unit:''})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})},{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},'traverse'],extra:['armcircle','catcow','squathold']}]}
+  PRECLIMB]}
 ];
 
 /* ---------- state ---------- */
