@@ -130,6 +130,9 @@ body[data-view="train"] header{padding-top:14px}
 .rwhave h4{margin:0 0 6px;font:700 16px/1 "Barlow Condensed",sans-serif}
 .rwh{display:grid;grid-template-columns:20px 64px 1fr auto;gap:6px;align-items:center;font-size:14px;padding:4px 0}
 .rwh em{font-style:normal}.rwh small{color:var(--muted)}
+.nocon{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid var(--acc);display:flex;gap:12px;align-items:center}
+.nocon p{margin:0;font-size:14px;line-height:1.45;flex:1}.nocon b{display:block}
+.syncextra{display:flex;flex-wrap:wrap;gap:6px 16px}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -438,7 +441,7 @@ button.chip::after{display:none}
   <label>Web app URL<input name="url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec"></label>
   <label>Token<input name="token" autocomplete="off"></label>
   <p class="syncmsg" id="syncMsg" role="status"></p>
-  <div class="syncextra"><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
+  <div class="syncextra"><button type="button" class="link" id="syncCopy">Link for another device</button><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Close</button><button class="btn pri" type="button" id="syncTest">Test and save</button></div>
 </form></dialog>
 
@@ -1160,7 +1163,9 @@ addEventListener('online',()=>scheduleFlush(500));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushQueue()});
 setInterval(()=>{if(lsGet(QKEY,[]).length)flushQueue()},60000);
 let stateT=null;
-function queueState(){if(!connected())return;clearTimeout(stateT);stateT=setTimeout(()=>{
+function isFresh(x){x=x||S;const empty=o=>!o||!Object.keys(o).length;
+  return empty(x.custom)&&empty(x.edits)&&empty(x.levels)&&empty(x.tune)&&empty(x.tiers)&&empty(x.slots)&&empty(x.planRefs)&&empty(x.runMeta)&&empty(x.run)&&empty(x.nepal)&&!(x.hidden||[]).length}
+function queueState(){if(!connected()||isFresh())return;clearTimeout(stateT);stateT=setTimeout(()=>{
   const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q);scheduleFlush(3000)},4000)}
 
 function logEntry(e,result,extra){
@@ -1275,7 +1280,7 @@ function renderHistory(){
       <button class="link hx" data-act="hdel" data-id="${esc(r.id)}" aria-label="Remove">✕</button></div></div>`;
   document.getElementById('plede').textContent='Plan ahead and see what you did.';
   document.getElementById('main').innerHTML=`
-   <section><p class="sub" id="syncline">${syncLine()}</p>
+   <section>${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}<p class="sub" id="syncline">${syncLine()}</p>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
       <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     <div class="calhead"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
@@ -1328,6 +1333,7 @@ function renderToday(){
       <button class="go sm" data-act="resume">Resume</button><button class="link" data-act="discard">Discard</button></div>`}
   const cdN=cdParts(nepalLeft()).d,cdR=Math.max(0,Math.round((d0(parseDay(RS().race))-d0(now))/864e5));
   document.getElementById('main').innerHTML=`<section class="todaysec">
+    ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     <div class="cdchips"><button data-act="gonepal"><em>🏔</em><b>${cdN}</b><span>days to<br>Three Passes</span></button><button data-act="gorun"><em>🏁</em><b>${cdR}</b><span>days to the<br>marathon</span></button></div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
@@ -2060,17 +2066,20 @@ function importData(){
 /* ---------- sync dialog ---------- */
 (function(){
   const d=document.getElementById('syncdlg'),msg=document.getElementById('syncMsg');
+  document.getElementById('syncCopy').addEventListener('click',async()=>{
+    const c=syncCfg();if(!c.url||!c.token){msg.textContent='Test and save first.';msg.className='syncmsg bad';return}
+    const link=connectLink();
+    try{if(navigator.share){await navigator.share({title:'Connect Training guide',text:'Open on your other device to connect it to your Sheet',url:link});return}}catch(e){if(e&&e.name==='AbortError')return}
+    try{await navigator.clipboard.writeText(link);msg.textContent='Link copied. Open it on the other device or browser and it connects by itself.';msg.className='syncmsg good'}
+    catch(e){msg.textContent=link;msg.className='syncmsg'}
+  });
   document.getElementById('syncTest').addEventListener('click',async()=>{
     const url=d.querySelector('[name=url]').value.trim(),token=d.querySelector('[name=token]').value.trim();
     if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)){msg.textContent='That does not look like an Apps Script web app URL.';msg.className='syncmsg bad';return}
     msg.textContent='Testing…';msg.className='syncmsg';
     const old=syncCfg();lsSet(SYKEY,{...old,url,token,error:''});
-    try{const j=await api({action:'ping'});msg.textContent='Connected to "'+j.sheet+'". Sending your history…';msg.className='syncmsg good';
-      const have=new Set(lsGet(QKEY,[]).filter(o=>o.op==='log').map(o=>o.row.id));
-      localLog().forEach(r=>{if(!have.has(r.id))enqueue({op:'log',row:r})});
-      clearTimeout(stateT);{const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q)}
-      await flushQueue();await pullHistory();msg.textContent='Connected to "'+j.sheet+'". Everything is synced.';
-      document.getElementById('syncOff').style.display=''}
+    try{const r=await connectFlow(t=>{msg.textContent=t;msg.className='syncmsg good'});
+      msg.textContent=r;msg.className='syncmsg good';document.getElementById('syncOff').style.display=''}
     catch(e){lsSet(SYKEY,old);msg.textContent='Could not connect: '+e.message;msg.className='syncmsg bad'}
   });
   document.getElementById('syncOff').addEventListener('click',()=>{ask('Disconnect the Sheet?','Your history stays on this phone and in the Sheet. New entries stay on this phone.','Disconnect',true)
@@ -2084,6 +2093,36 @@ function importData(){
   });
   d.addEventListener('close',()=>{if(cur==='history'||cur==='today')render();else updateSyncLine()});
 })();
+/* ---------- connecting a browser: restore first, never overwrite the Sheet with a blank phone ---------- */
+async function connectFlow(say){
+  say=say||(()=>{});
+  const j=await api({action:'ping'});say('Connected to "'+j.sheet+'". Checking what is saved…');
+  let restored='';
+  try{const st=await api({action:'loadState'});
+    if(st.state&&!isFresh(st.state)){
+      if(isFresh()){S=clean(st.state);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}restored=' Slots, settings and plans restored.'}
+      else{const useSheet=await ask('Two copies of your settings','Your Sheet has saved slots and settings, and so does this device. Use the Sheet copy (recommended), or keep this device\u2019s and replace the Sheet copy?','Use the Sheet copy');
+        if(useSheet){S=clean(st.state);try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}restored=' Loaded from the Sheet.'}
+        else{clearTimeout(stateT);const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q)}}}
+    else if(!isFresh()){const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q)}
+  }catch(e){}
+  const have=new Set(lsGet(QKEY,[]).filter(o=>o.op==='log').map(o=>o.row.id));
+  localLog().forEach(r=>{if(!have.has(r.id))enqueue({op:'log',row:r})});
+  say('Sending and fetching your history…');
+  await flushQueue();await pullHistory();await pullPlans();refresh();
+  return 'Connected to "'+j.sheet+'". Everything is synced.'+restored;
+}
+function connectLink(){const c=syncCfg();const b=btoa(unescape(encodeURIComponent(JSON.stringify({u:c.url,t:c.token})))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  return location.origin+location.pathname+'#connect='+b}
+async function handleConnectHash(){const m=location.hash.match(/^#connect=([\w-]+)/);if(!m)return;
+  try{history.replaceState(null,'',location.pathname)}catch(e){}
+  let cfg;try{cfg=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))))}catch(e){showErr('That connect link is broken.');return}
+  if(!cfg||!cfg.u||!cfg.t)return;
+  const old=syncCfg();lsSet(SYKEY,{...old,url:cfg.u,token:cfg.t,error:''});
+  try{const r=await connectFlow();undoBar(r.replace(/^Connected to "[^"]*"\. /,'Connected. '),()=>{})}
+  catch(e){lsSet(SYKEY,old);showErr('Could not connect: '+e.message)}
+}
+handleConnectHash();addEventListener('hashchange',handleConnectHash);
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
   S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
