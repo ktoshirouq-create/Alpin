@@ -133,6 +133,68 @@ body[data-view="train"] header{padding-top:14px}
 .nocon{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid var(--acc);display:flex;gap:12px;align-items:center}
 .nocon p{margin:0;font-size:14px;line-height:1.45;flex:1}.nocon b{display:block}
 .syncextra{display:flex;flex-wrap:wrap;gap:6px 16px}
+.objtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:10px 10px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px;border-top:4px solid var(--oc)}
+.otile em{font-style:normal;font-size:18px}.otile b{font:700 28px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.otile span{font-size:11px;line-height:1.2;color:var(--muted)}
+.otile.winter{background:linear-gradient(160deg,#16304A,#0B1726);color:#EAF6FF}.otile.winter span{color:#A9CBE4}
+body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
+.objpage{padding-top:8px}
+.tkhero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#EAF6FF;
+  background:radial-gradient(120% 80% at 70% 0%,#24476A 0%,#10223A 45%,#081322 100%)}
+.tkhero .snow{position:absolute;inset:0;pointer-events:none}
+.tkhero .snow i{position:absolute;top:-8px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.75}
+@media (prefers-reduced-motion:no-preference){.tkhero .snow i{animation:fall linear infinite}
+  @keyframes fall{0%{transform:translate(0,-10px)}100%{transform:translate(-26px,460px)}}
+  .tkroute .star{animation:tw 4s ease-in-out infinite}@keyframes tw{50%{opacity:.25}}
+  .tkroute .tkline{stroke-dasharray:1100;stroke-dashoffset:1100;animation:draw 1.8s ease-out forwards}}
+@media (prefers-reduced-motion:reduce){.tkhero .snow{display:none}}
+.tkhead{position:relative;display:flex;flex-direction:column;gap:2px}
+.tkkick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8EC9F0}
+.tkhead b{font-size:16px}.tkhead span:last-child{font-size:13px;color:#A9CBE4}
+.tkhero .cdbig{position:relative}.tkhero .cdbig span,.tkhero .cdsmall{color:#A9CBE4}.tkhero .cdsmall b{color:#EAF6FF}
+.tkroute{position:relative;display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
+.tkroute .star{fill:#fff}.tkroute .moon{fill:#F4F1DE}.tkroute .moonbite{fill:#14294A}
+.tkroute .tkland{fill:#14304D}.tkroute .tkline{fill:none;stroke:#DCEFFC;stroke-width:2;stroke-linejoin:round}
+.tkroute .tkdone{fill:none;stroke:#FF8A70;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.tkroute .snowline{stroke:#DCEFFC;stroke-width:1;stroke-dasharray:3 4;opacity:.6}.tkroute .snowlbl{fill:#A9CBE4;font:600 8px Barlow,sans-serif}
+.tkroute .daylbl{fill:#A9CBE4;font:700 8.5px Barlow,sans-serif}.tkroute .daylbl.hi{fill:#FF8A70}
+.tkroute .tksum line{stroke:#EAF6FF;stroke-width:1.2}.tkroute .tksum path{fill:#FF8A70}
+.tkroute .tkalt{fill:#EAF6FF;font:700 10px Barlow,sans-serif}.tkroute .tkname{fill:#A9CBE4;font:600 8px Barlow,sans-serif}
+.tkroute .tkpt{fill:#A9CBE4;font:600 7.5px Barlow,sans-serif}
+.tkroute .you{fill:#FF8A70;stroke:#081322;stroke-width:1.5}.tkroute .youglow{fill:#FF8A70;opacity:.28}
+.tkfoot{position:relative;display:flex;justify-content:space-between;font-size:12px;color:#A9CBE4;margin-top:4px}.tkfoot b{color:#EAF6FF}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.facts div{background:var(--panel);border-radius:12px;padding:10px}.facts b{display:block;white-space:nowrap;font:700 19px/1.05 "Barlow Condensed",sans-serif}
+.facts span{font-size:11px;line-height:1.25;color:var(--muted)}
+.objh{font-size:26px;margin:26px 0 10px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.gcount{font:600 13px Barlow,sans-serif;color:var(--muted)}
+.daystrip{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--rule);margin-left:6px}
+.dstep{position:relative;padding:0 0 14px 16px}
+.dstep::before{content:"";position:absolute;left:-7px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid #8EC9F0}
+.dstep.hi::before{background:#FF8A70;border-color:#FF8A70}
+.dstep em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}.dstep b{display:block;font-size:16px;margin:1px 0 3px}
+.dstep p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.prepl{display:flex;flex-direction:column;gap:8px}
+.prow2{display:flex;gap:12px;padding:12px;border-radius:14px;background:var(--panel)}
+.prow2.ms{border:1.5px solid #8EC9F0}.prow2.done{opacity:.6}
+.prow2 em{font-style:normal;font-size:12px;font-weight:700;color:#3FA7D6}.prow2 b{display:block;font-size:16px}
+.prow2 p{margin:3px 0 4px;font-size:14px;line-height:1.45;color:var(--muted)}.prow2 .link{margin-right:14px}
+.tick{position:relative;flex:0 0 auto;width:26px;height:26px}
+.tick input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+.tick span{display:block;width:26px;height:26px;border-radius:50%;border:2px solid var(--rule)}
+.tick input:checked+span{background:#3DAE74;border-color:#3DAE74;box-shadow:inset 0 0 0 5px var(--panel)}
+.gear{display:grid;grid-template-columns:1fr;gap:10px}
+.gcat{background:var(--panel);border-radius:14px;padding:10px 12px}.gcat h4{margin:2px 0 6px;font:700 17px/1 "Barlow Condensed",sans-serif}
+.gitem{position:relative;display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--rule);font-size:15px;cursor:pointer}
+.gitem:first-of-type{border-top:0}
+.gitem input{width:20px;height:20px;accent-color:#3DAE74;flex:0 0 auto}
+.gitem.on span{color:var(--muted);text-decoration:line-through}
+.after{display:grid;grid-template-columns:1fr;gap:8px}
+.after div{background:var(--panel);border-radius:12px;padding:10px 12px}.after b{display:block;font-size:15px}.after span{font-size:13px;color:var(--muted)}
+.cd.trip{box-shadow:inset 0 -4px 0 var(--oc)}
+.tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
+.tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -300,13 +362,16 @@ body.has-resume .wrap{padding-bottom:110px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .prow{display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;border-radius:12px;background:var(--panel);border-left:4px solid var(--tc)}
-.pmain{flex:1;min-width:0}.pmain b{display:block;font-size:16px}.pmain span{font-size:13px;color:var(--muted)}
+.pmain{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer}
+.pmain u{display:block;margin-top:6px;font-size:12px;color:var(--muted);text-decoration:none}
+.pmain u::before{content:'✎ '}.pmain b{display:block;font-size:16px}.pmain span{font-size:13px;color:var(--muted)}
 .pmain small{display:block;margin-top:6px;font-size:13px;line-height:1.45;color:var(--ink)}
 .pmain em.ok{color:var(--rest);font-style:normal;font-weight:600}
 .pside{display:flex;align-items:center;gap:6px}
 .tdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:middle}
 .upc{display:block;width:100%;text-align:left;background:none;border:0;border-left:4px solid var(--tc);padding:8px 12px;margin:6px 0}
 .upc b{display:block;font-size:14px}.upc span{font-size:13px;color:var(--muted)}
+#editplandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #plandlg input[type=date],#plandlg input[type=time]{font-size:16px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -466,6 +531,19 @@ button.chip::after{display:none}
   <div class="feelrow"><span>How was it?</span><label><input type="radio" name="feel" value="easy">Easy</label><label><input type="radio" name="feel" value="good">Good</label><label><input type="radio" name="feel" value="hard">Hard</label></div>
   <label>Note <span class="hint">optional</span><input name="note" autocomplete="off"></label>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save run</button></div>
+</form></dialog>
+
+<dialog id="editplandlg"><form method="dialog" id="editplanfrm">
+  <h2>Change this session</h2>
+  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
+  <div class="runopts" id="epRun" hidden><select name="rtype" aria-label="Run type"></select>
+    <label class="kmin"><input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5" aria-label="Kilometres">km</label></div>
+  <div class="durrow"><label>Duration, minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label>
+    <div id="epChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div></div>
+  <label>Title in your calendar<input name="title" autocomplete="off" required></label>
+  <p class="syncmsg" id="epMsg" role="status"></p>
+  <div class="dbtns"><button type="button" class="btn danger" id="epDel">Remove</button><span></span>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
 </form></dialog>
 
 <dialog id="nepdlg"><form method="dialog" id="nepfrm">
@@ -932,7 +1010,7 @@ function pinchClose(w,label){
    <rect class="inkf" x="${L-11}" y="60" width="11" height="34" rx="5.5"/>${fing}`;
 }
 Object.assign(EX,{
- pulse:{name:'Pulse raiser',kind:'hold',P:{sets:1,time:180,rest:0,sides:false},
+ pulse:{name:'Pulse raiser',kind:'hold',P:{sets:1,time:120,rest:0,sides:false},
   cue:'Skipping, a light jog or jumping jacks. You want to feel warm and breathing a little harder, not tired.',
   frames:[
    {cap:'Feet together, arms down',front:true,pose:{hip:[80,86],L:[76,142],R:[84,142],hands:[[62,86],[98,86]],handRules:['back','fwd']}},
@@ -1050,6 +1128,7 @@ const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, 
   extra:['armcircle','squathold','catcow']};
 const HISTORY={id:'history',chip:'Calendar',title:'Calendar',lede:'',sections:[]};
 const TODAY={id:'today',chip:'Today',title:'Today',lede:'',sections:[]};
+const TOUBKAL={id:'toubkal',chip:'Toubkal',title:'Toubkal',lede:'',sections:[]};
 const TRAIN_IDS=['nepal','ice','climb','run','daily','warmup'];
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
@@ -1071,17 +1150,19 @@ const PROGS=[
  {id:'run',chip:'Run',title:'Marathon',lede:'',sections:[
   {title:'Run types',sub:'Tap a slot to pick the version you want. Intervals, tempo and strides run on the timer.',items:['runeasy','runlong','runrecovery','runstrides','runtempo','runintervals','runmp'],extra:[],flat:true,noPlay:true}]},
  HISTORY,
+ TOUBKAL,
  TODAY
 ];
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{},run:{},runMeta:{},nepal:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
-  if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=10;
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=5;
+  if(!S0.settings.readyV2){if(S0.settings.ready===10)S0.settings.ready=5;S0.settings.readyV2=1}
   if(!Array.isArray(S0.hidden))S0.hidden=[];
   // built-in edits keep only name and cue; numbers now live in levels and tuning
   Object.keys(S0.edits).forEach(id=>{const e=S0.edits[id]||{};const k={};
@@ -1262,16 +1343,17 @@ function renderHistory(){
     const planTabs=[...new Set((planBy[ds]||[]).map(p=>p.tab))].filter(t=>!doneTabs.includes(t));
     const dots=doneTabs.slice(0,4).map(t=>`<i style="background:${TABCOL[t]||'var(--muted)'}"></i>`).join('')
       +planTabs.slice(0,4-Math.min(4,doneTabs.length)).map(t=>`<i class="ring" style="border-color:${TABCOL[t]||'var(--muted)'}"></i>`).join('');
-    cells+=`<button type="button" class="cd${inM?'':' out'}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
+    const ob=objOn(ds)[0];
+    cells+=`<button type="button" style="${ob?'--oc:'+ob.col:''}" class="cd${ob?' trip'+(ds===ob.date?' tstart':'')+(ds===ob.end?' tend':''):''}${inM?'':' out'}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
   }
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));const wkStart=dayOf(wk);
   const week=all.filter(r=>r.date>=wkStart&&r.result!=='skipped'),secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
   const upcoming=plans.filter(p=>p.date>=todayS).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
   const dayPlans=(planBy[calSel]||[]).sort((a,b)=>a.start.localeCompare(b.start)),dayLog=(logBy[calSel]||[]).sort((a,b)=>a.time.localeCompare(b.time));
   const doneDay=dayLog.some(r=>r.result==='done');
-  const planRow=p=>`<div class="prow" style="--tc:${TABCOL[p.tab]||'var(--muted)'}"><div class="pmain"><b>${esc(p.title)}</b>
+  const planRow=p=>`<div class="prow" style="--tc:${TABCOL[p.tab]||'var(--muted)'}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(p.title)}</b>
       <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(p.status==='done'||(doneDay&&p.date<=todayS))?' · <em class="ok">✓ done</em>':''}</span>
-      ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}</div>
+      ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}<u>Tap to change time or day</u></button>
       <div class="pside">${(S.planRefs[p.id]||[]).length&&p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
         :(!(S.planRefs[p.id]||[]).length&&p.date<=todayS&&p.status!=='done'&&!(logBy[p.date]||[]).some(r=>r.plan_id===p.id)?`<button class="go sm alt" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`:'')}<button class="link hx" data-act="pdel" data-id="${esc(p.id)}" aria-label="Remove plan">✕</button></div></div>`;
   const logRow=r=>`<div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b><i class="tdot" style="background:${TABCOL[r.tab]||'var(--muted)'}"></i>${esc(r.exercise)}</b>
@@ -1289,6 +1371,9 @@ function renderHistory(){
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
     <div class="legend">${BASETABS.concat(EXTRAS.map(x=>x[0]).filter(t=>plans.some(p=>p.tab===t)||all.some(r=>r.tab===t))).map(t=>`<span><i style="background:${TABCOL[t]}"></i>${t}</span>`).join('')}<span><i class="ring"></i>planned</span></div>
     <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
+      ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
+        const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
+        return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
       ${dayPlans.map(planRow).join('')}
       ${dayLog.map(logRow).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
@@ -1318,7 +1403,8 @@ function renderToday(){
       ${(next.items||[]).length?`<p class="nc-items">${(next.items||[]).map(esc).join('<br>')}</p>`:''}
       <div class="nc-btns">${refs(next).length?`<button class="go" data-act="pstart" data-id="${esc(next.id)}">${playIcon}Start</button>`
         :(next.date<=todayS?`<button class="go" data-act="pdone" data-id="${esc(next.id)}">✓ Done</button>`:'')}
-        <button class="link" data-act="calday" data-d="${next.date}">See in calendar</button></div></div>`
+        <button class="link" data-act="pedit" data-id="${esc(next.id)}">Change</button>
+        <button class="link" data-act="calday" data-d="${next.date}">Calendar</button></div></div>`
     :`<div class="nextcard empty" style="--tc:var(--rule)"><h2>Nothing planned</h2><p class="nc-items">Plan your next session and it shows up here and in your Training calendar.</p></div>`;
   const quick=[['climb|0|e','Pre-climb'],['daily|0|e','Stretch'],['warmup|0|e','Pre-run'],['ice|0|e','Ice tools']];
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
@@ -1334,7 +1420,8 @@ function renderToday(){
   const cdN=cdParts(nepalLeft()).d,cdR=Math.max(0,Math.round((d0(parseDay(RS().race))-d0(now))/864e5));
   document.getElementById('main').innerHTML=`<section class="todaysec">
     ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
-    <div class="cdchips"><button data-act="gonepal"><em>🏔</em><b>${cdN}</b><span>days to<br>Three Passes</span></button><button data-act="gorun"><em>🏁</em><b>${cdR}</b><span>days to the<br>marathon</span></button></div>
+    <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
+      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile ${o.kind}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><span>${o.left>0?'days to ':''}${esc(o.name)}</span></button>`).join('')}</div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
@@ -1405,6 +1492,104 @@ function tickCountdown(){
   const p=cdParts(nepalLeft());els.forEach(el=>{const k=el.dataset.cd,v=k==='d'?String(p.d):pad2(p[k]);if(el.textContent!==v)el.textContent=v});
 }
 setInterval(tickCountdown,1000);
+/* ---------- objectives ---------- */
+const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco',start:'2027-01-12',trekEnd:'2027-01-14',end:'2027-01-18',prepStart:'2026-09-21',col:'#8EC9F0',icon:'❄',
+  route:[['Imlil',1740,0],['Aroumd',1900,0],['Sidi Chamharouch',2350,0],['Refuge',3207,0,1],['South col',3940,1],['Summit',4167,1,1],['Refuge',3207,1],['Refuge',3207,2],['Sidi Chamharouch',2350,2],['Imlil',1740,2]],
+  days:[
+   {d:'2027-01-12',t:'Imlil → Toubkal refuge',x:'Transfer from Marrakech (about 1½ h). Walk up through Aroumd and Sidi Chamharouch to the refuge at 3,207 m, 5–6 hours. Snow likely from about 2,500 m. Night at the refuge, well below freezing.'},
+   {d:'2027-01-13',t:'Summit day',x:'Alpine start around 5 am by headtorch. About 960 m up through the south col to 4,167 m with crampons and ice axe, then back down. The guide decides on the day if wind or snow make it unsafe.',hi:1},
+   {d:'2027-01-14',t:'Down to Imlil',x:'Descend to Imlil, transfer back to Marrakech. The long descent is hard on the knees: poles help.'},
+   {d:'2027-01-15',to:'2027-01-18',t:'Four open days',x:'Not decided yet: a Sahara desert tour, Marrakech\u2019s medina and gardens, or a rental car to the coast.'}],
+  note:'Guided trips differ: some summit on day 2 and sleep at the refuge again, others go straight down. Your guide sets the final plan.',
+  facts:[['4,167 m','highest point in North Africa'],['≈2,430 m','up from Imlil in total'],['≈960 m','on summit day, 8–10 h round trip'],['−10 °C','or colder at the refuge at night'],['Guide','legally required since 2018'],['Crampons','and ice axe above the snow line']],
+  prep:[
+   {id:'p1',when:'Sep – Oct',t:'Build the base',x:'Nepal strength twice a week: step-ups, step-downs, calf raises. A long hike every other week.',go:'nepal'},
+   {id:'p2',when:'November',t:'Pack and descents',x:'4–6 hour hikes with 8–10 kg and plenty of downhill. Front-point holds for crampon calves.',go:'ice'},
+   {id:'p3',when:'December',t:'Milestone test',x:'One 6–7 hour hike with about 1,200 m up and 10 kg. If there\u2019s snow, a day walking in crampons.',milestone:1,plan:'Hike'},
+   {id:'p4',when:'Early January',t:'Taper',x:'Shorter, easy hikes. Sleep, stay healthy, check the gear list.'}],
+  gear:[['Technical',['Insulated mountaineering boots (B2)','Crampons (can be rented in Imlil)','Ice axe (can be rented)','Helmet','Trekking poles']],
+   ['Warmth',['Down jacket','Hardshell jacket and trousers','Warm base layers','Insulated gloves + liner gloves','Warm hat and buff or balaclava','Sleeping bag, comfort −10 °C (or rent)']],
+   ['Small but vital',['Headtorch + spare batteries','Glacier or cat. 3–4 sunglasses','Sunscreen and lip balm','2 L of insulated bottles','Snacks for summit day']],
+   ['Papers',['Passport','Travel insurance covering 4,167 m and crampon use','Cash for tips and Imlil']]]};
+const OBJS=()=>[
+  {id:'toubkal',name:'Toubkal',icon:'❄',col:TK.col,date:TK.start,end:TK.end,go:'toubkal',kind:'winter'},
+  {id:'marathon',name:'Marathon',icon:'🏁',col:'#E2685A',date:RS().race,end:RS().race,go:'run',kind:'race'},
+  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),20)),go:'nepal',kind:'trek'}];
+function objOn(ds){return OBJS().filter(o=>ds>=o.date&&ds<=o.end)}
+function tripDays(){const set=new Set();OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});return set}
+function OS(id){S.obj[id]=S.obj[id]||{};return S.obj[id]}
+function cdBlock(targetISO){const ms=new Date(targetISO)-new Date(),p=cdParts(ms);
+  return `<div class="cdbig"><b data-cdk="d">${p.d}</b><span>days</span></div>
+    <div class="cdsmall" aria-hidden="true"><span><b data-cdk="h">${pad2(p.h)}</b>h</span><span><b data-cdk="m">${pad2(p.m)}</b>m</span><span><b data-cdk="s">${pad2(p.s)}</b>s</span></div>`}
+function tickObj(){document.querySelectorAll('[data-cdt]').forEach(box=>{const p=cdParts(new Date(box.dataset.cdt)-new Date());
+  box.querySelectorAll('[data-cdk]').forEach(el=>{const k=el.dataset.cdk,v=k==='d'?String(p.d):pad2(p[k]);if(el.textContent!==v)el.textContent=v})})}
+setInterval(tickObj,1000);
+function tkRouteSVG(prog){
+  const W=340,H=170,x0=16,x1=W-16,e0=1400,e1=4500,yOf=e=>H-22-(e-e0)/(e1-e0)*(H-58),R=TK.route;
+  const pts=R.map((r,i)=>[x0+i*(x1-x0)/(R.length-1),yOf(r[1])]);
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)},${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)},${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`}
+  const snowY=yOf(2500),fx=x0+prog*(x1-x0),seg=Math.min(pts.length-2,Math.floor(prog*(pts.length-1))),t=prog*(pts.length-1)-seg,fy=pts[seg][1]+(pts[seg+1][1]-pts[seg][1])*t;
+  const dayX=[0,1,2].map(k=>{const idx=R.map((r,i)=>r[2]===k?i:-1).filter(i=>i>=0);return [pts[idx[0]][0],pts[idx[idx.length-1]][0]]});
+  // a few fixed "random" stars
+  let seed=7;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+  const stars=[...Array(28)].map(()=>`<circle cx="${(rnd()*W).toFixed(1)}" cy="${(rnd()*62).toFixed(1)}" r="${(rnd()*.9+.3).toFixed(2)}" class="star" style="animation-delay:${(rnd()*4).toFixed(2)}s"/>`).join('');
+  const sm=pts[5];
+  return `<svg class="tkroute" viewBox="0 0 ${W} ${H}" role="img" aria-label="Toubkal route profile from Imlil at 1,740 metres to the summit at 4,167 metres and back, ${Math.round(prog*100)}% through your preparation">
+   <defs><linearGradient id="tkfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF6FF" stop-opacity=".95"/><stop offset=".35" stop-color="#BFE2F7" stop-opacity=".55"/><stop offset="1" stop-color="#5E8FB3" stop-opacity=".08"/></linearGradient>
+     <clipPath id="tksnow"><rect x="0" y="0" width="${W}" height="${snowY}"/></clipPath><clipPath id="tkdone"><rect x="0" y="0" width="${fx}" height="${H}"/></clipPath></defs>
+   ${stars}
+   <circle cx="${W-52}" cy="24" r="10" class="moon"/><circle cx="${W-47}" cy="21" r="9" class="moonbite"/>
+   <path d="${d} L${x1},${H} L${x0},${H} Z" class="tkland"/>
+   <path d="${d} L${x1},${H} L${x0},${H} Z" fill="url(#tkfill)" clip-path="url(#tksnow)"/>
+   <line x1="${x0}" x2="${x1}" y1="${snowY}" y2="${snowY}" class="snowline"/><text x="${x1-2}" y="${snowY-4}" text-anchor="end" class="snowlbl">snow line ≈ 2,500 m</text>
+   ${dayX.map(([a,b],k)=>`<text x="${((a+b)/2).toFixed(1)}" y="${H-6}" text-anchor="middle" class="daylbl${k===1?' hi':''}">Day ${k+1}${k===1?' · summit':''}</text>`).join('')}
+   <path d="${d}" class="tkline"/><path d="${d}" class="tkdone" clip-path="url(#tkdone)"/>
+   <g class="tksum"><line x1="${sm[0]}" y1="${sm[1]-4}" x2="${sm[0]}" y2="${sm[1]-20}"/><path d="M${sm[0]},${sm[1]-20} l9,3 l-9,3z"/>
+     <text x="${sm[0]}" y="${sm[1]-34}" text-anchor="middle" class="tkalt">4,167 m</text><text x="${sm[0]}" y="${sm[1]-25}" text-anchor="middle" class="tkname">Toubkal</text></g>
+   <text x="${pts[3][0]}" y="${pts[3][1]+14}" text-anchor="middle" class="tkpt">Refuge 3,207</text>
+   <text x="${x0}" y="${pts[0][1]-8}" class="tkpt">Imlil 1,740</text>
+   <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="9" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/>
+  </svg>`;
+}
+function renderObjective(){
+  const now=new Date(),o=OS('toubkal'),start=parseDay(TK.prepStart),go=parseDay(TK.start);
+  const prog=Math.max(0,Math.min(1,(now-start)/(go-start))),left=go-now;
+  document.getElementById('ptitle').textContent='Toubkal';
+  document.getElementById('plede').textContent=TK.sub;
+  document.title='Toubkal · Training guide';
+  const wk=Math.max(0,Math.ceil((d0(go)-d0(now))/(7*864e5)));
+  const fmt=(ds,opt)=>parseDay(ds).toLocaleDateString(undefined,opt||{weekday:'short',day:'numeric',month:'short'});
+  const gearAll=TK.gear.reduce((a,g)=>a+g[1].length,0),gearDone=Object.values(o.gear||{}).filter(Boolean).length;
+  const flakes=[...Array(26)].map((_,i)=>`<i style="left:${(i*37)%100}%;animation-delay:${((i*.73)%6).toFixed(2)}s;animation-duration:${(6+(i%5)).toFixed(1)}s;transform:scale(${(.5+(i%4)*.2).toFixed(2)})"></i>`).join('');
+  document.getElementById('main').innerHTML=`<section class="objpage">
+   <div class="tkhero" data-cdt="${go.toISOString().slice(0,10)}T06:00:00">
+     <div class="snow" aria-hidden="true">${flakes}</div>
+     <div class="tkhead"><span class="tkkick">❄ Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Guided, 3 days · then 4 days in Morocco</span></div>
+     ${left>0?cdBlock(go.toISOString().slice(0,10)+'T06:00:00'):`<div class="cdbig"><b>${now<=parseDay(TK.end)?'You\u2019re there':'Done'}</b></div>`}
+     ${tkRouteSVG(prog)}
+     <div class="tkfoot"><span>Prep: <b>${wk} weeks</b> to go</span><span>${Math.round(prog*100)}% of the way</span></div>
+   </div>
+   <div class="facts">${TK.facts.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div>
+   <h2 class="objh">Day by day</h2>
+   <div class="daystrip">${TK.days.map(x=>`<div class="dstep${x.hi?' hi':''}"><em>${esc(x.to?fmt(x.d)+' – '+fmt(x.to):fmt(x.d))}</em><b>${esc(x.t)}</b><p>${esc(x.x)}</p></div>`).join('')}</div>
+   <p class="hint">${esc(TK.note)}</p>
+   <h2 class="objh">Getting ready</h2>
+   <div class="prepl">${TK.prep.map(x=>{const done=(o.prep||{})[x.id];return `<div class="prow2${done?' done':''}${x.milestone?' ms':''}">
+      <label class="tick"><input type="checkbox" data-obj="prep" data-k="${x.id}"${done?' checked':''}><span></span></label>
+      <div><em>${esc(x.when)}${x.milestone?' · milestone':''}</em><b>${esc(x.t)}</b><p>${esc(x.x)}</p>
+      ${x.go?`<button class="link" data-act="objgo" data-go="${x.go}">Open ${x.go==='nepal'?'Nepal strength':'Ice: front-point holds'}</button>`:''}${x.plan?`<button class="link" data-act="objplan">Plan the test hike</button>`:''}</div></div>`}).join('')}</div>
+   <h2 class="objh">Gear <span class="gcount">${gearDone} / ${gearAll} packed</span></h2>
+   <div class="gear">${TK.gear.map(([cat,items],gi)=>`<div class="gcat"><h4>${esc(cat)}</h4>${items.map((it,ii)=>{const k=gi+'.'+ii,on=(o.gear||{})[k];
+      return `<label class="gitem${on?' on':''}"><input type="checkbox" data-obj="gear" data-k="${k}"${on?' checked':''}><span>${esc(it)}</span></label>`}).join('')}</div>`).join('')}</div>
+   <h2 class="objh">After the mountain</h2>
+   <div class="after"><div><b>🐪 Sahara tour</b><span>Usually 2–3 days from Marrakech, long drives over the Atlas.</span></div>
+     <div><b>🕌 Marrakech</b><span>Medina, souks and gardens; an easy way to recover.</span></div>
+     <div><b>🚗 The coast</b><span>A rental car to a coastal town like Essaouira, a few hours west.</span></div></div>
+  </section>`;
+  document.getElementById('foot').innerHTML='';
+}
 /* ---------- marathon plan ---------- */
 const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.83,anchorLong:10,longDate:'2026-09-21',cutbacks:[],dismissed:'',days:[0,1,2,4],longDay:1};
 const RS=()=>({...RUN_DEF,...(S.run||{})});
@@ -1476,7 +1661,8 @@ function suggestWeek(date){
   const W=weekInfo(date),ws=W.w,today=dayOf(new Date()),r=RS();
   const have=weekExisting(ws),haveKm=have.reduce((a,x)=>a+(+x.km||0),0),taken=new Set(have.map(x=>x.date));
   const dayIdx=i=>dayOf(addDays(ws,i));
-  let avail=(r.days&&r.days.length?r.days:[0,1,2,4]).slice().sort((a,b)=>a-b).filter(i=>dayIdx(i)>=today&&!taken.has(dayIdx(i)));
+  const away=tripDays();
+  let avail=(r.days&&r.days.length?r.days:[0,1,2,4]).slice().sort((a,b)=>a-b).filter(i=>dayIdx(i)>=today&&!taken.has(dayIdx(i))&&!away.has(dayIdx(i)));
   if(W.ph==='race'){
     const race=parseDay(r.race),rd=Math.round((d0(race)-ws)/864e5);
     const out=[];const pick=(pref,type,km)=>{const d=pref.find(i=>avail.includes(i)&&i<rd);if(d!=null){out.push([d,type,km]);avail=avail.filter(x=>x!==d)}};
@@ -1597,7 +1783,9 @@ function drawRunWeek(){
   document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
   const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>${RW.have.map(x=>`<div class="rwh"><span>${x.done?'✓':'📅'}</span><b>${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</b><em>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</em><small>${x.done?'done':'in calendar'}</small></div>`).join('')}</div>`:'';
   const thin=!RW.loading&&RW.runs.length&&!RW.short&&tot<W.target*.9;
-  const note=RW.loading?'<p class="empty">Checking your calendar…</p>':thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'';
+  const awayDays=days.map(dayOf).filter(ds=>tripDays().has(ds)),awayO=awayDays.length?objOn(awayDays[0])[0]:null;
+  const awayNote=awayO&&!RW.loading?`<p class="hint">${awayO.icon} Away for ${esc(awayO.name)} on ${awayDays.length} day${awayDays.length>1?'s':''} this week, so no runs are planned then.</p>`:'';
+  const note=awayNote+(RW.loading?'<p class="empty">Checking your calendar…</p>':'')+(RW.loading?'':thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'');
   document.getElementById('rwRows').innerHTML=haveHTML+note+(RW.loading?'':RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
     <select data-f="date" aria-label="Day">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}${rn?' · run planned':''}${o?' · '+o.join(''):''}${runDays.includes(di)?'':' · not a run day'}</option>`}).join('')}</select>
     <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
@@ -1800,11 +1988,12 @@ function render(){
   document.getElementById('plede').textContent=p.lede;
   document.title=p.title;
   const inTrain=TRAIN_IDS.includes(cur);
-  document.body.dataset.view=inTrain?'train':cur;
+  document.body.dataset.view=inTrain?'train':cur==='toubkal'?'obj':cur;
   document.getElementById('progs').innerHTML=inTrain?TRAIN_IDS.map(id=>{const x=PROGS.find(q=>q.id===id);return `<button data-prog="${x.id}" aria-pressed="${x.id===cur}">${x.chip}</button>`}).join(''):'';
-  document.querySelectorAll('#bnav [data-view]').forEach(b=>b.setAttribute('aria-current',(b.dataset.view==='train'?inTrain:b.dataset.view===cur)?'page':'false'));
+  document.querySelectorAll('#bnav [data-view]').forEach(b=>b.setAttribute('aria-current',(b.dataset.view==='train'?inTrain:b.dataset.view===(cur==='toubkal'?'today':cur))?'page':'false'));
   if(p.id==='history'){renderHistory();return}
   if(p.id==='today'){renderToday();return}
+  if(p.id==='toubkal'){renderObjective();return}
   document.getElementById('main').innerHTML=p.sections.map((s,si)=>{
     let items;try{items=sectionItems(p,si)}catch(err){showErr('Could not build '+s.title+': '+err.message);items=[]}
     const ess=items.filter(e=>e.tier==='e'),ext=items.filter(e=>e.tier!=='e');
@@ -1882,6 +2071,9 @@ function findByKey(key){
 }
 // Native controls fire 'change' reliably even where tap-to-click is unreliable.
 document.addEventListener('change',ev=>{
+  if(ev.target.matches&&ev.target.matches('input[data-obj]')){const t=ev.target,o=OS('toubkal'),g=t.dataset.obj;o[g]=o[g]||{};
+    if(t.checked)o[g][t.dataset.k]=1;else delete o[g][t.dataset.k];save();
+    const y=window.scrollY;render();window.scrollTo(0,y);return}
   const t=ev.target;
   
   try{
@@ -1921,11 +2113,14 @@ function onAct(b){
   if(act==='syncsetup'){openSync();return}
   if(act==='calprev'||act==='calnext'){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(act==='calnext'?1:-1),1);render();pullPlans();return}
   if(act==='calday'){calSel=b.dataset.d;calPicked=true;if(cur!=='history'){calMonth=monthStart(new Date(calSel+'T12:00'));go('history');return}const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
+  if(act==='pedit'){openPlanEdit(b.dataset.id);return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
   if(act==='gorun'){go('run');return}
   if(act==='gonepal'){go('nepal');return}
+  if(act==='objopen'||act==='objgo'){go(b.dataset.go);return}
+  if(act==='objplan'){calSel=dayOf(new Date());openPlan();setTimeout(()=>{const c=document.querySelector('#planOpts input[value="x:Hike"]');if(c){c.checked=true;const f=document.getElementById('planfrm');f.detail.value='Toubkal prep: 6–7 h, 1,200 m up, 10 kg';f.minutes.value=420;f.minutes.dataset.manual='1';planAuto()}},0);return}
   if(act==='nepset'){const f=document.getElementById('nepfrm'),n=NS();f.date.value=n.date;f.fixed.checked=!!n.fixed;document.getElementById('nepdlg').showModal();return}
   if(act==='runadj'){const prev=JSON.parse(JSON.stringify(RS()));const c=runCheck();if(!c)return;
     const r={...RS()},thisW=dayOf(mondayOf(new Date()));
@@ -2176,6 +2371,55 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
     S.run=r;save();refresh();
   });
 })();
+/* ---------- changing a planned session ---------- */
+let EP=null;
+function openPlanEdit(id){
+  const p=plansCache().find(x=>x.id===id);if(!p)return;
+  const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
+  EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=p.title;
+  const isRun=p.tab==='Run',m=S.runMeta[p.id]||{};
+  document.getElementById('epRun').hidden=!isRun;
+  f.rtype.innerHTML=Object.keys(RUNLBL).map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('');
+  f.rtype.value=m.type||'easy';f.rkm.value=m.km||'';
+  document.getElementById('epMsg').textContent='';
+  document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+p.minutes));
+  d.showModal();
+}
+function replacePlan(plan){
+  const q=lsGet(QKEY,[]),i=q.findIndex(o=>o.op==='plan'&&o.plan.id===plan.id);
+  if(i>=0&&!flushing){q[i]={...q[i],plan};lsSet(QKEY,q)}        // never reached the calendar yet
+  else{enqueue({op:'unplan',id:plan.id});enqueue({op:'plan',plan})}
+  setPlans(plansCache().map(x=>x.id===plan.id?{...plan,status:x.status,pending:true}:x));
+  scheduleFlush(300);save();refresh();
+}
+(function(){
+  const f=document.getElementById('editplanfrm');
+  document.getElementById('epChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
+    f.minutes.value=b.dataset.min;document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',x===b))});
+  f.minutes.addEventListener('input',()=>document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on')));
+  f.addEventListener('change',ev=>{
+    if(!EP||EP.tab!=='Run')return;
+    if(ev.target===f.rtype||ev.target===f.rkm){
+      const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,lbl=RUNLBL[f.rtype.value]||'Run';
+      f.title.value=`🏃 ${lbl}${km?' · '+km+' km':''}`;
+      if(km)f.minutes.value=Math.max(15,Math.round(km*runPace(f.rtype.value)/5)*5);
+    }});
+  document.getElementById('epDel').addEventListener('click',()=>{
+    const p=EP;if(!p)return;
+    ask('Remove this session?',p.title+' on '+niceDay(p.date)+' is removed from your Training calendar.','Remove',true).then(ok=>{if(!ok)return;
+      setPlans(plansCache().filter(x=>x.id!==p.id));delete S.planRefs[p.id];delete S.runMeta[p.id];save();
+      const q=lsGet(QKEY,[]),qi=q.findIndex(o=>o.op==='plan'&&o.plan.id===p.id);
+      if(qi>=0&&!flushing){q.splice(qi,1);lsSet(QKEY,q)}else enqueue({op:'unplan',id:p.id});
+      scheduleFlush(300);document.getElementById('editplandlg').close('done');refresh()})});
+  f.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save'||!EP)return;
+    const p={...EP,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:f.title.value.trim()||EP.title};
+    if(EP.tab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
+      S.runMeta[p.id]={type:ty,km};p.items=[`${RUNLBL[ty]}${km?': '+km+' km':''}`,zoneText(RUNZONE[ty]||[2,2])]}
+    p.link=location.origin+location.pathname+'#plan='+p.id;
+    replacePlan(p);
+  });
+})();
 /* ---------- plan dialog ---------- */
 (function(){
   const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),msg=document.getElementById('planMsg');
@@ -2227,11 +2471,11 @@ function tone(freq,dur,delay=0,vol=.22){try{actx=actx||new (window.AudioContext|
   o.connect(g).connect(actx.destination);o.start(t0);o.stop(t0+dur+.02)}catch(e){}}
 const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
 const SOUND={
-  tick:()=>{tone(660,.12);buzz(40)},
-  work:()=>{tone(1046,.5,0,.3);buzz(350)},
-  rest:()=>{tone(523,.22);tone(392,.4,.2);buzz([120,80,120])},
-  ready:()=>{tone(784,.3);buzz(150)},
-  done:()=>{tone(784,.18);tone(988,.18,.18);tone(1318,.5,.36,.3);buzz([200,100,200,100,400])}};
+  tick:n=>{const f=n===1?1046:n===2?880:784;tone(f,.16,0,n===1?.75:.6);buzz(n===1?110:70)},
+  work:()=>{tone(1318,.16,0,.85);tone(1760,.5,.14,.85);buzz([400])},
+  rest:()=>{tone(660,.2,0,.6);tone(440,.45,.18,.55);buzz([120,90,120])},
+  ready:()=>{tone(880,.3,0,.6);buzz(180)},
+  done:()=>{tone(784,.18,0,.7);tone(988,.18,.18,.7);tone(1318,.6,.36,.8);buzz([200,100,200,100,500])}};
 function beep(){SOUND.work()}
 const srcOf=e=>({it:e.warm?{id:e.id,warm:e.warmP}:e.id,pid:e.pid,sec:e.sec,tier:e.tier});
 function faElapsed(){if(!F.ph)return 0;if(F.done)return F.ph.reduce((a,x)=>a+(x.kind==='ready'?0:x.t),0);let t=0;for(let i=0;i<F.ph.length;i++){if(F.ph[i].kind==='ready')continue;if(i<F.p)t+=F.ph[i].t;else if(i===F.p)t+=F.ph[i].t-F.left}return t}
@@ -2319,7 +2563,7 @@ function drawFA(){
 function tick(){const k=Math.max(1,Math.round((Date.now()-F.last)/1000));F.last+=k*1000;for(let j=0;j<k&&F.run;j++)step();drawFA();saveSession()}
 function step(){
   F.left--;
-  if(F.left>0&&F.left<=3){SOUND.tick();return}
+  if(F.left>0&&F.left<=3){SOUND.tick(F.left);return}
   if(F.left<=0){
     if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)()}
     else{stop();F.done=true;F.left=0;SOUND.done();logFA('done')}}
