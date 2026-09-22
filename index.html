@@ -79,6 +79,38 @@ body[data-view="train"] header{padding-top:14px}
 .wklist{list-style:none;margin:0 0 14px;padding:0;font-size:14px;line-height:1.45}.wklist li{padding:6px 0;border-top:1px solid var(--rule)}
 .wklist b{display:block;font-size:13px;color:var(--muted);font-weight:600}
 .wkbtns{display:flex;gap:8px;margin-bottom:6px}
+:root{--ice:#3FA7D6}
+.nepcard{margin-top:12px;padding:16px 16px 12px;border-radius:20px;overflow:hidden;position:relative;
+  background:radial-gradient(120% 90% at 50% 0%,color-mix(in srgb,var(--ice) 22%,var(--panel)) 0%,var(--panel) 70%)}
+.nephead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.nepkick{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ice)}
+.nephead b{font-size:15px}
+.nephead .link{white-space:nowrap}
+.cdbig{display:flex;align-items:baseline;gap:10px;margin:10px 0 0}
+.cdbig b{font:700 clamp(64px,22vw,96px)/.9 "Barlow Condensed",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cdbig span{font:600 22px/1 "Barlow Condensed",sans-serif;color:var(--muted)}
+.cdsmall{display:flex;gap:14px;margin:6px 0 4px;color:var(--muted);font-size:13px}
+.cdsmall b{font:700 20px/1 "Barlow Condensed",sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;margin-right:2px}
+.route{display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
+.route .grid{stroke:var(--rule);stroke-width:1;stroke-dasharray:2 4}.route .galt{fill:var(--muted);font:600 8px Barlow,sans-serif}
+.route .rline{fill:none;stroke:var(--far);stroke-width:2.2;stroke-linejoin:round}
+.route .rdone{fill:none;stroke:var(--acc);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.route .pole{stroke:var(--ink);stroke-width:1}
+.route .plbl{fill:var(--ink);font:700 8.5px Barlow,sans-serif}.route .palt{fill:var(--muted);font:600 7.5px Barlow,sans-serif}
+.route .you{fill:var(--acc);stroke:var(--bg);stroke-width:1.5}.route .youglow{fill:var(--acc);opacity:.25}
+@media (prefers-reduced-motion:no-preference){
+  .route .rline{stroke-dasharray:900;stroke-dashoffset:900;animation:draw 1.6s ease-out forwards}
+  .route .youglow{animation:glow 2s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+  @keyframes draw{to{stroke-dashoffset:0}}@keyframes glow{50%{transform:scale(1.6);opacity:.08}}}
+.nepfoot{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-top:4px}.nepfoot b{color:var(--ink)}
+.cdchips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.cdchips button{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;justify-content:start;
+  text-align:left;background:var(--panel);border:0;border-radius:14px;padding:10px 12px}
+.cdchips em{grid-row:1/3;font-style:normal;font-size:22px}
+.cdchips b{font:700 30px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
+.cdchips span{font-size:11px;line-height:1.2;color:var(--muted)}
+#nepdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
+#nepdlg label.chk{flex-direction:row;align-items:center;gap:10px}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -412,6 +444,14 @@ button.chip::after{display:none}
   <div class="feelrow"><span>How was it?</span><label><input type="radio" name="feel" value="easy">Easy</label><label><input type="radio" name="feel" value="good">Good</label><label><input type="radio" name="feel" value="hard">Hard</label></div>
   <label>Note <span class="hint">optional</span><input name="note" autocomplete="off"></label>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save run</button></div>
+</form></dialog>
+
+<dialog id="nepdlg"><form method="dialog" id="nepfrm">
+  <h2>Trek date</h2>
+  <label>First day on the trail<input name="date" type="date" required></label>
+  <label class="chk"><input type="checkbox" name="fixed"> The dates are booked</label>
+  <p class="hint">Until they're booked, the countdown shows "around" the date you enter.</p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
 </form></dialog>
 
 <dialog id="runsetdlg"><form method="dialog" id="runsetfrm">
@@ -1011,11 +1051,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{},run:{},runMeta:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{},run:{},runMeta:{},nepal:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=10;
   if(!Array.isArray(S0.hidden))S0.hidden=[];
   // built-in edits keep only name and cue; numbers now live in levels and tuning
@@ -1264,7 +1304,9 @@ function renderToday(){
   let resume='';if(sess){const e=resolveSrc(sess.src[sess.i]),where=sess.done?'finished, next up':(sess.ph&&sess.ph[sess.p]?sess.ph[sess.p].l.replace(/^Get ready · /,''):'');
     resume=`<div class="rcard"><div><b>Paused:</b> ${esc(sess.src.length===1&&e?e.name:sess.title)}<span>${sess.src.length>1&&e?esc(e.name)+` (${sess.i+1} of ${sess.src.length})`:''}${where?(sess.src.length>1?' · ':'')+esc(where):''}</span></div>
       <button class="go sm" data-act="resume">Resume</button><button class="link" data-act="discard">Discard</button></div>`}
+  const cdN=cdParts(nepalLeft()).d,cdR=Math.max(0,Math.round((d0(parseDay(RS().race))-d0(now))/864e5));
   document.getElementById('main').innerHTML=`<section class="todaysec">
+    <div class="cdchips"><button data-act="gonepal"><em>🏔</em><b>${cdN}</b><span>days to<br>Three Passes</span></button><button data-act="gorun"><em>🏁</em><b>${cdR}</b><span>days to the<br>marathon</span></button></div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
@@ -1281,6 +1323,60 @@ function renderToday(){
   document.getElementById('foot').innerHTML='';
   const rb=document.getElementById('resumebar');if(rb)rb.remove();document.body.classList.remove('has-resume');
 }
+/* ---------- Three Passes countdown ---------- */
+const NEPAL_DEF={date:'2027-10-15',fixed:false,prepStart:'2026-09-21'};
+const NS=()=>({...NEPAL_DEF,...(S.nepal||{})});
+// Three Passes loop, approximate altitudes in metres
+const ROUTE=[['Lukla',2860],['Namche',3440],['Tengboche',3860],['Dingboche',4410],['Chhukung',4730],['Kongma La',5535,1],['Lobuche',4940],['Gorak Shep',5164],['Kala Patthar',5545],['Dzongla',4830],['Cho La',5420,1],['Gokyo',4790],['Renjo La',5360,1],['Lungden',4380],['Thame',3820],['Namche',3440],['Lukla',2860]];
+function nepalLeft(){const t=parseDay(NS().date);t.setHours(6,0,0,0);return t-new Date()}
+function cdParts(ms){ms=Math.max(0,ms);const d=Math.floor(ms/864e5),h=Math.floor(ms/36e5)%24,m=Math.floor(ms/6e4)%60,s2=Math.floor(ms/1e3)%60;return {d,h,m,s:s2}}
+function routeSVG(prog){
+  const W=340,H=150,x0=14,x1=W-14,e0=2600,e1=5800,yOf=e=>H-18-(e-e0)/(e1-e0)*(H-46);
+  const pts=ROUTE.map((r,i)=>[x0+i*(x1-x0)/(ROUTE.length-1),yOf(r[1])]);
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6],c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    d+=` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`}
+  const fillD=d+` L${x1},${H} L${x0},${H} Z`;
+  // your progress along the loop
+  const fx=x0+prog*(x1-x0),seg=Math.min(pts.length-2,Math.floor(prog*(pts.length-1))),t=prog*(pts.length-1)-seg;
+  const fy=pts[seg][1]+(pts[seg+1][1]-pts[seg][1])*t;
+  const flags=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'];
+  const passes=ROUTE.map((r,i)=>r[2]?`<g class="pass"><line x1="${pts[i][0]}" y1="${pts[i][1]-4}" x2="${pts[i][0]}" y2="${pts[i][1]-17}" class="pole"/>
+      ${[0,1,2].map(k=>`<rect x="${pts[i][0]+1+k*4.2}" y="${pts[i][1]-17+k*1.2}" width="3.6" height="4.4" fill="${flags[(i+k)%5]}"/>`).join('')}
+      <text x="${pts[i][0]}" y="${pts[i][1]-22}" text-anchor="middle" class="plbl">${r[0]}</text>
+      <text x="${pts[i][0]}" y="${pts[i][1]-31}" text-anchor="middle" class="palt">${r[1].toLocaleString('en').replace(',',' ')} m</text></g>`:'').join('');
+  return `<svg class="route" viewBox="0 0 ${W} ${H}" role="img" aria-label="Three Passes elevation profile, you are ${Math.round(prog*100)}% of the way through your preparation">
+    <defs><linearGradient id="rfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--ice)" stop-opacity=".35"/><stop offset="1" stop-color="var(--ice)" stop-opacity="0"/></linearGradient>
+      <clipPath id="rdone"><rect x="0" y="0" width="${fx}" height="${H}"/></clipPath></defs>
+    ${[3000,4000,5000].map(e=>`<line x1="${x0}" x2="${x1}" y1="${yOf(e)}" y2="${yOf(e)}" class="grid"/><text x="${x1}" y="${yOf(e)-3}" text-anchor="end" class="galt">${e/1000}k</text>`).join('')}
+    <path d="${fillD}" fill="url(#rfill)"/>
+    <path d="${d}" class="rline"/>
+    <path d="${d}" class="rdone" clip-path="url(#rdone)"/>
+    ${passes}
+    <text x="${x0}" y="${H-4}" class="plbl">Lukla</text><text x="${pts[8][0]}" y="${H-4}" text-anchor="middle" class="plbl">EBC</text><text x="${x1}" y="${H-4}" text-anchor="end" class="plbl">Lukla</text>
+    <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="9" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/>
+  </svg>`;
+}
+function nepalDash(){
+  const n=NS(),left=nepalLeft(),p=cdParts(left),trek=parseDay(n.date),start=parseDay(n.prepStart);
+  const prog=Math.max(0,Math.min(1,(new Date()-start)/(trek-start)));
+  const when=n.fixed?trek.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'long',year:'numeric'}):`Around ${trek.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})} · date not fixed`;
+  const race=parseDay(RS().race),gap=Math.round((trek-race)/864e5);
+  return `<section class="nepcard">
+    <div class="nephead"><div><span class="nepkick">Three Passes trek</span><b>${esc(when)}</b></div><button class="link" data-act="nepset">${n.fixed?'Change':'Set date'}</button></div>
+    ${left>0?`<div class="cdbig"><b data-cd="d">${p.d}</b><span>days</span></div>
+      <div class="cdsmall" aria-hidden="true"><span><b data-cd="h">${pad2(p.h)}</b>h</span><span><b data-cd="m">${pad2(p.m)}</b>m</span><span><b data-cd="s">${pad2(p.s)}</b>s</span></div>`
+      :`<div class="cdbig"><b>${left>-21*864e5?'On the trail':'Done'}</b><span>${left>-21*864e5?'enjoy every pass':'you walked it'}</span></div>`}
+    ${routeSVG(prog)}
+    <div class="nepfoot"><span>Prep day <b>${Math.max(1,Math.floor((d0(new Date())-d0(start))/864e5)+1)}</b> of ${Math.round((d0(trek)-d0(start))/864e5)}</span><span>${gap>0?`${gap} days after the marathon`:''}</span></div>
+  </section>`;
+}
+function tickCountdown(){
+  const els=document.querySelectorAll('[data-cd]');if(!els.length)return;
+  const p=cdParts(nepalLeft());els.forEach(el=>{const k=el.dataset.cd,v=k==='d'?String(p.d):pad2(p[k]);if(el.textContent!==v)el.textContent=v});
+}
+setInterval(tickCountdown,1000);
 /* ---------- marathon plan ---------- */
 const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.83,anchorLong:10,longDate:'2026-09-21',cutbacks:[],dismissed:''};
 const RS=()=>({...RUN_DEF,...(S.run||{})});
@@ -1644,6 +1740,7 @@ function render(){
       ${s.flat?cards(items):grp(ess,'Essential','Do these every time')+grp(ext,'Extra','When you have time')}
       <button class="add" data-act="add" data-sec="${si}">+ Add exercise${p.routine?'':' to '+s.title.toLowerCase().replace('pre-','pre-')}</button></section>`;
   }).join('');
+  if(p.id==='nepal'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',nepalDash())}catch(err){showErr('Countdown: '+err.message)}}
   if(p.id==='run'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',runDash())}catch(err){showErr('Run plan: '+err.message)}}
   const sess=F.open?null:loadSession();let rb=document.getElementById('resumebar');
   if(sess){const e=resolveSrc(sess.src[sess.i]);
@@ -1752,6 +1849,8 @@ function onAct(b){
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
   if(act==='gorun'){go('run');return}
+  if(act==='gonepal'){go('nepal');return}
+  if(act==='nepset'){const f=document.getElementById('nepfrm'),n=NS();f.date.value=n.date;f.fixed.checked=!!n.fixed;document.getElementById('nepdlg').showModal();return}
   if(act==='runadj'){const prev=JSON.parse(JSON.stringify(RS()));const c=runCheck();if(!c)return;
     const r={...RS()},thisW=dayOf(mondayOf(new Date()));
     if(c.kind==='hard')r.cutbacks=(r.cutbacks||[]).concat([thisW]);
@@ -1912,6 +2011,9 @@ function importData(){
   });
   d.addEventListener('close',()=>{if(cur==='history'||cur==='today')render();else updateSyncLine()});
 })();
+/* ---------- trek date ---------- */
+document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
+  S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
 /* ---------- run dialogs ---------- */
 (function(){
   const wf=document.getElementById('runweekfrm');
