@@ -195,6 +195,42 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .cd.trip{box-shadow:inset 0 -4px 0 var(--oc)}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
+.oshero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#FFF1E8;
+  background:linear-gradient(165deg,#7A2E22 0%,#3A1B1B 55%,#1A1216 100%)}
+.oshero .oswave{position:absolute;left:-10%;right:-10%;bottom:-30px;height:120px;border-radius:50%;background:rgba(255,160,120,.12)}
+.oskick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FFB59B}
+.oshero .tkhead b{font-size:16px}.oshero .tkhead span:last-child,.oshero .cdbig span,.oshero .cdsmall,.oshero .tkfoot{color:#F0C3B3}
+.oshero .cdsmall b,.oshero .tkfoot b{color:#FFF1E8}
+.goalpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gopt{position:relative;display:block;text-align:center;padding:12px 6px;border-radius:14px;background:var(--panel);border:1.5px solid var(--rule)}
+.gopt input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.gopt b{display:block;font:700 22px/1 "Barlow Condensed",sans-serif}.gopt span{font-size:12px;color:var(--muted)}
+.gopt.on{border-color:var(--acc)}.gopt.on b{color:var(--acc)}
+.ptab{width:100%;border-collapse:collapse;margin-top:10px;font-size:15px}
+.ptab th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:4px 0}
+.ptab td{padding:7px 0;border-top:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.ptab td:last-child{text-align:right;font-weight:600}
+.crs{display:grid;gap:8px}.crs div{background:var(--panel);border-radius:12px;padding:10px 12px}
+.crs b{display:block;font-size:15px}.crs span{font-size:13px;line-height:1.45;color:var(--muted)}
+.wklist2{list-style:none;margin:0;padding:0;font-size:15px}.wklist2 li{padding:8px 0;border-top:1px solid var(--rule)}
+.wklist2 b{display:inline-block;min-width:44px;color:var(--acc)}
+.tline{list-style:none;margin:0;padding:0;font-size:15px}.tline li{padding:8px 0 8px 0;border-top:1px solid var(--rule)}
+.tline b{display:inline-block;min-width:66px;color:var(--acc);font-variant-numeric:tabular-nums}
+.tphero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#F3ECDD;
+  background:linear-gradient(170deg,#2C3E57 0%,#1B2636 55%,#121A26 100%)}
+.tpkick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#E8C46A}
+.tphero .tkhead span:last-child,.tphero .cdbig span,.tphero .cdsmall,.tphero .tkfoot{color:#C3CBD8}
+.tphero .cdsmall b,.tphero .tkfoot b{color:#F3ECDD}
+.dirpick{display:flex;gap:6px;margin:10px 0 2px}
+.dirpick button{flex:1;background:rgba(255,255,255,.08);color:#F3ECDD;border:1.5px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 6px;font-weight:600;font-size:13px}
+.dirpick button.on{background:#E8C46A;border-color:#E8C46A;color:#1B2636}
+.tproute{display:block;width:100%;height:auto;margin-top:8px;overflow:visible}
+.tproute .grid{stroke:rgba(255,255,255,.15);stroke-dasharray:2 4}.tproute .galt{fill:#9AA7B8;font:600 8px Barlow,sans-serif}
+.tproute .tpfill{fill:rgba(232,196,106,.14)}.tproute .tpline{fill:none;stroke:#F3ECDD;stroke-width:2;stroke-linejoin:round}
+.tproute .pole{stroke:#F3ECDD;stroke-width:1}
+.tproute .tkname{fill:#F3ECDD;font:700 8px Barlow,sans-serif}.tproute .tkalt2{fill:#C3CBD8;font:600 7px Barlow,sans-serif}
+.tproute .tkpt{fill:#C3CBD8;font:600 8px Barlow,sans-serif}
+.tproute .you{fill:#E8C46A;stroke:#121A26;stroke-width:1.5}.tproute .youglow{fill:#E8C46A;opacity:.3}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -991,6 +1027,12 @@ EX.plank.frames=[OLD.plank.frames[0]];
 EX.plank.cue='Straight line from heels to head. Squeeze the glutes so the hips don\u2019t sag.';
 EX.sideplank.name='Side plank';
 EX.sideplank.frames=[OLD.plank.frames[1]];
+Object.assign(EX,{
+ handwarm:{name:'Warm the hands',kind:'hold',P:{sets:1,time:120,rest:0,sides:false},frames:[],
+  cue:'Cold fingers are the real injury risk outside. Shake the arms out, hands in your armpits or round a warm bottle, open and close fists. No crimping until they feel normal.'},
+ basetraverse:{name:'Traverse the base',kind:'hold',P:{sets:1,time:300,rest:0,sides:false},frames:[],
+  cue:'Move along the bottom of the crag on big holds, both directions. This is what replaces the gym\u2019s easy routes: quiet feet, straight arms, gradually smaller holds.'}
+});
 EX.sideplank.cue='Stack the feet, hips high, one straight line from feet to head.';
 const OVERHANG='<path class="prop" d="M148,146 L118,4 L160,4 L160,146 Z"/>';
 /* ---------- climbing, pre-climb and new stretches ---------- */
@@ -1123,12 +1165,18 @@ Object.assign(EX,{
   cue:'The pace you want to hold on race day, practised inside the long run. It should feel steady and sustainable, not hard.',
   L:[{v:'Short blocks',p:{dose:'3 × 2 km in the long run'}},{v:'Longer blocks',p:{dose:'2 × 4 km in the long run'}},{v:'Continuous',p:{dose:'8 km at MP in the long run'}},{v:'Race rehearsal',p:{dose:'12 km at MP in the long run'}},{v:'Final test',p:{dose:'16 km at MP in the long run'}}]}
 });
-const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
+const PRECLIMB={pid:'preclimb',title:'Pre-climb · indoor',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
   items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
   extra:['armcircle','squathold','catcow']};
+const PRECLIMB_OUT={pid:'preclimbout',title:'Pre-climb · outdoor',sub:'No easy routes, no hangboard, cold rock. The walk in is half the warm-up.',routine:true,
+  items:[{id:'pulse',...W({sets:1,time:180,rest:0,sides:false})},'handwarm','bandshoulder','proghang','basetraverse',
+    {id:'legswing',...W({sets:1,reps:10,unit:' per leg'})},{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'easyclimb',...W({sets:1,time:600,rest:0,sides:false})}],
+  extra:['legswing','squathold','easyclimb']};
 const HISTORY={id:'history',chip:'Calendar',title:'Calendar',lede:'',sections:[]};
 const TODAY={id:'today',chip:'Today',title:'Today',lede:'',sections:[]};
 const TOUBKAL={id:'toubkal',chip:'Toubkal',title:'Toubkal',lede:'',sections:[]};
+const OSLOP={id:'oslo',chip:'Oslo Marathon',title:'Oslo Marathon',lede:'',sections:[]};
+const PASSES={id:'passes',chip:'Three Passes',title:'Three Passes',lede:'',sections:[]};
 const TRAIN_IDS=['nepal','ice','climb','run','daily','warmup'];
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
@@ -1139,6 +1187,7 @@ const PROGS=[
   {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
  {id:'climb',chip:'Climbing',title:'Climbing',lede:'Finger strength and pulling. Always start with the pre-climb warm-up.',sections:[
   PRECLIMB,
+  PRECLIMB_OUT,
   {title:'Fingers',sub:'Twice a week, not the day before a hard climbing day. Rest at least 48 hours between finger sessions.',items:['hangboard','pinch'],extra:[]},
   {title:'Pull',sub:'After the finger work or on its own day.',items:['pullup','scap'],extra:[]}]},
  {id:'daily',chip:'Stretch',title:'Stretch',lede:'About 10 minutes, daily if you can, in the evening or after training. Slow and easy, breathe out into each stretch.',routine:true,sections:[
@@ -1146,11 +1195,14 @@ const PROGS=[
  {id:'warmup',chip:'Warm up',title:'Warm up',lede:'Pick the one for today\u2019s session. The essentials take a few minutes.',sections:[
   {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']},
   {pid:'prework',title:'Pre-workout',sub:'Wake up the hips, core and shoulders before strength work.',routine:true,items:[{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})},{id:'squat',...W({sets:1,reps:10,unit:''})},{id:'bridge',...W({sets:1,reps:10,unit:''})},'armcircle',{id:'plank',...W({sets:1,time:30,rest:0,sides:false})},{id:'bandwalk',...W({sets:1,reps:10,unit:' steps each way'})}],extra:['armcircle','plank','bandwalk']},
-  PRECLIMB]},
+  PRECLIMB,
+  PRECLIMB_OUT]},
  {id:'run',chip:'Run',title:'Marathon',lede:'',sections:[
   {title:'Run types',sub:'Tap a slot to pick the version you want. Intervals, tempo and strides run on the timer.',items:['runeasy','runlong','runrecovery','runstrides','runtempo','runintervals','runmp'],extra:[],flat:true,noPlay:true}]},
  HISTORY,
  TOUBKAL,
+ OSLOP,
+ PASSES,
  TODAY
 ];
 
@@ -1513,8 +1565,8 @@ const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco'
    ['Papers',['Passport','Travel insurance covering 4,167 m and crampon use','Cash for tips and Imlil']]]};
 const OBJS=()=>[
   {id:'toubkal',name:'Toubkal',icon:'❄',col:TK.col,date:TK.start,end:TK.end,go:'toubkal',kind:'winter'},
-  {id:'marathon',name:'Marathon',icon:'🏁',col:'#E2685A',date:RS().race,end:RS().race,go:'run',kind:'race'},
-  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),20)),go:'nepal',kind:'trek'}];
+  {id:'marathon',name:'Marathon',icon:'🏁',col:'#E2685A',date:RS().race,end:RS().race,go:'oslo',kind:'race'},
+  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),20)),go:'passes',kind:'trek'}];
 function objOn(ds){return OBJS().filter(o=>ds>=o.date&&ds<=o.end)}
 function tripDays(){const set=new Set();OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});return set}
 function OS(id){S.obj[id]=S.obj[id]||{};return S.obj[id]}
@@ -1587,6 +1639,116 @@ function renderObjective(){
    <div class="after"><div><b>🐪 Sahara tour</b><span>Usually 2–3 days from Marrakech, long drives over the Atlas.</span></div>
      <div><b>🕌 Marrakech</b><span>Medina, souks and gardens; an easy way to recover.</span></div>
      <div><b>🚗 The coast</b><span>A rental car to a coastal town like Essaouira, a few hours west.</span></div></div>
+  </section>`;
+  document.getElementById('foot').innerHTML='';
+}
+/* ---------- Oslo Marathon ---------- */
+const OSLO={goals:[['3:59:59','sub 4','5:41'],['4:15:00','4:15','6:02'],['4:30:00','4:30','6:24']],
+  kit:['Shoes you\u2019ve run at least 60 km in','Socks you\u2019ve raced in','Shorts and top, tested on a long run','Anti-chafe balm','Gels or chews: 4–6, practised in training','Watch, charged','Race number and pins the night before','Throwaway layer for the start','Tape or sleeve if the knee needs it','Warm clothes in the bag drop']};
+function paceTable(goal){const sec=goal[0].split(':').reduce((a,b)=>a*60+ +b,0),per=sec/42.195;
+  const ks=[5,10,15,20,21.1,25,30,35,40,42.195];
+  return `<table class="ptab"><thead><tr><th>km</th><th>split</th></tr></thead><tbody>${ks.map(k=>{const t=Math.round(per*k);
+    return `<tr><td>${k===21.1?'half':k===42.195?'finish':k}</td><td>${Math.floor(t/3600)}:${pad2(Math.floor(t/60)%60)}:${pad2(t%60)}</td></tr>`}).join('')}</tbody></table>`}
+function renderOslo(){
+  const now=new Date(),race=parseDay(RS().race),o=OS('oslo');race.setHours(9,0,0,0);
+  const left=race-now,W=weekInfo(now);
+  const goal=(o.goal==null?1:+o.goal),g=OSLO.goals[goal]||OSLO.goals[1];
+  document.getElementById('ptitle').textContent='Oslo Marathon';
+  document.getElementById('plede').textContent='Saturday 18 September 2027 · 42.195 km';
+  document.title='Oslo Marathon · Training guide';
+  const kitDone=Object.values(o.kit||{}).filter(Boolean).length;
+  document.getElementById('main').innerHTML=`<section class="objpage">
+   <div class="oshero" data-cdt="${dayOf(race)}T09:00:00">
+     <div class="oswave" aria-hidden="true"></div>
+     <div class="tkhead"><span class="oskick">🏁 Race day</span><b>Saturday 18 September 2027, 09:00</b><span>Two laps along the Oslofjord · booked</span></div>
+     ${left>0?cdBlock(dayOf(race)+'T09:00:00'):'<div class="cdbig"><b>Race day</b></div>'}
+     <div class="tkfoot"><span>${W.phase.name} · week ${W.idx} of ${W.total}</span><span>Long run now: <b>${W.long} km</b></span></div>
+   </div>
+   <h2 class="objh">Your goal</h2>
+   <div class="goalpick">${OSLO.goals.map((x,i)=>`<label class="gopt${i===goal?' on':''}"><input type="radio" name="osgoal" data-obj="goal" data-k="${i}"${i===goal?' checked':''}><b>${x[1]}</b><span>${x[2]}/km</span></label>`).join('')}</div>
+   <p class="hint">Your last marathon was 5:10 with knee and ankle pain from km 22. 4:15–4:30 is the honest target from where you are now; sub 4 is the stretch if the spring goes well. Decide for real after the half-marathon test in spring.</p>
+   ${paceTable(g)}
+   <h2 class="objh">The course</h2>
+   <div class="crs"><div><b>Two laps</b><span>You run the half-marathon route twice, so you see everything a second time. Good for pacing, hard on the head at km 25.</span></div>
+     <div><b>Along the fjord</b><span>City centre, Aker Brygge and the harbour, out along the water and back through Frogner.</span></div>
+     <div><b>≈350 m of climb</b><span>The organiser lists about 350 m for the marathon and 175 m for one lap: rolling, not flat. The 2027 route is published closer to the day.</span></div>
+     <div><b>Aid about every 5 km</b><span>Practise drinking on the move on long runs; take your own gels.</span></div></div>
+   <h2 class="objh">Race week</h2>
+   <ul class="wklist2"><li><b>Mon</b> easy 6 km, legs only</li><li><b>Tue</b> 8 km with 4 × 1 min at race pace</li><li><b>Wed</b> rest or a short walk</li><li><b>Thu</b> easy 5 km with 4 strides</li><li><b>Fri</b> rest, number pickup, early night</li><li><b>Sat</b> race, 09:00</li></ul>
+   <h2 class="objh">Race morning</h2>
+   <ol class="tline"><li><b>−3 h</b> breakfast you\u2019ve tested: porridge or bread and honey, coffee</li><li><b>−90 min</b> leave home, Furuset to the centre by T-bane</li><li><b>−45 min</b> bag drop, toilet queue, keep the throwaway layer on</li><li><b>−20 min</b> easy jog 5 min, leg swings, 3 strides</li><li><b>−5 min</b> in the pen, gel if you use one</li><li><b>Go</b> first 5 km about 10 s/km slower than goal pace</li></ol>
+   <h2 class="objh">Kit <span class="gcount">${kitDone} / ${OSLO.kit.length} ready</span></h2>
+   <div class="gcat">${OSLO.kit.map((it,i)=>`<label class="gitem${(o.kit||{})[i]?' on':''}"><input type="checkbox" data-obj="kit" data-k="${i}"${(o.kit||{})[i]?' checked':''}><span>${esc(it)}</span></label>`).join('')}</div>
+   <button class="add" data-act="objgo" data-go="run">Open the marathon plan</button>
+  </section>`;
+  document.getElementById('foot').innerHTML='';
+}
+/* ---------- Three Passes ---------- */
+const TP={
+  cw:[['Lukla',2860],['Namche',3440],['Thame',3800],['Lungden',4380],['Renjo La',5360,1],['Gokyo',4790],['Gokyo Ri',5357,2],['Cho La',5420,1],['Dzongla',4830],['Lobuche',4940],['Kala Patthar',5545,2],['Gorak Shep',5164],['Kongma La',5535,1],['Chhukung',4730],['Dingboche',4410],['Namche',3440],['Lukla',2860]],
+  extras:[['Everest Base Camp','5,364 m','A side trip from Gorak Shep on the Kala Patthar day.'],['Gokyo Ri','5,357 m','The best view of the trip, above Gokyo lakes.'],['Chhukung Ri','5,546 m','A good acclimatisation day before Kongma La or Island Peak.'],['Island Peak','6,189 m','From Chhukung. Permit and guide, basic crampon, rope and jumar skills. 3–4 extra days.'],['Lobuche East','6,119 m','Right by Lobuche, steeper snow and fixed ropes. Permit and guide.']],
+  notes:[['Direction','Clockwise puts Renjo La first, which acclimatises you more gently and keeps the passes in order of difficulty. Counter-clockwise is the common way round.'],
+   ['Walking in','From Salleri or Jiri adds roughly 4–6 days and excellent acclimatisation, and skips the Lukla flight lottery. Flying out from Lukla afterwards.'],
+   ['Permits','Sagarmatha National Park entry plus the Khumbu Pasang Lhamu rural municipality fee. Buy in Kathmandu or at Monjo and Lukla; check current prices before you go.'],
+   ['Teahouses','No need to book ahead outside peak weeks, but the passes days are long: start early, carry water and snacks.'],
+   ['Altitude','Above 5,000 m for three passes. Plan acclimatisation days, go up slowly, and talk to a doctor about Diamox before the trip.'],
+   ['Money','Cash only above Namche, and card machines are unreliable there too. Bring enough rupees for the whole trek plus a buffer.']],
+  gear:[['Sleeping and warmth',['Down jacket','Sleeping bag, comfort −10 °C or warmer','Base layers and fleece','Warm hat, buff, liner and warm gloves']],
+   ['On the trail',['Boots worn in on long hikes','Microspikes or light crampons for the passes','Trekking poles','35–45 L pack','Sunglasses cat. 3–4, sunscreen, lip balm']],
+   ['Practical',['Headtorch and spare batteries','Water treatment and 2 L capacity','Power bank, charging costs money up there','First aid, blister kit, painkillers','Travel insurance with helicopter evacuation to 6,000 m']]],
+  prep:[{id:'n1',when:'Now → spring',t:'Keep the Nepal strength',x:'Step-ups, step-downs, split squats and calf work twice a week. This is the same base the marathon needs.',go:'nepal'},
+   {id:'n2',when:'Spring',t:'Long hikes with a pack',x:'Build to 6–8 hours with 8–10 kg, and plenty of descent. Nordmarka is perfect for this.'},
+   {id:'n3',when:'After the marathon',t:'Two easy weeks, then hike',x:'Recover from the race first, then back-to-back long hiking days with the pack.',milestone:1},
+   {id:'n4',when:'4 weeks before',t:'Dress rehearsal',x:'Two consecutive days of 6–7 hours with the full pack and the boots you\u2019ll take.',milestone:1,plan:'Hike'}]};
+function tpRoute(dir,prog){
+  const pts0=dir==='cw'?TP.cw:TP.cw.slice().reverse();
+  const R=pts0.filter(p=>p[2]!==2),W=340,H=165,x0=14,x1=W-14,e0=2400,e1=5900,yOf=e=>H-24-(e-e0)/(e1-e0)*(H-60);
+  const pts=R.map((r,i)=>[x0+i*(x1-x0)/(R.length-1),yOf(r[1])]);
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    d+=` C${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)},${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)} ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)},${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`}
+  const fx=x0+prog*(x1-x0),seg=Math.min(pts.length-2,Math.floor(prog*(pts.length-1))),t=prog*(pts.length-1)-seg,fy=pts[seg][1]+(pts[seg+1][1]-pts[seg][1])*t;
+  const cols=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'];
+  const passes=R.map((r,i)=>r[2]===1?`<g><line x1="${pts[i][0]}" y1="${pts[i][1]-3}" x2="${pts[i][0]}" y2="${pts[i][1]-15}" class="pole"/>
+     ${[0,1,2].map(k=>`<rect x="${pts[i][0]+1+k*4}" y="${pts[i][1]-15+k*1.1}" width="3.4" height="4.2" fill="${cols[(i+k)%5]}"/>`).join('')}
+     <text x="${pts[i][0]}" y="${pts[i][1]-27}" text-anchor="middle" class="tkname">${r[0]}</text>
+     <text x="${pts[i][0]}" y="${pts[i][1]-19}" text-anchor="middle" class="tkalt2">${r[1].toLocaleString('en').replace(',',' ')}</text></g>`:'').join('');
+  return `<svg class="tproute" viewBox="0 0 ${W} ${H}" role="img" aria-label="Three Passes profile, ${dir==='cw'?'clockwise':'counter-clockwise'}">
+   ${[3000,4000,5000].map(e=>`<line x1="${x0}" x2="${x1}" y1="${yOf(e)}" y2="${yOf(e)}" class="grid"/><text x="${x1}" y="${yOf(e)-3}" text-anchor="end" class="galt">${e/1000}k</text>`).join('')}
+   <path d="${d} L${x1},${H} L${x0},${H} Z" class="tpfill"/><path d="${d}" class="tpline"/>
+   ${passes}
+   <text x="${x0}" y="${H-6}" class="tkpt">${R[0][0]}</text><text x="${x1}" y="${H-6}" text-anchor="end" class="tkpt">${R[R.length-1][0]}</text>
+   <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="8" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/></svg>`;
+}
+function renderPasses(){
+  const now=new Date(),o=OS('passes'),n=NS(),go=parseDay(n.date),start=parseDay(n.prepStart);
+  const dir=o.dir||'cw',prog=Math.max(0,Math.min(1,(now-start)/(go-start)));
+  document.getElementById('ptitle').textContent='Three Passes';
+  document.getElementById('plede').textContent='Khumbu, Nepal · with a friend, teahouses, no guide';
+  document.title='Three Passes · Training guide';
+  const gearAll=TP.gear.reduce((a,g)=>a+g[1].length,0),gearDone=Object.values(o.gear||{}).filter(Boolean).length;
+  document.getElementById('main').innerHTML=`<section class="objpage">
+   <div class="tphero" data-cdt="${n.date}T06:00:00">
+     <div class="tkhead"><span class="tpkick">🏔 Three Passes</span><b>${n.fixed?parseDay(n.date).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'Around '+parseDay(n.date).toLocaleDateString(undefined,{month:'long',year:'numeric'})+' · dates not fixed'}</b>
+       <span>Kongma La 5,535 · Cho La 5,420 · Renjo La 5,360</span></div>
+     ${cdBlock(n.date+'T06:00:00')}
+     <div class="dirpick"><button class="${dir==='cw'?'on':''}" data-act="tpdir" data-d="cw">Clockwise</button><button class="${dir==='ccw'?'on':''}" data-act="tpdir" data-d="ccw">Counter-clockwise</button></div>
+     ${tpRoute(dir,prog)}
+     <div class="tkfoot"><span>${dir==='cw'?'Renjo La → Cho La → Kongma La':'Kongma La → Cho La → Renjo La'}</span><button class="link" data-act="nepset">Set dates</button></div>
+   </div>
+   <h2 class="objh">Side trips and peaks</h2>
+   <div class="crs">${TP.extras.map(([a,b2,c])=>`<div><b>${esc(a)} · ${esc(b2)}</b><span>${esc(c)}</span></div>`).join('')}</div>
+   <p class="hint">Mera Peak (6,476 m) sits in the Hinku valley, a trip of its own unless you cross the Amphu Labtsa. Island Peak or Lobuche East fit this loop far better.</p>
+   <h2 class="objh">Good to know</h2>
+   <div class="crs">${TP.notes.map(([a,b2])=>`<div><b>${esc(a)}</b><span>${esc(b2)}</span></div>`).join('')}</div>
+   <h2 class="objh">Getting ready</h2>
+   <div class="prepl">${TP.prep.map(x=>{const done=(o.prep||{})[x.id];return `<div class="prow2${done?' done':''}${x.milestone?' ms':''}">
+      <label class="tick"><input type="checkbox" data-obj="prep" data-k="${x.id}"${done?' checked':''}><span></span></label>
+      <div><em>${esc(x.when)}${x.milestone?' · milestone':''}</em><b>${esc(x.t)}</b><p>${esc(x.x)}</p>
+      ${x.go?`<button class="link" data-act="objgo" data-go="${x.go}">Open Nepal strength</button>`:''}${x.plan?`<button class="link" data-act="objplan">Plan the rehearsal hike</button>`:''}</div></div>`}).join('')}</div>
+   <h2 class="objh">Gear <span class="gcount">${gearDone} / ${gearAll} packed</span></h2>
+   <div class="gear">${TP.gear.map(([cat,items],gi)=>`<div class="gcat"><h4>${esc(cat)}</h4>${items.map((it,ii)=>{const k=gi+'.'+ii,on=(o.gear||{})[k];
+      return `<label class="gitem${on?' on':''}"><input type="checkbox" data-obj="gear" data-k="${k}"${on?' checked':''}><span>${esc(it)}</span></label>`}).join('')}</div>`).join('')}</div>
   </section>`;
   document.getElementById('foot').innerHTML='';
 }
@@ -1988,12 +2150,14 @@ function render(){
   document.getElementById('plede').textContent=p.lede;
   document.title=p.title;
   const inTrain=TRAIN_IDS.includes(cur);
-  document.body.dataset.view=inTrain?'train':cur==='toubkal'?'obj':cur;
+  document.body.dataset.view=inTrain?'train':['toubkal','oslo','passes'].includes(cur)?'obj':cur;
   document.getElementById('progs').innerHTML=inTrain?TRAIN_IDS.map(id=>{const x=PROGS.find(q=>q.id===id);return `<button data-prog="${x.id}" aria-pressed="${x.id===cur}">${x.chip}</button>`}).join(''):'';
-  document.querySelectorAll('#bnav [data-view]').forEach(b=>b.setAttribute('aria-current',(b.dataset.view==='train'?inTrain:b.dataset.view===(cur==='toubkal'?'today':cur))?'page':'false'));
+  document.querySelectorAll('#bnav [data-view]').forEach(b=>b.setAttribute('aria-current',(b.dataset.view==='train'?inTrain:b.dataset.view===(['toubkal','oslo','passes'].includes(cur)?'today':cur))?'page':'false'));
   if(p.id==='history'){renderHistory();return}
   if(p.id==='today'){renderToday();return}
   if(p.id==='toubkal'){renderObjective();return}
+  if(p.id==='oslo'){renderOslo();return}
+  if(p.id==='passes'){renderPasses();return}
   document.getElementById('main').innerHTML=p.sections.map((s,si)=>{
     let items;try{items=sectionItems(p,si)}catch(err){showErr('Could not build '+s.title+': '+err.message);items=[]}
     const ess=items.filter(e=>e.tier==='e'),ext=items.filter(e=>e.tier!=='e');
@@ -2071,7 +2235,8 @@ function findByKey(key){
 }
 // Native controls fire 'change' reliably even where tap-to-click is unreliable.
 document.addEventListener('change',ev=>{
-  if(ev.target.matches&&ev.target.matches('input[data-obj]')){const t=ev.target,o=OS('toubkal'),g=t.dataset.obj;o[g]=o[g]||{};
+  if(ev.target.matches&&ev.target.matches('input[data-obj]')){const t=ev.target,o=OS(cur==='oslo'?'oslo':cur==='passes'?'passes':'toubkal'),g=t.dataset.obj;
+    if(g==='goal'){o.goal=+t.dataset.k;save();const y=window.scrollY;render();window.scrollTo(0,y);return}o[g]=o[g]||{};
     if(t.checked)o[g][t.dataset.k]=1;else delete o[g][t.dataset.k];save();
     const y=window.scrollY;render();window.scrollTo(0,y);return}
   const t=ev.target;
@@ -2120,6 +2285,7 @@ function onAct(b){
   if(act==='gorun'){go('run');return}
   if(act==='gonepal'){go('nepal');return}
   if(act==='objopen'||act==='objgo'){go(b.dataset.go);return}
+  if(act==='tpdir'){OS('passes').dir=b.dataset.d;save();const y=window.scrollY;render();window.scrollTo(0,y);return}
   if(act==='objplan'){calSel=dayOf(new Date());openPlan();setTimeout(()=>{const c=document.querySelector('#planOpts input[value="x:Hike"]');if(c){c.checked=true;const f=document.getElementById('planfrm');f.detail.value='Toubkal prep: 6–7 h, 1,200 m up, 10 kg';f.minutes.value=420;f.minutes.dataset.manual='1';planAuto()}},0);return}
   if(act==='nepset'){const f=document.getElementById('nepfrm'),n=NS();f.date.value=n.date;f.fixed.checked=!!n.fixed;document.getElementById('nepdlg').showModal();return}
   if(act==='runadj'){const prev=JSON.parse(JSON.stringify(RS()));const c=runCheck();if(!c)return;
@@ -2318,6 +2484,7 @@ async function handleConnectHash(){const m=location.hash.match(/^#connect=([\w-]
   catch(e){lsSet(SYKEY,old);showErr('Could not connect: '+e.message)}
 }
 handleConnectHash();addEventListener('hashchange',handleConnectHash);
+addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t!==cur){cur=t;if(TRAIN_IDS.includes(t))lastTrain=t;refresh();window.scrollTo(0,0)}});
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
   S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
