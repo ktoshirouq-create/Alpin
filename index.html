@@ -79,6 +79,9 @@ body[data-view="train"] header{padding-top:14px}
 .wklist{list-style:none;margin:0 0 14px;padding:0;font-size:14px;line-height:1.45}.wklist li{padding:6px 0;border-top:1px solid var(--rule)}
 .wklist b{display:block;font-size:13px;color:var(--muted);font-weight:600}
 .wkbtns{display:flex;gap:8px;margin-bottom:6px}
+.adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
+.adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
+.adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
 .monthcard{margin-top:14px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--rule)}
 .monthcard h3{font:700 20px/1 "Barlow Condensed",sans-serif;margin:0 0 6px}.monthcard p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
 #runweekdlg form,#runlogdlg form,#runsetdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -416,8 +419,9 @@ button.chip::after{display:none}
   <label>Race day<input name="race" type="date" required></label>
   <div class="row2"><label>Max heart rate<input name="maxHR" type="number" inputmode="numeric" min="140" max="220" required></label><label>Resting heart rate<input name="restHR" type="number" inputmode="numeric" min="30" max="90" required></label></div>
   <div class="row2"><label>Current km per week <span class="hint">where you are now</span><input name="anchorKm" type="number" inputmode="decimal" min="0" max="150" step="1" required></label><label>Peak km per week<input name="peakKm" type="number" inputmode="numeric" min="30" max="150" required></label></div>
+  <label>Recent long run, km <span class="hint">your longest run lately</span><input name="anchorLong" type="number" inputmode="decimal" min="3" max="45" step="1" required></label>
   <label>Easy pace, min/km<input name="easyPace" placeholder="7:20" pattern="\d{1,2}:\d{2}" required></label>
-  <p class="hint">Changing "current km per week" re-anchors the plan from this week, e.g. after illness or a break.</p>
+  <p class="hint">Changing current km or your recent long run re-anchors the plan from this week, up or down. The app also suggests this on its own when your logged runs drift from the plan.</p>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
 </form></dialog>
 
@@ -1278,7 +1282,7 @@ function renderToday(){
   const rb=document.getElementById('resumebar');if(rb)rb.remove();document.body.classList.remove('has-resume');
 }
 /* ---------- marathon plan ---------- */
-const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.33};
+const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.83,anchorLong:10,longDate:'2026-09-21',cutbacks:[],dismissed:''};
 const RS=()=>({...RUN_DEF,...(S.run||{})});
 const d0=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
 const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
@@ -1311,13 +1315,19 @@ function weekInfo(date){
   const aw=mondayOf(parseDay(r.anchorDate));let c0=pts[0][1];
   for(let i=0;i<pts.length-1;i++){if(aw>=pts[i][0]&&aw<pts[i+1][0]){c0=pts[i][1]+(aw-pts[i][0])/(pts[i+1][0]-pts[i][0])*(pts[i+1][1]-pts[i][1]);break}}
   let target=ph==='taper'||ph==='race'?curve:(r.anchorKm>=c0?Math.max(curve,Math.min(r.anchorKm,r.peakKm)):Math.min(curve,r.anchorKm*Math.pow(1.08,since)));
-  const cutback=!['taper','race'].includes(ph)&&idx>0&&idx%4===3;
+  const cutback=!['taper','race'].includes(ph)&&((idx>0&&idx%4===3)||(r.cutbacks||[]).includes(dayOf(w)));
   const full=target;
   if(cutback)target*=.75;
   target=Math.max(8,Math.round(target));
   const frac={base:.42,build:.45,spec:.48,peak:.52,taper:.45,race:0}[ph],cap={base:16,build:22,spec:28,peak:32,taper:22,race:0}[ph];
-  let long=ph==='race'?0:Math.min(cap,Math.max(8,Math.round(full*frac)));
-  if(cutback)long=Math.max(8,Math.round(long*.8));
+  const aL=+r.anchorLong||0,floor=aL?Math.min(8,aL):8;
+  let long=ph==='race'?0:Math.max(floor,Math.round(full*frac));
+  if(aL&&ph!=='race'&&ph!=='taper'){const sl=Math.max(0,wkBetween(parseDay(r.longDate||r.anchorDate),w));
+    // hold your current long run, then add about 1 km a week while it stays under ~60% of the week
+    long=Math.max(long,aL,Math.min(aL+sl,Math.round(full*.6)));
+    if(aL<long&&aL<Math.round(full*frac))long=Math.min(long,aL+sl+1)}
+  long=Math.min(cap,long);
+  if(cutback)long=Math.max(floor,Math.round(long*.8));
   if(ph==='taper'&&wkBetween(D.taper,w)===1)long=Math.min(long,14);
   const runs={base:3,build:4,spec:4,peak:5,taper:4,race:3}[ph];
   return {w,idx:idx+1,total,ph,phase:PHASES.find(x=>x.id===ph)||{id:'race',name:'Race week',col:'#E2685A'},target,long,runs,cutback,D};
@@ -1346,6 +1356,24 @@ function suggestWeek(date){
   }
   return {W,runs:t.map(([d,ty,km])=>({date:dayOf(addDays(ws,d)),type:ty,km:ty==='race'?42.2:roundKm(km),start:ty==='race'?'09:00':'14:00'}))
     .filter(r=>parseDay(r.date)>=today)};
+}
+function runCheck(){
+  const r=RS(),now=new Date(),thisW=mondayOf(now);
+  if(r.dismissed===dayOf(thisW))return null;
+  const recent=localLog().filter(x=>x.tab==='Run'&&x.result!=='skipped').sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  // several hard runs lately: offer an easier week
+  const last4=recent.slice(0,4);
+  if(last4.length>=3&&last4.filter(x=>x.feel==='hard').length>=2&&!(r.cutbacks||[]).includes(dayOf(thisW))&&!weekInfo(now).cutback)
+    return {kind:'hard',text:`${last4.filter(x=>x.feel==='hard').length} of your last ${last4.length} runs felt hard. An easier week lets your body catch up.`,btn:'Make this a cutback week'};
+  // compare the last 3 full weeks since the plan was anchored
+  const weeks=[1,2,3].map(i=>addDays(thisW,-7*i)).filter(ws=>ws>=mondayOf(parseDay(r.anchorDate)));
+  if(weeks.length<2)return null;
+  const done=weeks.map(runKmIn),plan=weeks.map(ws=>weekInfo(ws).target);
+  const avg=done.reduce((a,b)=>a+b,0)/weeks.length,avgP=plan.reduce((a,b)=>a+b,0)/weeks.length,ratio=avgP?avg/avgP:1;
+  const longest=recent.filter(x=>parseDay(x.date)>=weeks[weeks.length-1]).reduce((m,x)=>Math.max(m,parseFloat(x.completed)||0),0);
+  if(ratio<.7)return {kind:'down',avg,avgP,longest,text:`Last ${weeks.length} weeks you ran about ${Math.round(avg)} km a week, against ${Math.round(avgP)} planned. Set the plan to where you are, so it builds from there.`,btn:'Adjust to my level'};
+  if(ratio>1.15&&!last4.some(x=>x.feel==='hard'))return {kind:'up',avg,avgP,longest,text:`You're ahead: about ${Math.round(avg)} km a week against ${Math.round(avgP)} planned, and nothing felt hard. Move the plan up to match?`,btn:'Move the plan up'};
+  return null;
 }
 function runKmIn(ws){const a=dayOf(ws),b=dayOf(addDays(ws,6));
   return localLog().filter(r=>r.tab==='Run'&&r.result!=='skipped'&&r.date>=a&&r.date<=b).reduce((x,r)=>x+(parseFloat(r.completed)||0),0)}
@@ -1379,6 +1407,7 @@ function runDash(){
       <span>${daysTo>0?`${wksTo} weeks, ${daysTo%7} days to go`:daysTo===0?'Race day!':'Race done'}</span></div>
       <button class="link" data-act="runset">Settings</button></div>
     ${bar}
+    ${(()=>{const c=runCheck();return c?`<div class="adjcard ${c.kind}"><p>${esc(c.text)}</p><div><button class="go sm" data-act="runadj">${esc(c.btn)}</button><button class="link" data-act="runkeep">Not now</button></div></div>`:''})()}
     <div class="wkcard" style="--tc:${W.phase.col}">
       <div class="wkhead"><span class="wkph">${W.phase.name}${W.cutback?' · cutback week':''}</span><span class="wkn">Week ${W.idx} of ${W.total}</span></div>
       <h3>This week: ${W.runs} runs · about ${W.target} km</h3>
@@ -1723,9 +1752,15 @@ function onAct(b){
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
   if(act==='gorun'){go('run');return}
+  if(act==='runadj'){const prev=JSON.parse(JSON.stringify(RS()));const c=runCheck();if(!c)return;
+    const r={...RS()},thisW=dayOf(mondayOf(new Date()));
+    if(c.kind==='hard')r.cutbacks=(r.cutbacks||[]).concat([thisW]);
+    else{r.anchorKm=Math.max(5,Math.round(c.avg));r.anchorDate=thisW;if(c.longest){r.anchorLong=Math.max(4,Math.round(c.longest));r.longDate=thisW}}
+    S.run=r;save();refresh();undoBar(c.kind==='hard'?'This week is now a cutback week':'Plan adjusted to your level',()=>{S.run=prev;save();refresh()});return}
+  if(act==='runkeep'){S.run={...RS(),dismissed:dayOf(mondayOf(new Date()))};save();refresh();return}
   if(act==='runlog'){openRunLog();return}
   if(act==='runset'){const f=document.getElementById('runsetfrm'),r=RS();f.race.value=r.race;f.maxHR.value=r.maxHR;f.restHR.value=r.restHR;
-    f.anchorKm.value=Math.round(weekInfo(new Date()).target);f.anchorKm.dataset.was=f.anchorKm.value;f.peakKm.value=r.peakKm;f.easyPace.value=fmtPace(r.easyPace);
+    f.anchorKm.value=Math.round(weekInfo(new Date()).target);f.anchorKm.dataset.was=f.anchorKm.value;f.anchorLong.value=weekInfo(new Date()).long;f.anchorLong.dataset.was=f.anchorLong.value;f.peakKm.value=r.peakKm;f.easyPace.value=fmtPace(r.easyPace);
     document.getElementById('runsetdlg').showModal();return}
   if(act==='pdone'&&(plansCache().find(x=>x.id===b.dataset.id)||{}).tab==='Run'){const pl=plansCache().find(x=>x.id===b.dataset.id),m=S.runMeta[pl.id]||{};
     openRunLog({planId:pl.id,date:pl.date,type:m.type||'easy',km:m.km||''});return}
@@ -1921,6 +1956,7 @@ function importData(){
     const m=sf.easyPace.value.match(/^(\d{1,2}):(\d{2})$/);if(!m){ev.preventDefault();return}
     const r={...RS(),race:sf.race.value,maxHR:+sf.maxHR.value,restHR:+sf.restHR.value,peakKm:+sf.peakKm.value,easyPace:+m[1]+(+m[2])/60};
     if(sf.anchorKm.value!==sf.anchorKm.dataset.was){r.anchorKm=+sf.anchorKm.value;r.anchorDate=dayOf(mondayOf(new Date()))}
+    if(sf.anchorLong.value!==sf.anchorLong.dataset.was){r.anchorLong=+sf.anchorLong.value;r.longDate=dayOf(mondayOf(new Date()))}
     S.run=r;save();refresh();
   });
 })();
