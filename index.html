@@ -111,6 +111,14 @@ body[data-view="train"] header{padding-top:14px}
 .cdchips span{font-size:11px;line-height:1.2;color:var(--muted)}
 #nepdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #nepdlg label.chk{flex-direction:row;align-items:center;gap:10px}
+.runopts[hidden]{display:none}
+.runopts{display:flex;gap:8px;align-items:center;margin:0 0 8px 30px}
+.runopts select,.runopts input{font-size:15px;padding:8px;border:1.5px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0}
+.runopts select{flex:1}.runopts .kmin{display:flex;flex-direction:row;align-items:center;gap:6px;font-weight:400}.runopts .kmin input{width:5em}
+.durrow{display:flex;flex-direction:column;gap:8px}.durrow label{max-width:50%}
+.durchips{display:flex;flex-wrap:wrap;gap:6px}
+.durchips button{border:1.5px solid var(--rule);background:none;border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px;color:var(--ink)}
+.durchips button.on{border-color:var(--acc);background:var(--acc);color:#fff}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -470,7 +478,8 @@ button.chip::after{display:none}
   <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
   <div id="planOpts" class="planopts"></div>
   <label>Details <span class="hint">optional, e.g. "easy 8 km" or "Kolsås"</span><input name="detail" autocomplete="off"></label>
-  <div class="row2"><label>Minutes<input name="minutes" type="number" min="5" max="600" inputmode="numeric" required></label><span></span></div>
+  <div class="durrow"><label>Duration, minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label>
+    <div id="durChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div></div>
   <label>Title in your calendar<input name="title" autocomplete="off" required></label>
   <p class="syncmsg" id="planMsg" role="status"></p>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
@@ -1180,10 +1189,10 @@ function syncLine(){const c=syncCfg(),q=lsGet(QKEY,[]).filter(o=>o.op!=='state')
 function updateSyncLine(){const n=document.getElementById('syncline');if(n)n.innerHTML=syncLine()}
 
 const FEELS=[['easy','Easy'],['good','Good'],['hard','Hard']];
-const TABCOL={'Nepal':'#3B6FC4','Ice':'#3FA7D6','Climbing':'#E2685A','Stretch':'#3DAE74','Warm up':'#E1B12C','Run':'#F08C3A','Hike':'#9B7BE0','Climb outside':'#C24F45','Other':'#8A9AA8'};
-const TABICON={'Nepal':'🏔','Ice':'🧊','Climbing':'🧗','Stretch':'🧘','Warm up':'🔥','Run':'🏃','Hike':'🥾','Climb outside':'⛰️','Other':'✳️'};
+const TABCOL={'Nepal':'#3B6FC4','Ice':'#3FA7D6','Climbing':'#E2685A','Stretch':'#3DAE74','Warm up':'#E1B12C','Run':'#F08C3A','Hike':'#9B7BE0','Climb outside':'#C24F45','Boulder outside':'#C9823B','Ice climbing':'#2B8FC0','Other':'#8A9AA8'};
+const TABICON={'Nepal':'🏔','Ice':'🧊','Climbing':'🧗','Stretch':'🧘','Warm up':'🔥','Run':'🏃','Hike':'🥾','Climb outside':'⛰️','Boulder outside':'🪨','Ice climbing':'⛏️','Other':'✳️'};
 const BASETABS=['Nepal','Ice','Climbing','Stretch','Warm up'];
-const EXTRAS=[['Run',45],['Hike',180],['Climb outside',180],['Other',60]];
+const EXTRAS=[['Run',45],['Hike',180],['Climb outside',240],['Boulder outside',180],['Ice climbing',360],['Other',60]];
 let calPicked=false,calDay=null;
 const PKEY='tpg:plans';
 const plansCache=()=>lsGet(PKEY,[]);
@@ -1558,17 +1567,27 @@ function openPlan(){
   document.getElementById('planOpts').innerHTML=Object.keys(byTab).map(t=>`<div class="pgrp"><h4 style="--tc:${TABCOL[t]}">${TABICON[t]||''} ${esc(t)}</h4>
     ${byTab[t].map(o=>`<label class="popt"><input type="checkbox" value="${esc(o.key)}" data-tab="${esc(t)}" data-name="${esc(o.name)}" data-label="${esc(o.label)}" data-min="${o.min}"><span>${esc(o.label)}</span><em>≈${o.min} min</em></label>`).join('')}</div>`).join('');
   document.getElementById('planOpts').insertAdjacentHTML('afterbegin',`<div class="pgrp"><h4 style="--tc:var(--muted)">Something else</h4>
-    ${EXTRAS.map(([t,m])=>`<label class="popt"><input type="checkbox" value="x:${esc(t)}" data-extra="1" data-tab="${esc(t)}" data-name="${esc(t)}" data-label="${esc(t)}" data-min="${m}"><span>${TABICON[t]} ${esc(t)}</span><em>${m} min</em></label>`).join('')}</div>`);
+    ${EXTRAS.map(([t,m])=>`<label class="popt"><input type="checkbox" value="x:${esc(t)}" data-extra="1" data-tab="${esc(t)}" data-name="${esc(t)}" data-label="${esc(t)}" data-min="${m}"><span>${TABICON[t]} ${esc(t)}</span><em>${m>=60&&m%60===0?m/60+' h':m+' min'}</em></label>
+      ${t==='Run'?`<div class="runopts" hidden><select id="prType" aria-label="Run type">${Object.keys(RUNLBL).filter(k=>k!=='strides').map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('')}</select>
+        <label class="kmin"><input id="prKm" type="number" inputmode="decimal" min="1" max="50" step="0.5" aria-label="Kilometres">km</label></div>`:''}`).join('')}</div>`);
+  const ty=document.getElementById('prType'),km=document.getElementById('prKm'),W=weekInfo(parseDay(f.date.value));
+  ty.value='easy';km.value='';km.dataset.auto='1';km.placeholder='km';
+  ty.onchange=()=>{if(km.dataset.auto==='1')km.value=ty.value==='long'||ty.value==='mp'?W.long:ty.value==='race'?42.2:'';planAuto()};
+  km.oninput=()=>{km.dataset.auto='0';planAuto()};
+  f.minutes.dataset.manual='0';document.querySelectorAll('#durChips button').forEach(b=>b.classList.remove('on'));
   document.getElementById('planMsg').textContent='';
   d.showModal();
 }
 function planAuto(){
   const f=document.getElementById('planfrm'),ch=[...f.querySelectorAll('#planOpts input:checked')];
-  const min=ch.reduce((a,x)=>a+(+x.dataset.min||0),0);f.minutes.value=ch.length?Math.max(5,Math.round(min/5)*5):'';
+  const run=ch.find(x=>x.value==='x:Run'),ro=f.querySelector('.runopts');if(ro)ro.hidden=!run;
+  const rt=run?document.getElementById('prType').value:'',rk=run?parseFloat(document.getElementById('prKm').value)||0:0;
+  const min=ch.reduce((a,x)=>a+(x===run&&rk?Math.round(rk*runPace(rt)):(+x.dataset.min||0)),0);
+  if(f.minutes.dataset.manual!=='1')f.minutes.value=ch.length?Math.max(5,Math.round(min/5)*5):'';
   if(f.title.dataset.auto==='1'){const app=ch.filter(x=>!x.dataset.extra),ext=ch.filter(x=>x.dataset.extra),det=f.detail.value.trim();
     const tabs=[...new Set(app.map(x=>x.dataset.tab))];
     const parts=[];if(app.length)parts.push(`${tabs.join(' + ')}: ${[...new Set(app.map(x=>x.dataset.name))].join(' + ')}`);
-    ext.forEach(x=>parts.push(x.dataset.name));
+    ext.forEach(x=>parts.push(x===run?`${RUNLBL[rt]||'Run'}${rk?' · '+rk+' km':''}`:x.dataset.name));
     const icons=[...new Set(tabs.concat(ext.map(x=>x.dataset.tab)))].map(t=>TABICON[t]||'').join('');
     f.title.value=ch.length?`${icons} ${parts.join(' + ')}${det?' · '+det:''}`:(det?det:'')}
 }
@@ -2066,6 +2085,11 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
 (function(){
   const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),msg=document.getElementById('planMsg');
   f.addEventListener('change',ev=>{if(ev.target.matches('#planOpts input'))planAuto()});
+  document.getElementById('durChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
+    f.minutes.value=b.dataset.min;f.minutes.dataset.manual='1';
+    document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',x===b));
+    if(+b.dataset.min>=480&&f.start.value>'10:00')f.start.value='08:00';});
+  f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'))});
   f.detail.addEventListener('input',planAuto);
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
   f.addEventListener('submit',ev=>{
@@ -2073,10 +2097,11 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
     const ch=[...f.querySelectorAll('#planOpts input:checked')];
     if(!ch.length){ev.preventDefault();msg.textContent='Pick at least one session.';msg.className='syncmsg bad';return}
     const id=uid(),app=ch.filter(x=>!x.dataset.extra),tabs=[...new Set(app.concat(ch.filter(x=>x.dataset.extra)).map(x=>x.dataset.tab))],det=f.detail.value.trim();
-    const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(600,parseInt(f.minutes.value,10)||45)),
-      title:f.title.value.trim()||tabs.join(' + '),tab:tabs[0],items:ch.map(x=>x.dataset.extra?x.dataset.label+(det?': '+det:''):`${x.dataset.label} (≈${x.dataset.min} min)`),
+    const runC=ch.find(x=>x.value==='x:Run'),rt=runC?document.getElementById('prType').value:'',rk=runC?Math.round((parseFloat(document.getElementById('prKm').value)||0)*10)/10:0;
+    const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||45)),
+      title:f.title.value.trim()||tabs.join(' + '),tab:tabs[0],items:ch.map(x=>x===runC?`${RUNLBL[rt]}${rk?': '+rk+' km':''} · ${zoneText(RUNZONE[rt]||[2,2])}${det?' · '+det:''}`:x.dataset.extra?x.dataset.label+(det?': '+det:''):`${x.dataset.label} (≈${x.dataset.min} min)`),
       link:location.origin+location.pathname+'#plan='+id};
-    S.planRefs[id]=app.map(x=>x.value);save();calPicked=true;
+    S.planRefs[id]=app.map(x=>x.value);if(runC)S.runMeta[id]={type:rt,km:rk};save();calPicked=true;
     setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
     enqueue({op:'plan',plan});scheduleFlush(300);
     calSel=plan.date;calMonth=monthStart(new Date(plan.date+'T12:00'));
