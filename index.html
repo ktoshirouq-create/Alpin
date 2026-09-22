@@ -119,6 +119,17 @@ body[data-view="train"] header{padding-top:14px}
 .durchips{display:flex;flex-wrap:wrap;gap:6px}
 .durchips button{border:1.5px solid var(--rule);background:none;border-radius:999px;padding:7px 12px;font-weight:600;font-size:14px;color:var(--ink)}
 .durchips button.on{border-color:var(--acc);background:var(--acc);color:#fff}
+.daypick{display:flex;flex-direction:column;gap:6px;font-weight:600;font-size:14px}
+.daypick div{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.daypick label{position:relative;display:block}
+.daypick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.daypick div span{display:block;text-align:center;padding:9px 0;border-radius:10px;border:1.5px solid var(--rule);font-weight:600;font-size:13px}
+.daypick div input:checked+span{background:var(--acc);border-color:var(--acc);color:#fff}
+.daypick input:focus-visible+span{outline:2px solid var(--acc);outline-offset:2px}
+.rwhave{background:var(--panel);border-radius:12px;padding:10px 12px}
+.rwhave h4{margin:0 0 6px;font:700 16px/1 "Barlow Condensed",sans-serif}
+.rwh{display:grid;grid-template-columns:20px 64px 1fr auto;gap:6px;align-items:center;font-size:14px;padding:4px 0}
+.rwh em{font-style:normal}.rwh small{color:var(--muted)}
 .adjcard{margin-top:14px;padding:14px 16px;border-radius:14px;background:var(--panel);border-left:5px solid #3FA7D6}
 .adjcard.up{border-left-color:#3DAE74}.adjcard.hard{border-left-color:#F08C3A}
 .adjcard p{margin:0 0 10px;font-size:14px;line-height:1.45}.adjcard div{display:flex;align-items:center;gap:14px}
@@ -467,6 +478,8 @@ button.chip::after{display:none}
   <label>Race day<input name="race" type="date" required></label>
   <div class="row2"><label>Max heart rate<input name="maxHR" type="number" inputmode="numeric" min="140" max="220" required></label><label>Resting heart rate<input name="restHR" type="number" inputmode="numeric" min="30" max="90" required></label></div>
   <div class="row2"><label>Current km per week <span class="hint">where you are now</span><input name="anchorKm" type="number" inputmode="decimal" min="0" max="150" step="1" required></label><label>Peak km per week<input name="peakKm" type="number" inputmode="numeric" min="30" max="150" required></label></div>
+  <div class="daypick"><span>Days you can run</span><div id="dayPick"></div></div>
+  <label>Long run day<select name="longDay"></select></label>
   <label>Recent long run, km <span class="hint">your longest run lately</span><input name="anchorLong" type="number" inputmode="decimal" min="3" max="45" step="1" required></label>
   <label>Easy pace, min/km<input name="easyPace" placeholder="7:20" pattern="\d{1,2}:\d{2}" required></label>
   <p class="hint">Changing current km or your recent long run re-anchors the plan from this week, up or down. The app also suggests this on its own when your logged runs drift from the plan.</p>
@@ -1387,7 +1400,7 @@ function tickCountdown(){
 }
 setInterval(tickCountdown,1000);
 /* ---------- marathon plan ---------- */
-const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.83,anchorLong:10,longDate:'2026-09-21',cutbacks:[],dismissed:''};
+const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.83,anchorLong:10,longDate:'2026-09-21',cutbacks:[],dismissed:'',days:[0,1,2,4],longDay:1};
 const RS=()=>({...RUN_DEF,...(S.run||{})});
 const d0=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
 const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
@@ -1429,12 +1442,12 @@ function weekInfo(date){
   let long=ph==='race'?0:Math.max(floor,Math.round(full*frac));
   if(aL&&ph!=='race'&&ph!=='taper'){const sl=Math.max(0,wkBetween(parseDay(r.longDate||r.anchorDate),w));
     // hold your current long run, then add about 1 km a week while it stays under ~60% of the week
-    long=Math.max(long,aL,Math.min(aL+sl,Math.round(full*.6)));
+    long=Math.max(long,aL,Math.min(aL+sl,Math.round(full*.55)));
     if(aL<long&&aL<Math.round(full*frac))long=Math.min(long,aL+sl+1)}
   long=Math.min(cap,long);
   if(cutback)long=Math.max(floor,Math.round(long*.8));
   if(ph==='taper'&&wkBetween(D.taper,w)===1)long=Math.min(long,14);
-  const runs={base:3,build:4,spec:4,peak:5,taper:4,race:3}[ph];
+  const runs=Math.min({base:3,build:4,spec:4,peak:5,taper:4,race:3}[ph],Math.max(1,(r.days||[0,1,2,4]).length));
   return {w,idx:idx+1,total,ph,phase:PHASES.find(x=>x.id===ph)||{id:'race',name:'Race week',col:'#E2685A'},target,long,runs,cutback,D};
 }
 const RUNLBL={long:'Long run',easy:'Easy run',recovery:'Recovery jog',tempo:'Tempo',intervals:'Intervals',mp:'Long run with marathon pace',race:'Marathon',strides:'Easy run + strides'};
@@ -1442,25 +1455,56 @@ const RUNEX={long:'runlong',easy:'runeasy',recovery:'runrecovery',tempo:'runtemp
 const RUNZONE={long:[2,2],easy:[2,2],recovery:[1,1],tempo:[3,4],intervals:[4,5],mp:[2,3],race:[3,3],strides:[2,2]};
 const runPace=t=>({tempo:6.4,intervals:6.6,mp:6.9,race:6.3,recovery:RS().easyPace+.4}[t]||RS().easyPace);
 const roundKm=x=>Math.max(3,Math.round(x*2)/2);
+function weekExisting(ws){
+  const a=dayOf(ws),b=dayOf(addDays(ws,6)),out=[];
+  const plans=plansCache().filter(p=>p.tab==='Run'&&p.date>=a&&p.date<=b);
+  const typeOf=t=>{t=String(t||'').toLowerCase();return t.includes('marathon pace')?'mp':t.includes('long')?'long':t.includes('tempo')?'tempo':t.includes('interval')?'intervals':t.includes('recovery')?'recovery':t.includes('marathon')?'race':'easy'};
+  plans.forEach(p=>{const m=S.runMeta[p.id]||{},km=m.km||parseFloat((String(p.title).match(/([\d.]+)\s*km/)||[])[1])||0;
+    const done=localLog().some(r=>r.plan_id===p.id&&r.result!=='skipped')||p.status==='done';
+    out.push({date:p.date,type:m.type||typeOf(p.title),km,start:p.start,title:p.title,planned:true,done,id:p.id})});
+  localLog().filter(r=>r.tab==='Run'&&r.result!=='skipped'&&r.date>=a&&r.date<=b&&!plans.some(p=>p.id===r.plan_id))
+    .forEach(r=>out.push({date:r.date,type:typeOf(r.exercise),km:parseFloat(r.completed)||0,title:r.exercise,done:true,planned:false}));
+  return out.sort((x,y)=>x.date.localeCompare(y.date));
+}
 function suggestWeek(date){
-  const W=weekInfo(date),ws=W.w,today=d0(new Date());
-  let t;
-  if(W.ph==='race')t=[[1,'easy',8],[3,'strides',5],[5,'race',42.2]];
-  else{
-    const q=W.idx%2?'tempo':'intervals';
-    t={base:[[1,W.idx>=4?'long':'long'],[4,W.idx>=4?'strides':'easy'],[6,'easy']],
-       build:[[1,'long'],[2,'recovery'],[4,q],[6,'easy']],
-       spec:[[1,W.idx%2?'mp':'long'],[2,'recovery'],[3,'easy'],[4,q],[6,'easy']],
-       peak:[[1,W.idx%2?'mp':'long'],[2,'recovery'],[3,'easy'],[4,q],[6,'easy']],
-       taper:[[1,'long'],[2,'recovery'],[4,'tempo'],[6,'easy']]}[W.ph];
-    if(W.cutback&&t.length>4)t=t.filter(x=>x[1]!=='easy'||x[0]!==3);
-    const rest=W.target-W.long,qk=Math.min(12,Math.max(6,Math.round(rest*.3))),rk=W.ph==='base'?0:4.5;
-    const nEasy=t.filter(x=>['easy','strides'].includes(x[1])).length,hasQ=t.some(x=>['tempo','intervals'].includes(x[1]));
-    const ek=nEasy?(rest-(hasQ?qk:0)-(t.some(x=>x[1]==='recovery')?rk:0))/nEasy:0;
-    t=t.map(([d,ty])=>[d,ty,ty==='long'||ty==='mp'?W.long:ty==='recovery'?rk:(ty==='tempo'||ty==='intervals')?qk:Math.min(14,Math.max(4.5,roundKm(ek)))]);
+  const W=weekInfo(date),ws=W.w,today=dayOf(new Date()),r=RS();
+  const have=weekExisting(ws),haveKm=have.reduce((a,x)=>a+(+x.km||0),0),taken=new Set(have.map(x=>x.date));
+  const dayIdx=i=>dayOf(addDays(ws,i));
+  let avail=(r.days&&r.days.length?r.days:[0,1,2,4]).slice().sort((a,b)=>a-b).filter(i=>dayIdx(i)>=today&&!taken.has(dayIdx(i)));
+  if(W.ph==='race'){
+    const race=parseDay(r.race),rd=Math.round((d0(race)-ws)/864e5);
+    const out=[];const pick=(pref,type,km)=>{const d=pref.find(i=>avail.includes(i)&&i<rd);if(d!=null){out.push([d,type,km]);avail=avail.filter(x=>x!==d)}};
+    pick([1,2,0],'easy',8);pick([rd-2,rd-3,3],'strides',5);
+    if(dayIdx(rd)>=today&&!have.some(x=>x.type==='race'))out.push([rd,'race',42.2]);
+    return {W,have,runs:out.map(([d,ty,km])=>({date:dayIdx(d),type:ty,km,start:ty==='race'?'09:00':'14:00'}))};
   }
-  return {W,runs:t.map(([d,ty,km])=>({date:dayOf(addDays(ws,d)),type:ty,km:ty==='race'?42.2:roundKm(km),start:ty==='race'?'09:00':'14:00'}))
-    .filter(r=>parseDay(r.date)>=today)};
+  const hasLong=have.some(x=>x.type==='long'||x.type==='mp'),hasQ=have.some(x=>x.type==='tempo'||x.type==='intervals');
+  const need=Math.max(0,W.runs-have.length);
+  const q=W.idx%2?'tempo':'intervals',wantQ=W.ph!=='base'&&!hasQ,wantRec=['build','spec','peak','taper'].includes(W.ph);
+  const placed=[];const free=()=>avail.filter(i=>!placed.some(p=>p[0]===i));
+  const gap=i=>{const ds=placed.map(p=>Math.abs(p[0]-i)).concat(have.map(h=>Math.abs(Math.round((parseDay(h.date)-ws)/864e5)-i)));return ds.length?Math.min(...ds):9};
+  // 1. long run on your long-run day, or the earliest free day
+  if(!hasLong&&need>0&&free().length){const ld=free().includes(r.longDay)?r.longDay:free()[0];
+    placed.push([ld,W.ph==='spec'||W.ph==='peak'?(W.idx%2?'mp':'long'):'long'])}
+  const longD=(placed.find(p=>p[1]==='long'||p[1]==='mp')||[])[0];
+  // 2. quality at least one day away from the long run
+  if(wantQ&&placed.length<need){const c=free().filter(i=>longD==null||Math.abs(i-longD)>=2).sort((a,b)=>gap(b)-gap(a));if(c.length)placed.push([c[0],W.ph==='taper'?'tempo':q])}
+  // 3. recovery the day after the long run
+  if(wantRec&&placed.length<need&&longD!=null&&free().includes(longD+1))placed.push([longD+1,'recovery']);
+  // 4. easy runs on the remaining days, spread out
+  while(placed.length<need&&free().length){const c=free().sort((a,b)=>gap(b)-gap(a)||a-b);placed.push([c[0],W.ph==='base'&&W.idx>=4&&!placed.some(p=>p[1]==='strides')?'strides':'easy'])}
+  // distances: what's left of the week after what's already there
+  const longKm=W.long,left=Math.max(0,W.target-haveKm);
+  const qk=Math.min(12,Math.max(6,Math.round((W.target-W.long)*.3))),rk=4.5;
+  const fixed=placed.reduce((a,p)=>a+(p[1]==='long'||p[1]==='mp'?longKm:p[1]==='recovery'?rk:(p[1]==='tempo'||p[1]==='intervals')?qk:0),0);
+  // easy runs the day before the long run stay short; the rest share what's left
+  const easy=placed.filter(p=>p[1]==='easy'||p[1]==='strides'),pre=easy.filter(p=>longD!=null&&p[0]===longD-1);
+  const preKm=pre.length?Math.min(6,Math.max(4.5,(left-fixed)/easy.length)):0;
+  const others=easy.length-pre.length,ek=others?(left-fixed-preKm*pre.length)/others:0;
+  const runs=placed.map(([d,ty])=>({date:dayIdx(d),type:ty,start:'14:00',
+    km:ty==='long'||ty==='mp'?longKm:ty==='recovery'?rk:(ty==='tempo'||ty==='intervals')?qk:(longD!=null&&d===longD-1)?roundKm(preKm):Math.min(14,Math.max(4.5,roundKm(ek)))}))
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  return {W,have,runs,short:need>avail.length};
 }
 function runCheck(){
   const r=RS(),now=new Date(),thisW=mondayOf(now);
@@ -1533,21 +1577,28 @@ function runDash(){
 let RW=null;
 function openRunWeek(offset){
   if(!connected()){ask('Connect your Sheet first','Planned runs go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
-  const base=addDays(mondayOf(new Date()),7*(+offset||0)),sug=suggestWeek(base);
-  RW={ws:base,W:sug.W,runs:sug.runs};drawRunWeek();document.getElementById('runweekdlg').showModal();
+  const base=addDays(mondayOf(new Date()),7*(+offset||0));
+  RW={ws:base,W:weekInfo(base),runs:[],have:[],loading:true};drawRunWeek();document.getElementById('runweekdlg').showModal();
+  (async()=>{try{await pullPlans()}catch(e){}
+    const sug=suggestWeek(base);RW={ws:base,W:sug.W,runs:sug.runs,have:sug.have,short:sug.short,loading:false};drawRunWeek()})();
 }
 function drawRunWeek(){
   const W=RW.W,days=[...Array(7)].map((_,i)=>addDays(RW.ws,i)),today=dayOf(new Date());
   document.getElementById('rwTitle').textContent=`Week ${W.idx} · ${W.phase.name}${W.cutback?' · cutback':''}`;
-  const tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0);
+  const haveKm=(RW.have||[]).reduce((a,x)=>a+(+x.km||0),0),tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0)+haveKm;
+  const others={};plansCache().filter(p=>p.tab!=='Run').forEach(p=>{(others[p.date]=others[p.date]||[]).push(TABICON[p.tab]||'•')});
+  const runDays=RS().days||[0,1,2,4];
   document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
-  document.getElementById('rwRows').innerHTML=RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
-    <select data-f="date" aria-label="Day">${days.map(d=>{const ds=dayOf(d);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}</option>`}).join('')}</select>
+  const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>${RW.have.map(x=>`<div class="rwh"><span>${x.done?'✓':'📅'}</span><b>${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</b><em>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</em><small>${x.done?'done':'in calendar'}</small></div>`).join('')}</div>`:'';
+  const thin=!RW.loading&&RW.runs.length&&!RW.short&&tot<W.target*.9;
+  const note=RW.loading?'<p class="empty">Checking your calendar…</p>':thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'';
+  document.getElementById('rwRows').innerHTML=haveHTML+note+(RW.loading?'':RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
+    <select data-f="date" aria-label="Day">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}${rn?' · run planned':''}${o?' · '+o.join(''):''}${runDays.includes(di)?'':' · not a run day'}</option>`}).join('')}</select>
     <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
     <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
     <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
     <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
-    :'<p class="empty">No runs left to plan this week. Try next week.</p>';
+    :((RW.have||[]).length?'<p class="empty">This week is already planned. Nothing to add.</p>':'<p class="empty">No run days left this week. Try next week.</p>'));
 }
 function openRunLog(pre){
   const d=document.getElementById('runlogdlg'),f=document.getElementById('runlogfrm');pre=pre||{};
@@ -1878,6 +1929,9 @@ function onAct(b){
   if(act==='runkeep'){S.run={...RS(),dismissed:dayOf(mondayOf(new Date()))};save();refresh();return}
   if(act==='runlog'){openRunLog();return}
   if(act==='runset'){const f=document.getElementById('runsetfrm'),r=RS();f.race.value=r.race;f.maxHR.value=r.maxHR;f.restHR.value=r.restHR;
+    {const wd=[...Array(7)].map((_,i)=>new Date(2024,0,1+i).toLocaleDateString(undefined,{weekday:'short'}));const dy=r.days||[0,1,2,4];
+      document.getElementById('dayPick').innerHTML=wd.map((n,i)=>`<label><input type="checkbox" value="${i}"${dy.includes(i)?' checked':''}><span>${n}</span></label>`).join('');
+      f.longDay.innerHTML=wd.map((n,i)=>`<option value="${i}">${n}</option>`).join('');f.longDay.value=String(r.longDay??1)}
     f.anchorKm.value=Math.round(weekInfo(new Date()).target);f.anchorKm.dataset.was=f.anchorKm.value;f.anchorLong.value=weekInfo(new Date()).long;f.anchorLong.dataset.was=f.anchorLong.value;f.peakKm.value=r.peakKm;f.easyPace.value=fmtPace(r.easyPace);
     document.getElementById('runsetdlg').showModal();return}
   if(act==='pdone'&&(plansCache().find(x=>x.id===b.dataset.id)||{}).tab==='Run'){const pl=plansCache().find(x=>x.id===b.dataset.id),m=S.runMeta[pl.id]||{};
@@ -2075,7 +2129,9 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
   sf.addEventListener('submit',ev=>{
     if(!ev.submitter||ev.submitter.value!=='save')return;
     const m=sf.easyPace.value.match(/^(\d{1,2}):(\d{2})$/);if(!m){ev.preventDefault();return}
-    const r={...RS(),race:sf.race.value,maxHR:+sf.maxHR.value,restHR:+sf.restHR.value,peakKm:+sf.peakKm.value,easyPace:+m[1]+(+m[2])/60};
+    const days=[...sf.querySelectorAll('#dayPick input:checked')].map(x=>+x.value);
+    if(!days.length){ev.preventDefault();return}
+    const r={...RS(),race:sf.race.value,maxHR:+sf.maxHR.value,restHR:+sf.restHR.value,peakKm:+sf.peakKm.value,easyPace:+m[1]+(+m[2])/60,days,longDay:+sf.longDay.value};
     if(sf.anchorKm.value!==sf.anchorKm.dataset.was){r.anchorKm=+sf.anchorKm.value;r.anchorDate=dayOf(mondayOf(new Date()))}
     if(sf.anchorLong.value!==sf.anchorLong.dataset.was){r.anchorLong=+sf.anchorLong.value;r.longDate=dayOf(mondayOf(new Date()))}
     S.run=r;save();refresh();
