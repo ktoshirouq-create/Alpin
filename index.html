@@ -53,8 +53,46 @@ body:not([data-view="today"]) #flags{display:none}
 body:not([data-view="train"]) #progs{display:none}
 body[data-view="train"] h1{font-size:clamp(34px,9vw,52px)}
 body[data-view="train"] header{padding-top:14px}
-#progs{justify-content:space-between;gap:4px;overflow:visible}
-#progs button{flex:1 1 0;min-width:0;padding:9px 2px;font-size:14px;white-space:nowrap}
+.tlabel+.runline{margin-bottom:8px}
+#progs{justify-content:space-between;gap:0;overflow:visible;padding:4px 0 0}
+#progs button{flex:0 1 auto;min-width:0;padding:10px 2px 9px;font-size:15px;white-space:nowrap;border:0;border-radius:0;background:none!important;color:var(--muted)!important;position:relative}
+#progs button[aria-pressed="true"]{color:var(--ink)!important;font-weight:700}
+#progs button[aria-pressed="true"]::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:2px;background:var(--acc)}
+.zbar{display:flex;gap:3px;margin:12px 0 4px}
+.zbar span{flex:1;text-align:center;padding:5px 0 4px;border-radius:6px;background:var(--panel);color:var(--muted);font-size:11px;line-height:1.15}
+.zbar span b{display:block;font-size:12px}.zbar span i{font-style:normal;opacity:.8}
+.zbar .z1.on{background:#8FB9D6;color:#10202b}.zbar .z2.on{background:#3DAE74;color:#fff}.zbar .z3.on{background:#E1B12C;color:#241c02}
+.zbar .z4.on{background:#F08C3A;color:#fff}.zbar .z5.on{background:#E2685A;color:#fff}
+.ztxt{margin:2px 0 0;font-size:13px;color:var(--muted)}
+.rundash{padding-top:14px}
+.racecard{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.racecard b{display:block;font-size:17px}.racecard span{color:var(--muted);font-size:14px}
+.phbar{position:relative;display:flex;gap:2px;height:10px;margin:16px 0 6px;border-radius:6px;overflow:visible}
+.phbar span{border-radius:3px;opacity:.9}
+.phbar .you{position:absolute;top:-6px;width:4px;height:22px;margin-left:-2px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--bg)}
+.phlbl{display:flex;gap:2px;font-size:11px;color:var(--muted);line-height:1.2}.phlbl span{min-width:0;overflow:hidden}.phlbl em{font-style:normal;opacity:.75}
+.wkcard{background:var(--panel);border-radius:18px;padding:16px;margin-top:16px;border-top:5px solid var(--tc)}
+.wkhead{display:flex;justify-content:space-between;font-size:13px;font-weight:600}.wkph{color:var(--tc)}.wkn{color:var(--muted)}
+.wkcard h3{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:8px 0 10px}
+.kmbar{height:8px;border-radius:4px;background:var(--rule);overflow:hidden}.kmbar i{display:block;height:100%;background:var(--tc);border-radius:4px}
+.kmtxt{margin:6px 0 10px;font-size:13px;color:var(--muted)}.kmtxt b{color:var(--ink)}
+.wklist{list-style:none;margin:0 0 14px;padding:0;font-size:14px;line-height:1.45}.wklist li{padding:6px 0;border-top:1px solid var(--rule)}
+.wklist b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.wkbtns{display:flex;gap:8px;margin-bottom:6px}
+.monthcard{margin-top:14px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--rule)}
+.monthcard h3{font:700 20px/1 "Barlow Condensed",sans-serif;margin:0 0 6px}.monthcard p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+#runweekdlg form,#runlogdlg form,#runsetdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
+.rwrows{display:flex;flex-direction:column;gap:8px}
+.rwrow{display:grid;grid-template-columns:1fr 1.5fr auto;grid-template-areas:"d t x" "k s x";gap:6px;padding:10px;border-radius:12px;background:var(--panel)}
+.rwrow select,.rwrow input{font-size:15px;padding:8px;border:1.5px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0}
+.rwrow [data-f=date]{grid-area:d}.rwrow [data-f=type]{grid-area:t}.rwrow .kmin{grid-area:k;display:flex;align-items:center;gap:6px;flex-direction:row;font-weight:400}
+.rwrow .kmin input{width:5.5em}.rwrow [data-f=start]{grid-area:s}.rwrow .hx{grid-area:x;align-self:center}
+.feelrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}.feelrow>span{color:var(--muted);margin-right:4px}
+.feelrow label{flex-direction:row;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--rule);border-radius:999px;font-weight:600}
+.feelrow input{accent-color:var(--acc)}
+.runline{display:block;width:100%;text-align:left;background:var(--panel);border:0;border-radius:14px;padding:12px 14px;margin-bottom:8px;position:relative}
+.runline span{font-size:15px}.runline em{display:block;font-style:normal;font-size:12px;color:var(--tc);font-weight:600;margin-top:2px}
+.runline i{display:block;height:6px;border-radius:3px;background:var(--rule);margin-top:8px;overflow:hidden}.runline u{display:block;height:100%;background:var(--tc)}
 #resumebar,#undobar{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)!important}
 .tlabel{font:700 22px/1 "Barlow Condensed",sans-serif;margin:26px 0 10px}
 .todaysec .tlabel:first-of-type{margin-top:16px}
@@ -355,6 +393,33 @@ button.chip::after{display:none}
   <button type="button" data-view="train"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21 9.5 7l4 6 2.5-3.5L22 21z"/></svg><span>Train</span></button>
   <button type="button" data-view="history"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg><span>Calendar</span></button>
 </nav>
+
+<dialog id="runweekdlg"><form method="dialog" id="runweekfrm">
+  <h2 id="rwTitle">Plan this week</h2><p class="hint" id="rwSub"></p>
+  <div id="rwRows" class="rwrows"></div>
+  <button type="button" class="link" id="rwAdd">+ Add a run</button>
+  <p class="syncmsg" id="rwMsg" role="status"></p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
+</form></dialog>
+
+<dialog id="runlogdlg"><form method="dialog" id="runlogfrm">
+  <h2>Log a run</h2>
+  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Type<select name="type"></select></label></div>
+  <div class="row2"><label>Distance, km<input name="km" type="number" inputmode="decimal" min="0.5" max="100" step="0.01" required></label><label>Time, min <span class="hint">optional</span><input name="min" type="number" inputmode="numeric" min="1" max="600"></label></div>
+  <div class="feelrow"><span>How was it?</span><label><input type="radio" name="feel" value="easy">Easy</label><label><input type="radio" name="feel" value="good">Good</label><label><input type="radio" name="feel" value="hard">Hard</label></div>
+  <label>Note <span class="hint">optional</span><input name="note" autocomplete="off"></label>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save run</button></div>
+</form></dialog>
+
+<dialog id="runsetdlg"><form method="dialog" id="runsetfrm">
+  <h2>Marathon settings</h2>
+  <label>Race day<input name="race" type="date" required></label>
+  <div class="row2"><label>Max heart rate<input name="maxHR" type="number" inputmode="numeric" min="140" max="220" required></label><label>Resting heart rate<input name="restHR" type="number" inputmode="numeric" min="30" max="90" required></label></div>
+  <div class="row2"><label>Current km per week <span class="hint">where you are now</span><input name="anchorKm" type="number" inputmode="decimal" min="0" max="150" step="1" required></label><label>Peak km per week<input name="peakKm" type="number" inputmode="numeric" min="30" max="150" required></label></div>
+  <label>Easy pace, min/km<input name="easyPace" placeholder="7:20" pattern="\d{1,2}:\d{2}" required></label>
+  <p class="hint">Changing "current km per week" re-anchors the plan from this week, e.g. after illness or a break.</p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
+</form></dialog>
 
 <dialog id="plandlg"><form method="dialog" id="planfrm">
   <h2>Plan a session</h2>
@@ -888,14 +953,37 @@ EX.tooltraverse={name:'Ice tool traverse',kind:'hold',
    {cap:'Straight arms, move the feet, then the next tool',props:[OVERHANG,tool(118,40),tool(110,52,true)],pose:{hip:[80,112],torso:16,near:[138,124],far:[100,140],farKnee:'fwd',hand:[118,40],elbow:'down',hand2:[110,52],elbow2:'down'},arrows:[[102,128,124,112]]}]};
 
 const W=(p)=>({warm:p});
+Object.assign(EX,{
+ runeasy:{name:'Easy run',kind:'text',zone:[2,2],frames:[],P:{dose:'40 min'},
+  cue:'Conversational: you could talk in full sentences. Most of your running lives here. If the heart rate drifts up, slow down or walk a hill.',
+  L:[{v:'Short',p:{dose:'30 min'}},{v:'Standard',p:{dose:'40 min'}},{v:'Longer',p:{dose:'50 min'}},{v:'Long easy',p:{dose:'60 min'}},{v:'Double-digit easy',p:{dose:'70 min'}}]},
+ runlong:{name:'Long run',kind:'text',zone:[2,2],frames:[],P:{dose:'8–10 km'},
+  cue:'The key run of the week. Slow and steady, start slower than feels right. Take water and something to eat once it passes 90 minutes. Walk breaks are fine.',
+  L:[{v:'Getting started',p:{dose:'8–10 km'}},{v:'Base',p:{dose:'12–14 km'}},{v:'Late base / build',p:{dose:'16–18 km'}},{v:'Build',p:{dose:'20–24 km'}},{v:'Peak',p:{dose:'28–32 km'}}]},
+ runrecovery:{name:'Recovery jog',kind:'text',zone:[1,1],frames:[],P:{dose:'25 min'},
+  cue:'Very easy, the day after the long run. Shorter and slower than an easy run. It should feel like it loosens the legs.',
+  L:[{v:'Very short',p:{dose:'20 min'}},{v:'Standard',p:{dose:'25 min'}},{v:'Longer',p:{dose:'30 min'}},{v:'With 4 strides',p:{dose:'30 min'}},{v:'Easy 40',p:{dose:'40 min'}}]},
+ runstrides:{name:'Strides',kind:'iv',zone:[4,5],frames:[],P:{reps:6,work:20,rest:60,sets:1,setRest:0},
+  cue:'After an easy run. Build to fast but relaxed over 20 seconds, never a sprint. Walk or jog back slowly. Good for form and turnover.',
+  L:[{v:'Six strides',p:{}},{v:'Eight strides',p:{reps:8}},{v:'Ten strides',p:{reps:10}},{v:'On a gentle uphill',p:{reps:8}},{v:'Longer strides',p:{reps:8,work:25}}]},
+ runtempo:{name:'Tempo',kind:'iv',zone:[3,4],frames:[],P:{reps:3,work:480,rest:120,sets:1,setRest:0},
+  cue:'Comfortably hard, just below your threshold: short sentences only. Warm up 10–15 min easy first, cool down 10 min after.',
+  L:[{v:'3 × 8 min',p:{}},{v:'2 × 12 min',p:{reps:2,work:720,rest:180}},{v:'20 min steady',p:{reps:1,work:1200,rest:0}},{v:'25 min steady',p:{reps:1,work:1500,rest:0}},{v:'30 min steady',p:{reps:1,work:1800,rest:0}}]},
+ runintervals:{name:'Intervals',kind:'iv',zone:[4,5],frames:[],P:{reps:6,work:120,rest:120,sets:1,setRest:0},
+  cue:'Hard but controlled: the last rep as fast as the first. Jog the recoveries. Warm up 15 min easy with a few strides, cool down 10 min.',
+  L:[{v:'6 × 2 min',p:{}},{v:'6 × 3 min',p:{work:180}},{v:'5 × 4 min',p:{reps:5,work:240,rest:150}},{v:'4 × 5 min',p:{reps:4,work:300,rest:180}},{v:'5 × 5 min',p:{reps:5,work:300,rest:180}}]},
+ runmp:{name:'Marathon pace',kind:'text',zone:[3,3],frames:[],P:{dose:'3 × 2 km in the long run'},
+  cue:'The pace you want to hold on race day, practised inside the long run. It should feel steady and sustainable, not hard.',
+  L:[{v:'Short blocks',p:{dose:'3 × 2 km in the long run'}},{v:'Longer blocks',p:{dose:'2 × 4 km in the long run'}},{v:'Continuous',p:{dose:'8 km at MP in the long run'}},{v:'Race rehearsal',p:{dose:'12 km at MP in the long run'}},{v:'Final test',p:{dose:'16 km at MP in the long run'}}]}
+});
 const PRECLIMB={pid:'preclimb',title:'Pre-climb',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
   items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
   extra:['armcircle','squathold','catcow']};
 const HISTORY={id:'history',chip:'Calendar',title:'Calendar',lede:'',sections:[]};
 const TODAY={id:'today',chip:'Today',title:'Today',lede:'',sections:[]};
-const TRAIN_IDS=['nepal','ice','climb','daily','warmup'];
+const TRAIN_IDS=['nepal','ice','climb','run','daily','warmup'];
 const PROGS=[
- {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Sep 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
+ {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
   {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','hills','z2'],extra:['z2']}]},
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
@@ -911,17 +999,19 @@ const PROGS=[
   {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']},
   {pid:'prework',title:'Pre-workout',sub:'Wake up the hips, core and shoulders before strength work.',routine:true,items:[{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})},{id:'squat',...W({sets:1,reps:10,unit:''})},{id:'bridge',...W({sets:1,reps:10,unit:''})},'armcircle',{id:'plank',...W({sets:1,time:30,rest:0,sides:false})},{id:'bandwalk',...W({sets:1,reps:10,unit:' steps each way'})}],extra:['armcircle','plank','bandwalk']},
   PRECLIMB]},
+ {id:'run',chip:'Run',title:'Marathon',lede:'',sections:[
+  {title:'Run types',sub:'Tap a slot to pick the version you want. Intervals, tempo and strides run on the timer.',items:['runeasy','runlong','runrecovery','runstrides','runtempo','runintervals','runmp'],extra:[],flat:true,noPlay:true}]},
  HISTORY,
  TODAY
 ];
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:10},planRefs:{},run:{},runMeta:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=10;
   if(!Array.isArray(S0.hidden))S0.hidden=[];
   // built-in edits keep only name and cue; numbers now live in levels and tuning
@@ -1176,6 +1266,8 @@ function renderToday(){
     <button class="add" data-act="plannew">+ Plan a session</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${TABCOL[p.tab]||'var(--muted)'}"><b>${esc(when(p))}</b><span>${esc(p.title)}</span></button>`).join('')}`:''}
     <h3 class="tlabel">This week</h3>
+    ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
+      return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>🏃 ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
     <div class="weekstrip">${days}</div>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days</span></div><div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     <h3 class="tlabel">Quick start</h3>
@@ -1184,6 +1276,152 @@ function renderToday(){
   </section>`;
   document.getElementById('foot').innerHTML='';
   const rb=document.getElementById('resumebar');if(rb)rb.remove();document.body.classList.remove('has-resume');
+}
+/* ---------- marathon plan ---------- */
+const RUN_DEF={race:'2027-09-18',maxHR:185,restHR:54,anchorKm:15,anchorDate:'2026-09-21',peakKm:60,easyPace:7.33};
+const RS=()=>({...RUN_DEF,...(S.run||{})});
+const d0=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const addDays=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const mondayOf=d=>{const x=d0(d);return addDays(x,-((x.getDay()+6)%7))};
+const wkBetween=(a,b)=>Math.round((mondayOf(b)-mondayOf(a))/(7*864e5));
+const parseDay=s=>new Date(s+'T12:00:00');
+const fmtPace=p=>`${Math.floor(p)}:${pad2(Math.round((p%1)*60)%60)}`;
+const ZNAME=['','Recovery','Easy','Steady','Threshold','Hard'];
+function zones(){const r=RS(),hrr=r.maxHR-r.restHR;return [0,.5,.6,.7,.8,.9,1].map(x=>Math.round(r.restHR+hrr*x))}
+function zoneText(z){const b=zones();return z[0]===z[1]?`Zone ${z[0]} · ${b[z[0]]}–${b[z[0]+1]} bpm`:`Zones ${z[0]}–${z[1]} · ${b[z[0]]}–${b[z[1]+1]} bpm`}
+function zoneBar(z){const b=zones();
+  return `<div class="zbar" aria-label="${esc(zoneText(z))}">${[1,2,3,4,5].map(i=>`<span class="z${i}${i>=z[0]&&i<=z[1]?' on':''}"><b>Z${i}</b><i>${b[i]}</i></span>`).join('')}</div>
+    <p class="ztxt">${esc(zoneText(z))} · ${ZNAME[z[0]]}${z[1]!==z[0]?' to '+ZNAME[z[1]].toLowerCase():''}</p>`}
+const PHASES=[{id:'base',name:'Base',col:'#3DAE74'},{id:'build',name:'Build',col:'#3FA7D6'},{id:'spec',name:'Specific',col:'#E1B12C'},{id:'peak',name:'Peak',col:'#E2685A'},{id:'taper',name:'Taper',col:'#9B7BE0'}];
+function planDates(){const r=RS(),raceW=mondayOf(parseDay(r.race)),taper=addDays(raceW,-14),peak=addDays(taper,-28),spec=addDays(peak,-91),build=addDays(spec,-91),base=mondayOf(parseDay(r.anchorDate)<build?parseDay(r.anchorDate):addDays(build,-7));
+  return {raceW,taper,peak,spec,build,base,start:base<addDays(build,-133)?base:addDays(build,-133)}}
+function weekInfo(date){
+  const r=RS(),D=planDates(),w=mondayOf(date),k=r.peakKm/60;
+  const idx=wkBetween(D.start,w),total=wkBetween(D.start,D.raceW)+1;
+  let ph;if(w>=D.raceW)ph='race';else if(w>=D.taper)ph='taper';else if(w>=D.peak)ph='peak';else if(w>=D.spec)ph='spec';else if(w>=D.build)ph='build';else ph='base';
+  // the volume curve between phase boundaries (scaled to your peak)
+  const pts=[[D.start,15*k],[D.build,32*k],[D.spec,45*k],[D.peak,55*k],[addDays(D.taper,-7),60*k]];
+  let curve=pts[pts.length-1][1];
+  for(let i=0;i<pts.length-1;i++){if(w>=pts[i][0]&&w<pts[i+1][0]){const t=(w-pts[i][0])/(pts[i+1][0]-pts[i][0]);curve=pts[i][1]+t*(pts[i+1][1]-pts[i][1]);break}}
+  if(w<pts[0][0])curve=pts[0][1];
+  if(ph==='taper')curve=r.peakKm*(wkBetween(D.taper,w)===0?.75:.6);
+  if(ph==='race')curve=r.peakKm*.3;
+  const since=Math.max(0,wkBetween(parseDay(r.anchorDate),w));
+  // follow your real level: grow ~8%/week from it until it meets the plan, or hold it until the plan catches up
+  const aw=mondayOf(parseDay(r.anchorDate));let c0=pts[0][1];
+  for(let i=0;i<pts.length-1;i++){if(aw>=pts[i][0]&&aw<pts[i+1][0]){c0=pts[i][1]+(aw-pts[i][0])/(pts[i+1][0]-pts[i][0])*(pts[i+1][1]-pts[i][1]);break}}
+  let target=ph==='taper'||ph==='race'?curve:(r.anchorKm>=c0?Math.max(curve,Math.min(r.anchorKm,r.peakKm)):Math.min(curve,r.anchorKm*Math.pow(1.08,since)));
+  const cutback=!['taper','race'].includes(ph)&&idx>0&&idx%4===3;
+  const full=target;
+  if(cutback)target*=.75;
+  target=Math.max(8,Math.round(target));
+  const frac={base:.42,build:.45,spec:.48,peak:.52,taper:.45,race:0}[ph],cap={base:16,build:22,spec:28,peak:32,taper:22,race:0}[ph];
+  let long=ph==='race'?0:Math.min(cap,Math.max(8,Math.round(full*frac)));
+  if(cutback)long=Math.max(8,Math.round(long*.8));
+  if(ph==='taper'&&wkBetween(D.taper,w)===1)long=Math.min(long,14);
+  const runs={base:3,build:4,spec:4,peak:5,taper:4,race:3}[ph];
+  return {w,idx:idx+1,total,ph,phase:PHASES.find(x=>x.id===ph)||{id:'race',name:'Race week',col:'#E2685A'},target,long,runs,cutback,D};
+}
+const RUNLBL={long:'Long run',easy:'Easy run',recovery:'Recovery jog',tempo:'Tempo',intervals:'Intervals',mp:'Long run with marathon pace',race:'Marathon',strides:'Easy run + strides'};
+const RUNEX={long:'runlong',easy:'runeasy',recovery:'runrecovery',tempo:'runtempo',intervals:'runintervals',mp:'runmp',race:'runlong',strides:'runstrides'};
+const RUNZONE={long:[2,2],easy:[2,2],recovery:[1,1],tempo:[3,4],intervals:[4,5],mp:[2,3],race:[3,3],strides:[2,2]};
+const runPace=t=>({tempo:6.4,intervals:6.6,mp:6.9,race:6.3,recovery:RS().easyPace+.4}[t]||RS().easyPace);
+const roundKm=x=>Math.max(3,Math.round(x*2)/2);
+function suggestWeek(date){
+  const W=weekInfo(date),ws=W.w,today=d0(new Date());
+  let t;
+  if(W.ph==='race')t=[[1,'easy',8],[3,'strides',5],[5,'race',42.2]];
+  else{
+    const q=W.idx%2?'tempo':'intervals';
+    t={base:[[1,W.idx>=4?'long':'long'],[4,W.idx>=4?'strides':'easy'],[6,'easy']],
+       build:[[1,'long'],[2,'recovery'],[4,q],[6,'easy']],
+       spec:[[1,W.idx%2?'mp':'long'],[2,'recovery'],[3,'easy'],[4,q],[6,'easy']],
+       peak:[[1,W.idx%2?'mp':'long'],[2,'recovery'],[3,'easy'],[4,q],[6,'easy']],
+       taper:[[1,'long'],[2,'recovery'],[4,'tempo'],[6,'easy']]}[W.ph];
+    if(W.cutback&&t.length>4)t=t.filter(x=>x[1]!=='easy'||x[0]!==3);
+    const rest=W.target-W.long,qk=Math.min(12,Math.max(6,Math.round(rest*.3))),rk=W.ph==='base'?0:4.5;
+    const nEasy=t.filter(x=>['easy','strides'].includes(x[1])).length,hasQ=t.some(x=>['tempo','intervals'].includes(x[1]));
+    const ek=nEasy?(rest-(hasQ?qk:0)-(t.some(x=>x[1]==='recovery')?rk:0))/nEasy:0;
+    t=t.map(([d,ty])=>[d,ty,ty==='long'||ty==='mp'?W.long:ty==='recovery'?rk:(ty==='tempo'||ty==='intervals')?qk:Math.min(14,Math.max(4.5,roundKm(ek)))]);
+  }
+  return {W,runs:t.map(([d,ty,km])=>({date:dayOf(addDays(ws,d)),type:ty,km:ty==='race'?42.2:roundKm(km),start:ty==='race'?'09:00':'14:00'}))
+    .filter(r=>parseDay(r.date)>=today)};
+}
+function runKmIn(ws){const a=dayOf(ws),b=dayOf(addDays(ws,6));
+  return localLog().filter(r=>r.tab==='Run'&&r.result!=='skipped'&&r.date>=a&&r.date<=b).reduce((x,r)=>x+(parseFloat(r.completed)||0),0)}
+const MONTHGOAL=['Race month: taper, keep a little speed, then the marathon on the 18th. After that, two easy weeks and Nepal hiking takes over.',
+ 'Peak month: two or three long runs of 28–32 km, your biggest weeks. One cutback week in the middle.',
+ 'Long runs up to 28 km with marathon-pace sections. One quality run a week. Heat: slow down and drink.',
+ 'Long runs 24–26 km, marathon pace practice every other long run. Weekly volume near its high.',
+ 'Specific phase starts: marathon-pace blocks inside the long run. Keep the Friday session.',
+ 'A half-marathon effort as a check, race or solo. Long run 20–22 km.',
+ 'Long run 18–20 km, weekly volume around 40 km. Tempo and intervals alternate on Fridays.',
+ 'Build starts: one quality run a week, tempo one week and intervals the next. Long run to 18 km.',
+ 'Hold steady weeks around 30 km, long run 14–16 km. Spikes or the treadmill on icy days.',
+ 'Winter base: keep the routine, long run 12–14 km. Strides once a week.',
+ 'Grow slowly toward 25 km weeks, long run 12 km. Everything conversational.',
+ 'Build the habit: 3 easy runs a week, long run 8–10 km. Everything conversational.',
+ 'Get back into a rhythm: short easy runs and a first long run of about an hour. No pace targets yet.'];
+function monthGoal(date){const r=parseDay(RS().race);const off=(r.getFullYear()-date.getFullYear())*12+r.getMonth()-date.getMonth();return MONTHGOAL[Math.max(0,Math.min(12,off))]}
+function runDash(){
+  const now=new Date(),W=weekInfo(now),D=W.D,r=RS(),race=parseDay(r.race);
+  const daysTo=Math.round((d0(race)-d0(now))/864e5),wksTo=Math.max(0,Math.floor(daysTo/7));
+  const done=runKmIn(W.w),pct=Math.min(100,Math.round(done/W.target*100));
+  const segs=[['base',D.start,D.build],['build',D.build,D.spec],['spec',D.spec,D.peak],['peak',D.peak,D.taper],['taper',D.taper,addDays(D.raceW,7)]];
+  const tot=addDays(D.raceW,7)-D.start,mk=Math.max(0,Math.min(100,(d0(now)-D.start)/tot*100));
+  const bar=`<div class="phbar">${segs.map(([id,a,b])=>{const P=PHASES.find(x=>x.id===id);return `<span style="flex:${Math.max(1,(b-a)/864e5)};background:${P.col}" title="${P.name}"></span>`}).join('')}<i class="you" style="left:${mk}%"></i></div>
+    <div class="phlbl">${segs.map(([id,a,b])=>{const P=PHASES.find(x=>x.id===id);return `<span style="flex:${Math.max(1,(b-a)/864e5)}">${P.name}<br><em>${a.toLocaleDateString(undefined,{month:'short'})}</em></span>`}).join('')}</div>`;
+  const lr=W.long,lmin=Math.round(lr*r.easyPace/5)*5;
+  const qtxt={base:W.idx>=4?'Strides after one easy run.':'No hard sessions yet. Just easy running.',build:(W.idx%2?'Tempo':'Intervals')+' on Friday.',spec:(W.idx%2?'Marathon-pace blocks in the long run, ':'')+(W.idx%2?'tempo':'intervals')+' on Friday.',
+    peak:(W.idx%2?'Marathon-pace blocks in the long run, ':'')+(W.idx%2?'tempo':'intervals')+' on Friday.',taper:'Short tempo on Friday to stay sharp.',race:'Easy, short, and the race on Saturday.'}[W.ph];
+  return `<section class="rundash">
+    <div class="racecard"><div><b>🏁 ${race.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'long',year:'numeric'})}</b>
+      <span>${daysTo>0?`${wksTo} weeks, ${daysTo%7} days to go`:daysTo===0?'Race day!':'Race done'}</span></div>
+      <button class="link" data-act="runset">Settings</button></div>
+    ${bar}
+    <div class="wkcard" style="--tc:${W.phase.col}">
+      <div class="wkhead"><span class="wkph">${W.phase.name}${W.cutback?' · cutback week':''}</span><span class="wkn">Week ${W.idx} of ${W.total}</span></div>
+      <h3>This week: ${W.runs} runs · about ${W.target} km</h3>
+      <div class="kmbar"><i style="width:${pct}%"></i></div>
+      <p class="kmtxt"><b>${Math.round(done*10)/10} km</b> of ${W.target} km logged</p>
+      <ul class="wklist">
+        ${W.ph!=='race'?`<li><b>Long run</b> ${lr} km · about ${lmin} min · ${zoneText([2,2]).replace('Zone 2 · ','')}</li>`:''}
+        <li><b>Quality</b> ${esc(qtxt)}</li>
+        <li><b>Easy runs</b> fill the rest, 30–50 min, all conversational</li>
+      </ul>
+      <div class="wkbtns"><button class="go" data-act="runweek" data-w="0">Plan this week</button><button class="go alt" data-act="runweek" data-w="1">Next week</button></div>
+      <button class="link" data-act="runlog">Log a run you did</button>
+    </div>
+    <div class="monthcard"><h3>${now.toLocaleDateString(undefined,{month:'long'})}</h3><p>${esc(monthGoal(now))}</p></div>
+  </section>`;
+}
+/* week planner */
+let RW=null;
+function openRunWeek(offset){
+  if(!connected()){ask('Connect your Sheet first','Planned runs go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
+  const base=addDays(mondayOf(new Date()),7*(+offset||0)),sug=suggestWeek(base);
+  RW={ws:base,W:sug.W,runs:sug.runs};drawRunWeek();document.getElementById('runweekdlg').showModal();
+}
+function drawRunWeek(){
+  const W=RW.W,days=[...Array(7)].map((_,i)=>addDays(RW.ws,i)),today=dayOf(new Date());
+  document.getElementById('rwTitle').textContent=`Week ${W.idx} · ${W.phase.name}${W.cutback?' · cutback':''}`;
+  const tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0);
+  document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
+  document.getElementById('rwRows').innerHTML=RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
+    <select data-f="date" aria-label="Day">${days.map(d=>{const ds=dayOf(d);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}</option>`}).join('')}</select>
+    <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
+    <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
+    <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
+    <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
+    :'<p class="empty">No runs left to plan this week. Try next week.</p>';
+}
+function openRunLog(pre){
+  const d=document.getElementById('runlogdlg'),f=document.getElementById('runlogfrm');pre=pre||{};
+  f.date.value=pre.date||dayOf(new Date());f.date.max=dayOf(new Date());
+  f.type.innerHTML=Object.keys(RUNLBL).map(t=>`<option value="${t}">${RUNLBL[t]}</option>`).join('');f.type.value=pre.type||'easy';
+  f.km.value=pre.km||'';f.min.value='';f.note.value='';f.dataset.plan=pre.planId||'';
+  f.querySelectorAll('[name=feel]').forEach(x=>x.checked=false);
+  d.showModal();setTimeout(()=>{try{f.km.focus()}catch(e){}},50);
 }
 function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
@@ -1346,6 +1584,7 @@ function card(e){
    <div class="exhead"><h3>${esc(e.name)}${e.custom?'<span class="tag">yours</span>':''}</h3><span class="dose">${esc(e.dose)}</span></div>
    ${framesHTML(e.frames)}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
+   ${EX[e.id]&&EX[e.id].zone?zoneBar(EX[e.id].zone):''}
    ${e.L?`<div class="lv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'c')}</div>`:''}
    ${e.warm?`<p class="warmnote">Warm-up dose, separate from your slots</p>`:''}
    ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>edited</em>':''}</summary>
@@ -1372,10 +1611,11 @@ function render(){
     const head=p.routine?`<p class="sub">${est}</p>`:`<h2>${s.title}</h2><p class="sub">${s.sub}${s.routine?`<br><span class="muted">${est}</span>`:''}</p>`;
     const cards=list=>list.map(e=>{try{return card(e)}catch(err){showErr('Could not draw '+e.id+': '+err.message);return ''}}).join('');
     const grp=(list,name,note)=>list.length?`<div class="grp"><h4>${name}</h4><span>${note}</span></div>${cards(list)}`:'';
-    return `<section><div class="sechead"><div>${head}</div>${items.length?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="go alt" data-act="start" data-mode="all" data-sec="${si}">${playIcon}Full</button></div>`:''}</div>
-      ${grp(ess,'Essential','Do these every time')}${grp(ext,'Extra','When you have time')}
+    return `<section><div class="sechead"><div>${head}</div>${items.length&&!s.noPlay?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="go alt" data-act="start" data-mode="all" data-sec="${si}">${playIcon}Full</button></div>`:''}</div>
+      ${s.flat?cards(items):grp(ess,'Essential','Do these every time')+grp(ext,'Extra','When you have time')}
       <button class="add" data-act="add" data-sec="${si}">+ Add exercise${p.routine?'':' to '+s.title.toLowerCase().replace('pre-','pre-')}</button></section>`;
   }).join('');
+  if(p.id==='run'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',runDash())}catch(err){showErr('Run plan: '+err.message)}}
   const sess=F.open?null:loadSession();let rb=document.getElementById('resumebar');
   if(sess){const e=resolveSrc(sess.src[sess.i]);
     const where=sess.done?'finished, next up':(sess.ph&&sess.ph[sess.p]?sess.ph[sess.p].l.replace(/^Get ready · /,''):'');
@@ -1481,6 +1721,14 @@ function onAct(b){
   if(act==='calday'){calSel=b.dataset.d;calPicked=true;if(cur!=='history'){calMonth=monthStart(new Date(calSel+'T12:00'));go('history');return}const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
+  if(act==='runweek'){openRunWeek(b.dataset.w);return}
+  if(act==='gorun'){go('run');return}
+  if(act==='runlog'){openRunLog();return}
+  if(act==='runset'){const f=document.getElementById('runsetfrm'),r=RS();f.race.value=r.race;f.maxHR.value=r.maxHR;f.restHR.value=r.restHR;
+    f.anchorKm.value=Math.round(weekInfo(new Date()).target);f.anchorKm.dataset.was=f.anchorKm.value;f.peakKm.value=r.peakKm;f.easyPace.value=fmtPace(r.easyPace);
+    document.getElementById('runsetdlg').showModal();return}
+  if(act==='pdone'&&(plansCache().find(x=>x.id===b.dataset.id)||{}).tab==='Run'){const pl=plansCache().find(x=>x.id===b.dataset.id),m=S.runMeta[pl.id]||{};
+    openRunLog({planId:pl.id,date:pl.date,type:m.type||'easy',km:m.km||''});return}
   if(act==='pdone'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
     const now=new Date(),row={id:uid(),date:pl.date,time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,tab:pl.tab,section:'',exercise_id:'',
       exercise:pl.title.replace(/^[^A-Za-z0-9]+/,''),slot:'',slot_name:'',dose:pl.minutes+' min',result:'done',completed:'',seconds:String(pl.minutes*60),feel:'',note:'',plan_id:pl.id};
@@ -1510,6 +1758,8 @@ function onAct(b){
   const id=art.dataset.id,sec=+art.dataset.sec;
   if(act==='one'){const e=sectionItems(p,sec).find(x=>x.id===id);if(e)openFA([e],e.name);return}
   if(act==='hide'){S.hidden.push(kpOf(p,sec)+':'+id);save();refresh();return}
+  if(act==='logdone'&&art&&/^run(easy|long|recovery|strides|tempo|intervals|mp)$/.test(art.dataset.id)){
+    const ty=Object.keys(RUNEX).find(k=>RUNEX[k]===art.dataset.id&&k!=='race')||'easy';openRunLog({type:ty});return}
   if(act==='logdone'){const e=sectionItems(p,sec).find(x=>x.id===id);if(!e)return;const lid=logEntry(e,'done',{completed:'all'});
     undoBar('Logged '+e.name+(e.dose?' · '+e.dose:''),()=>{removeEntry(lid);refresh()});return}
   if(act==='edit'){openDlg(id,sec);return}
@@ -1626,6 +1876,53 @@ function importData(){
     catch(e){msg.textContent='Could not load: '+e.message;msg.className='syncmsg bad'}
   });
   d.addEventListener('close',()=>{if(cur==='history'||cur==='today')render();else updateSyncLine()});
+})();
+/* ---------- run dialogs ---------- */
+(function(){
+  const wf=document.getElementById('runweekfrm');
+  wf.addEventListener('change',ev=>{const row=ev.target.closest('.rwrow');if(!row)return;const x=RW.runs[+row.dataset.i],k=ev.target.dataset.f;
+    x[k]=k==='km'?(parseFloat(ev.target.value)||0):ev.target.value;
+    if(k==='type'&&x.type==='race')x.km=42.2;
+    if(k==='type'||k==='km'){RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()}
+    if(k==='date'){RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()}});
+  wf.addEventListener('click',ev=>{const b=ev.target.closest('[data-rm]');if(!b)return;RW.runs.splice(+b.dataset.rm,1);drawRunWeek()});
+  document.getElementById('rwAdd').addEventListener('click',()=>{const today=dayOf(new Date());let d=RW.ws;for(let i=0;i<7;i++){const ds=dayOf(addDays(RW.ws,i));if(ds>=today&&!RW.runs.some(r=>r.date===ds)){d=addDays(RW.ws,i);break}}
+    RW.runs.push({date:dayOf(d)<today?today:dayOf(d),type:'easy',km:6,start:'14:00'});RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()});
+  wf.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    const msg=document.getElementById('rwMsg');
+    if(!RW.runs.length){ev.preventDefault();msg.textContent='Nothing to add.';msg.className='syncmsg bad';return}
+    const add=[];RW.runs.forEach(x=>{const id=uid(),km=Math.round((+x.km||0)*10)/10,lbl=RUNLBL[x.type]||'Run';
+      const minutes=Math.max(15,Math.round(km*runPace(x.type)/5)*5);
+      const ex=EX[RUNEX[x.type]],lv=ex&&ex.L?ex.L[Math.min(S.levels[RUNEX[x.type]]||0,4)]:null;
+      const plan={id,date:x.date,start:x.start||'14:00',minutes,title:`🏃 ${lbl} · ${km} km`,tab:'Run',
+        items:[`${lbl}: ${km} km`,zoneText(RUNZONE[x.type]||[2,2])].concat((x.type==='tempo'||x.type==='intervals')&&lv?[`Main set: ${lv.v}`]:[]),
+        link:location.origin+location.pathname+'#plan='+id};
+      S.runMeta[id]={type:x.type,km};add.push(plan)});
+    save();setPlans(plansCache().concat(add.map(p=>({...p,status:'planned',pending:true}))));
+    add.forEach(p=>enqueue({op:'plan',plan:p}));scheduleFlush(300);refresh();
+  });
+  const lf=document.getElementById('runlogfrm');
+  lf.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    const km=Math.round((parseFloat(lf.km.value)||0)*100)/100;if(!km){ev.preventDefault();return}
+    const now=new Date(),min=parseInt(lf.min.value,10)||0,ty=lf.type.value,feel=(lf.querySelector('[name=feel]:checked')||{}).value||'';
+    const pace=min?` · ${fmtPace(min/km)}/km`:'';
+    const row={id:uid(),date:lf.date.value,time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,tab:'Run',section:'Marathon',exercise_id:RUNEX[ty]||'',
+      exercise:RUNLBL[ty]||'Run',slot:'',slot_name:'',dose:`${km} km${min?' · '+min+' min':''}${pace}`,result:'done',completed:`${km} km`,
+      seconds:min?String(min*60):'',feel,note:lf.note.value.trim(),plan_id:lf.dataset.plan||''};
+    const l=localLog();l.push(row);setLocalLog(l);if(connected()){enqueue({op:'log',row});scheduleFlush(300)}
+    if(lf.dataset.plan)setPlans(plansCache().map(x=>x.id===lf.dataset.plan?{...x,status:'done'}:x));
+    refresh();
+  });
+  const sf=document.getElementById('runsetfrm');
+  sf.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    const m=sf.easyPace.value.match(/^(\d{1,2}):(\d{2})$/);if(!m){ev.preventDefault();return}
+    const r={...RS(),race:sf.race.value,maxHR:+sf.maxHR.value,restHR:+sf.restHR.value,peakKm:+sf.peakKm.value,easyPace:+m[1]+(+m[2])/60};
+    if(sf.anchorKm.value!==sf.anchorKm.dataset.was){r.anchorKm=+sf.anchorKm.value;r.anchorDate=dayOf(mondayOf(new Date()))}
+    S.run=r;save();refresh();
+  });
 })();
 /* ---------- plan dialog ---------- */
 (function(){
