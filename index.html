@@ -1050,6 +1050,19 @@ EX.plank.cue='Straight line from heels to head. Squeeze the glutes so the hips d
 EX.sideplank.name='Side plank';
 EX.sideplank.frames=[OLD.plank.frames[1]];
 Object.assign(EX,{
+ scapress:{name:'Scapula press-ups + press-ups',kind:'reps',P:{sets:2,reps:8,unit:' of each'},
+  cue:'Push-up position, arms straight the whole time for the first part: squeeze the shoulder blades together, then push the floor away so the upper back rounds. 6–10 of those, then 6–10 normal press-ups. Wakes up the shoulders and the antagonists.',
+  L:[{v:'From the knees',p:{sets:2,reps:6}},{v:'Full press-up position',p:{}},{v:'Slow, 2 s each way',p:{reps:10}},{v:'Feet raised',p:{reps:8}},{v:'Feet raised, slow',p:{reps:10}}],
+  frames:[
+   {cap:'Blades squeezed together, chest sinks',pose:{hip:[62,124],torso:85,near:[6,136],far:[6,136],nearFoot:100,farFoot:100,hand:[120,142],elbow:'down',bend:-5}},
+   {cap:'Push the floor away, upper back rounds',pose:{hip:[62,120],torso:85,near:[6,132],far:[6,132],nearFoot:100,farFoot:100,hand:[120,142],elbow:'down',bend:8},arrows:[[96,112,96,94]]},
+   {cap:'Then normal press-ups',pose:{hip:[62,128],torso:85,near:[6,140],far:[6,140],nearFoot:100,farFoot:100,hand:[112,142],elbow:'fwd'}}]},
+ cossack:{name:'Cossack squat',kind:'hold',P:{sets:2,time:25,rest:10,sides:true},
+  cue:'Wide stance, sink onto one leg with that heel down and the other leg straight, toes up. Hold 20–30 seconds, then move slowly across to the other side. Hips and adductors for high steps and drop knees.',
+  L:[{v:'Hold a door frame for balance',p:{sets:1}},{v:'Free-standing',p:{}},{v:'Deeper, longer holds',p:{time:30}},{v:'Rocking side to side in the hold',p:{time:30}},{v:'Holding a light weight at the chest',p:{sets:2,time:30}}],
+  frames:[
+   {cap:'Sink onto the left leg, right leg straight',front:true,pose:{hip:[56,128],tl:34,L:[44,142],R:[126,142],kL:[38,134],kR:[92,137],hands:[[70,112],[84,112]],elbows:[[50,116],[74,116]]}},
+   {cap:'Move slowly across to the other side',front:true,pose:{hip:[104,128],tl:34,L:[34,142],R:[116,142],kL:[68,137],kR:[122,134],hands:[[96,112],[110,112]],elbows:[[86,116],[110,116]]},arrows:[[66,152,98,152]]}]},
  handwarm:{name:'Warm the hands',kind:'hold',P:{sets:1,time:120,rest:0,sides:false},frames:[],
   cue:'Cold fingers are the real injury risk outside. Shake the arms out, hands in your armpits or round a warm bottle, open and close fists. No crimping until they feel normal.'},
  basetraverse:{name:'Traverse the base',kind:'hold',P:{sets:1,time:300,rest:0,sides:false},frames:[],
@@ -1188,12 +1201,12 @@ Object.assign(EX,{
   L:[{v:'Short blocks',p:{dose:'3 × 2 km in the long run'}},{v:'Longer blocks',p:{dose:'2 × 4 km in the long run'}},{v:'Continuous',p:{dose:'8 km at MP in the long run'}},{v:'Race rehearsal',p:{dose:'12 km at MP in the long run'}},{v:'Final test',p:{dose:'16 km at MP in the long run'}}]}
 });
 const PRECLIMB={pid:'preclimb',title:'Pre-climb · indoor',sub:'Body, shoulders, fingers, then the wall. Do the essentials before any hangboard or hard climbing.',routine:true,
-  items:['pulse','bandshoulder',{id:'scap',...W({sets:2,reps:8,unit:''})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
-  extra:['armcircle','squathold','catcow']};
+  items:['pulse','bandshoulder','scapress',{id:'scap',...W({sets:2,reps:8,unit:''})},{id:'pullup',...W({sets:1,reps:6,unit:''})},'cossack',{id:'hipflex',...W({sets:1,time:30,rest:0,sides:true})},'fingers','proghang','easyclimb','armcircle',{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'catcow',...W({sets:1,time:45,rest:0,sides:false})}],
+  extra:['armcircle','squathold','catcow','cossack','hipflex']};
 const PRECLIMB_OUT={pid:'preclimbout',title:'Pre-climb · outdoor',sub:'No easy routes, no hangboard, cold rock. The walk in is half the warm-up.',routine:true,
-  items:[{id:'pulse',...W({sets:1,time:180,rest:0,sides:false})},'handwarm','bandshoulder','proghang','basetraverse',
+  items:[{id:'pulse',...W({sets:1,time:180,rest:0,sides:false})},'handwarm','bandshoulder','scapress','proghang','basetraverse','cossack',
     {id:'legswing',...W({sets:1,reps:10,unit:' per leg'})},{id:'squathold',...W({sets:1,time:45,rest:0,sides:false})},{id:'easyclimb',...W({sets:1,time:600,rest:0,sides:false})}],
-  extra:['legswing','squathold','easyclimb']};
+  extra:['legswing','squathold','easyclimb','cossack']};
 const HISTORY={id:'history',chip:'Calendar',title:'Calendar',lede:'',sections:[]};
 const TODAY={id:'today',chip:'Today',title:'Today',lede:'',sections:[]};
 const TOUBKAL={id:'toubkal',chip:'Toubkal',title:'Toubkal',lede:'',sections:[]};
