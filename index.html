@@ -432,6 +432,7 @@ body.has-resume .wrap{padding-bottom:110px}
 .upc{display:block;width:100%;text-align:left;background:none;border:0;border-left:4px solid var(--tc);padding:8px 12px;margin:6px 0}
 .upc b{display:block;font-size:14px}.upc span{font-size:13px;color:var(--muted)}
 #editplandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
+#editplandlg label[hidden]{display:none}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #plandlg input[type=date],#plandlg input[type=time]{font-size:16px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -595,6 +596,7 @@ button.chip::after{display:none}
 
 <dialog id="editplandlg"><form method="dialog" id="editplanfrm">
   <h2>Change this session</h2>
+  <label id="epTypeRow">What it is<select name="tab"></select></label>
   <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
   <div class="runopts" id="epRun" hidden><select name="rtype" aria-label="Run type"></select>
     <label class="kmin"><input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5" aria-label="Kilometres">km</label></div>
@@ -2711,12 +2713,17 @@ function openPlanEdit(id){
   const p=plansCache().find(x=>x.id===id);if(!p)return;
   const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
   EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=p.title;
-  const isRun=p.tab==='Run',m=S.runMeta[p.id]||{};
+  const app=(S.planRefs[p.id]||[]).length;
+  f.tab.innerHTML=EXTRAS.map(([t])=>`<option value="${t}">${TABICON[t]||''} ${t}</option>`).join('')
+    +(app||!EXTRAS.some(([t])=>t===tabName(p.tab))?`<option value="${esc(tabName(p.tab))}">${TABICON[tabName(p.tab)]||''} ${esc(tabName(p.tab))}</option>`:'');
+  f.tab.value=tabName(p.tab);
+  document.getElementById('epTypeRow').hidden=!!app;
+  const isRun=tabName(p.tab)==='Run',m=S.runMeta[p.id]||{};
   document.getElementById('epRun').hidden=!isRun;
   f.rtype.innerHTML=Object.keys(RUNLBL).map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('');
   f.rtype.value=m.type||'easy';f.rkm.value=m.km||'';
   document.getElementById('epMsg').textContent='';
-  document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+p.minutes));
+  f.minutes.dataset.touched='';document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+p.minutes));
   d.showModal();
 }
 function replacePlan(plan){
@@ -2730,9 +2737,16 @@ function replacePlan(plan){
   const f=document.getElementById('editplanfrm');
   document.getElementById('epChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
     f.minutes.value=b.dataset.min;document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',x===b))});
-  f.minutes.addEventListener('input',()=>document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on')));
+  f.minutes.addEventListener('input',()=>{f.minutes.dataset.touched='1';document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on'))});
   f.addEventListener('change',ev=>{
-    if(!EP||EP.tab!=='Run')return;
+    if(ev.target===f.tab){
+      const t=f.tab.value,det=(f.title.value.split(' · ').slice(1).join(' · ')||'').trim();
+      document.getElementById('epRun').hidden=t!=='Run';
+      if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;f.title.value=`🏃 ${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
+      else f.title.value=`${TABICON[t]||''} ${t}${det?' · '+det:''}`.trim();
+      const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
+      return}
+    if(!EP||f.tab.value!=='Run')return;
     if(ev.target===f.rtype||ev.target===f.rkm){
       const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,lbl=RUNLBL[f.rtype.value]||'Run';
       f.title.value=`🏃 ${lbl}${km?' · '+km+' km':''}`;
@@ -2747,8 +2761,10 @@ function replacePlan(plan){
       scheduleFlush(300);document.getElementById('editplandlg').close('done');refresh()})});
   f.addEventListener('submit',ev=>{
     if(!ev.submitter||ev.submitter.value!=='save'||!EP)return;
-    const p={...EP,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:f.title.value.trim()||EP.title};
-    if(EP.tab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
+    const newTab=document.getElementById('epTypeRow').hidden?tabName(EP.tab):f.tab.value;
+    const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:f.title.value.trim()||EP.title};
+    if(newTab!=='Run'){delete S.runMeta[p.id];const det=(p.title.split(' · ').slice(1).join(' · ')||'').trim();p.items=[newTab+(det?': '+det:'')]}
+    if(newTab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
       S.runMeta[p.id]={type:ty,km};p.items=[`${RUNLBL[ty]}${km?': '+km+' km':''}`,zoneText(RUNZONE[ty]||[2,2])]}
     p.link=location.origin+location.pathname+'#plan='+p.id;
     replacePlan(p);
