@@ -224,6 +224,28 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .dirpick{display:flex;gap:6px;margin:10px 0 2px}
 .dirpick button{flex:1;background:rgba(255,255,255,.08);color:#F3ECDD;border:1.5px solid rgba(255,255,255,.18);border-radius:999px;padding:8px 6px;font-weight:600;font-size:13px}
 .dirpick button.on{background:#E8C46A;border-color:#E8C46A;color:#1B2636}
+.tptog{display:grid;gap:8px;margin-top:12px}
+.chk2{display:flex;align-items:center;gap:10px;background:var(--panel);border-radius:12px;padding:10px 12px;font-size:15px;font-weight:600}
+.chk2 input{width:22px;height:22px;accent-color:var(--acc);flex:0 0 auto}
+.chk2 em{font-style:normal;font-weight:400;color:var(--muted);font-size:13px;margin-left:6px}
+.tpmap{display:block;width:100%;height:auto;background:var(--panel);border-radius:16px;padding:8px}
+.tpmap .mtrail{stroke:var(--rule);stroke-width:1.5}
+.tpmap .mroute{stroke:var(--acc);stroke-width:3;stroke-linecap:round}
+@media (prefers-reduced-motion:no-preference){.tpmap .mroute{stroke-dasharray:60;stroke-dashoffset:60;animation:draw .5s ease-out forwards}}
+.tpmap .marrow{fill:var(--acc)}
+.tpmap .mnode{cursor:pointer}
+.tpmap .mhit{fill:transparent!important}
+.tpmap .mnode circle,.tpmap .mnode path{fill:var(--rule)}
+.tpmap .mnode text{fill:var(--muted);font:600 7.5px Barlow,sans-serif}
+.tpmap .mnode.on circle,.tpmap .mnode.on path{fill:var(--ink)}
+.tpmap .mnode.on text{fill:var(--ink)}
+.tpmap .mnode.mpass.on path{fill:var(--acc)}.tpmap .mnode.mpass.on text{fill:var(--acc);font-weight:700}
+.tpmap .mv{fill:var(--muted);opacity:.6;font:600 8px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase}
+.tpdays .dstep::before{border-color:var(--ice)}
+.tpdays .dstep.acc::before{background:var(--bg);border-color:#3DAE74}
+.tpdays .dstep.buf::before{border-color:var(--muted)}
+.tpdays .dmeta{display:block;font-size:12.5px;color:var(--muted);margin-bottom:3px}
+.tpdays .dstep.flash{background:color-mix(in srgb,var(--acc) 14%,transparent);border-radius:10px}
 .tproute{display:block;width:100%;height:auto;margin-top:8px;overflow:visible}
 .tproute .grid{stroke:rgba(255,255,255,.15);stroke-dasharray:2 4}.tproute .galt{fill:#9AA7B8;font:600 8px Barlow,sans-serif}
 .tproute .tpfill{fill:rgba(232,196,106,.14)}.tproute .tpline{fill:none;stroke:#F3ECDD;stroke-width:2;stroke-linejoin:round}
@@ -1566,7 +1588,7 @@ const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco'
 const OBJS=()=>[
   {id:'toubkal',name:'Toubkal',icon:'❄',col:TK.col,date:TK.start,end:TK.end,go:'toubkal',kind:'winter'},
   {id:'marathon',name:'Marathon',icon:'🏁',col:'#E2685A',date:RS().race,end:RS().race,go:'oslo',kind:'race'},
-  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),20)),go:'passes',kind:'trek'}];
+  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),Math.max(1,tpDays().length-1))),go:'passes',kind:'trek'}];
 function objOn(ds){return OBJS().filter(o=>ds>=o.date&&ds<=o.end)}
 function tripDays(){const set=new Set();OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});return set}
 function OS(id){S.obj[id]=S.obj[id]||{};return S.obj[id]}
@@ -1683,6 +1705,99 @@ function renderOslo(){
   </section>`;
   document.getElementById('foot').innerHTML='';
 }
+/* ---------- Three Passes: map and itinerary ---------- */
+const TPN={ // schematic map: name:[x,y]
+ 'Lukla':[40,208],'Phakding':[58,188],'Namche':[86,168],'Thame':[44,142],'Lungden':[34,112],'Renjo La':[64,94],
+ 'Gokyo':[96,86],'Thagnak':[124,94],'Cho La':[148,88],'Dzongla':[170,98],'Lobuche':[196,84],'Gorak Shep':[216,68],
+ 'EBC':[244,56],'Kongma La':[206,120],'Chhukung':[234,132],'Dingboche':[196,142],'Pangboche':[160,152],'Tengboche':[130,160],'Island Peak':[258,146]};
+const TPE=[['Lukla','Phakding'],['Phakding','Namche'],['Namche','Thame'],['Thame','Lungden'],['Lungden','Renjo La'],['Renjo La','Gokyo'],
+ ['Gokyo','Thagnak'],['Thagnak','Cho La'],['Cho La','Dzongla'],['Dzongla','Lobuche'],['Lobuche','Gorak Shep'],['Gorak Shep','EBC'],
+ ['Lobuche','Kongma La'],['Kongma La','Chhukung'],['Chhukung','Dingboche'],['Dingboche','Pangboche'],['Pangboche','Tengboche'],['Tengboche','Namche'],['Chhukung','Island Peak']];
+const TPD_CW=[
+ {t:'Lukla → Phakding',a:2610,g:'−250 m',h:'3–4 h',v:'Chheplung, Ghat',x:'Fly in, then a gentle downhill start along the Dudh Koshi. Easy first day on purpose.',at:'Phakding'},
+ {t:'Phakding → Namche',a:3440,g:'+830 m',h:'5–6 h',v:'Monjo, park entry, Hillary bridge',x:'Park permits at Monjo, then the long climb to Namche. First real effort.',at:'Namche'},
+ {t:'Namche · acclimatisation',a:3440,g:'+400 m up and down',h:'3–4 h',v:'Khumjung, Everest View',k:'acc',x:'Walk high, sleep low. First sight of Everest if the cloud plays along.',at:'Namche'},
+ {t:'Namche → Thame',a:3800,g:'+360 m',h:'4–5 h',v:'Thamo, Thame gompa',x:'Leave the main trail up the quiet Bhote Koshi valley. Far fewer people from here.',at:'Thame'},
+ {t:'Thame → Lungden',a:4380,g:'+580 m',h:'4–5 h',v:'Marulung',x:'Yak pastures and a thinning valley. Cold night at 4,380 m.',at:'Lungden'},
+ {t:'Lungden · acclimatisation',a:4380,g:'+400 m up and down',h:'3 h',k:'acc',v:'Toward Renjo La',x:'Walk part way up toward the pass and back. Important before the first 5,000 m.',at:'Lungden'},
+ {t:'Lungden → Renjo La → Gokyo',a:4790,g:'+980 / −570 m',h:'7–8 h',k:'pass',v:'Renjo La 5,360 m',x:'Pass number one. The view from the top over Gokyo lakes and Everest is the trip\u2019s first big one. Start early.',at:'Gokyo'},
+ {t:'Gokyo Ri and the lakes',a:4790,g:'+570 m up and down',h:'4–5 h',k:'acc',v:'Gokyo Ri 5,357 m',x:'The best viewpoint of the trek. Rest afternoon by the lake.',at:'Gokyo'},
+ {t:'Gokyo → Thagnak',a:4700,g:'−90 m',h:'3–4 h',v:'Ngozumpa glacier crossing',x:'Short day across the glacier. Save the legs for tomorrow.',at:'Thagnak'},
+ {t:'Thagnak → Cho La → Dzongla',a:4830,g:'+720 / −590 m',h:'7–9 h',k:'pass',v:'Cho La 5,420 m',x:'The hardest pass: steep, often icy on the east side, a small glacier to cross. Microspikes earn their place.',at:'Dzongla'},
+ {t:'Dzongla → Lobuche',a:4940,g:'+110 m',h:'3–4 h',v:'Above the Khumbu glacier',x:'Short and scenic, joining the main Everest trail again.',at:'Lobuche'},
+ {t:'Lobuche → Gorak Shep → EBC',a:5164,g:'+420 / −200 m',h:'6–7 h',v:'Everest Base Camp 5,364 m',x:'Base camp and back to the highest night of the trip. Thin, cold and busy.',at:'Gorak Shep'},
+ {t:'Kala Patthar → Lobuche',a:4940,g:'+380 / −600 m',h:'5–6 h',k:'acc',v:'Kala Patthar 5,545 m',x:'Dark start for sunrise on Everest, then down. The highest point unless you climb a peak.',at:'Lobuche'},
+ {t:'Lobuche → Kongma La → Chhukung',a:4730,g:'+600 / −800 m',h:'8–9 h',k:'pass',v:'Kongma La 5,535 m',x:'The highest pass and the longest day: the Khumbu glacier first, then a steep climb and a long descent.',at:'Chhukung'},
+ {t:'Chhukung → Tengboche',a:3860,g:'−870 m',h:'5–6 h',v:'Dingboche, Pangboche',x:'Down into the trees and air that feels rich. Tengboche monastery in the evening.',at:'Tengboche'},
+ {t:'Tengboche → Namche',a:3440,g:'−420 m',h:'5 h',v:'Phunki Tenga',x:'Bakeries, showers and a proper meal in Namche.',at:'Namche'},
+ {t:'Namche → Lukla',a:2860,g:'−580 m',h:'7–8 h',wp:['Phakding'],v:'Monjo, Phakding',x:'Long last day back down the valley.',at:'Lukla'},
+ {t:'Lukla · buffer day',a:2860,g:'—',h:'—',k:'buffer',v:'Flight or weather day',x:'Keep one spare day here. Lukla flights are cancelled often enough that it matters.',at:'Lukla'}];
+const TPD_WALKIN=[
+ {t:'Kathmandu → Salleri',a:2360,g:'jeep',h:'9–11 h',k:'buffer',v:'Long road day',x:'Rough drive east. Cheaper and more reliable than the Lukla flight.',at:'Lukla'},
+ {t:'Salleri → Nunthala',a:2220,g:'+700 / −800 m',h:'6–7 h',v:'Ringmo, Trakshindu La',x:'Farmland and rhododendron forest, almost no other trekkers.',at:'Lukla'},
+ {t:'Nunthala → Bupsa',a:2360,g:'+900 / −700 m',h:'6–7 h',v:'Jubing, Kharikhola',x:'Down to the river and back up. Hot, green, hard work.',at:'Lukla'},
+ {t:'Bupsa → Surke',a:2290,g:'+700 / −800 m',h:'6–7 h',v:'Puiyan, Kharte',x:'The trail finally turns into the Dudh Koshi valley.',at:'Lukla'},
+ {t:'Surke → Phakding',a:2610,g:'+400 m',h:'4–5 h',v:'Below Lukla',x:'Join the main trail. Five days of walking already banked: the acclimatisation shows later.',at:'Phakding'}];
+const TPD_ISLAND=[
+ {t:'Chhukung · skills day',a:4730,g:'—',h:'3–4 h',k:'acc',v:'With the guide',x:'Crampons, rope, jumar and abseil practice on a slope near the village.',at:'Chhukung'},
+ {t:'Chhukung → Island Peak base camp',a:5087,g:'+360 m',h:'3–4 h',v:'Imja valley',x:'Short walk in, early night, gear laid out.',at:'Island Peak'},
+ {t:'Island Peak summit',a:6189,g:'+1,100 / −1,450 m',h:'10–14 h',k:'pass',v:'Island Peak 6,189 m',x:'Start at 1–2 am. Rock, then the glacier, fixed ropes on the headwall, back to base camp or Chhukung.',at:'Island Peak'},
+ {t:'Back to Chhukung · rest',a:4730,g:'−360 m',h:'2–3 h',k:'buffer',v:'Spare weather day',x:'Buffer in case the summit day slips a day. It often does.',at:'Chhukung'}];
+const TPVILL=[['Lukla','2,840 m','Flights in and out, and the weather lottery. Keep a buffer day.'],
+ ['Namche','3,440 m','ATMs, gear shops, bakeries and the last proper town. Draw all your cash here or in Kathmandu.'],
+ ['Thame','3,800 m','Quiet Sherpa village with an old gompa, on the way to Renjo La.'],
+ ['Gokyo','4,790 m','Lakes and Gokyo Ri. The nicest rest day on the loop.'],
+ ['Dingboche','4,410 m','Bakeries, wifi and the acclimatisation hub of the Imja valley.'],
+ ['Chhukung','4,730 m','The base for Kongma La, Chhukung Ri and Island Peak.'],
+ ['Gorak Shep','5,164 m','Highest sleep of the trek, cold and thin. One night is plenty.']];
+const TPD_CCW=[
+ {t:'Lukla → Phakding',a:2610,g:'−250 m',h:'3–4 h',v:'Chheplung, Ghat',x:'Fly in, then a gentle downhill start along the Dudh Koshi.',at:'Phakding'},
+ {t:'Phakding → Namche',a:3440,g:'+830 m',h:'5–6 h',v:'Monjo, park entry, Hillary bridge',x:'Park permits at Monjo, then the long climb to Namche.',at:'Namche'},
+ {t:'Namche · acclimatisation',a:3440,g:'+400 m up and down',h:'3–4 h',k:'acc',v:'Khumjung, Everest View',x:'Walk high, sleep low. First sight of Everest.',at:'Namche'},
+ {t:'Namche → Tengboche',a:3860,g:'+420 m',h:'5 h',v:'Phunki Tenga',x:'Down to the river, then up through forest to the monastery.',at:'Tengboche'},
+ {t:'Tengboche → Dingboche',a:4410,g:'+550 m',h:'5–6 h',v:'Pangboche, Somare',x:'Above the tree line into the Imja valley.',at:'Dingboche'},
+ {t:'Dingboche · acclimatisation',a:4410,g:'+670 m up and down',h:'4 h',k:'acc',v:'Nangkartshang 5,083 m',x:'A first taste of 5,000 m, then back down to sleep.',at:'Dingboche'},
+ {t:'Dingboche → Chhukung',a:4730,g:'+320 m',h:'3 h',v:'Imja valley',x:'Short day deeper into the valley under Ama Dablam and Lhotse.',at:'Chhukung'},
+ {t:'Chhukung Ri',a:4730,g:'+800 m up and down',h:'4–5 h',k:'acc',v:'Chhukung Ri 5,546 m',x:'The best acclimatisation day of the trek before the first pass.',at:'Chhukung'},
+ {t:'Chhukung → Kongma La → Lobuche',a:4940,g:'+800 / −600 m',h:'8–9 h',k:'pass',v:'Kongma La 5,535 m',x:'Pass number one, and the highest: steep climb, then the Khumbu glacier crossing. Long day, start early.',at:'Lobuche'},
+ {t:'Lobuche → Gorak Shep → EBC',a:5164,g:'+420 / −200 m',h:'6–7 h',v:'Everest Base Camp 5,364 m',x:'Base camp and back to the highest night of the trip.',at:'Gorak Shep'},
+ {t:'Kala Patthar → Dzongla',a:4830,g:'+380 / −700 m',h:'6–7 h',v:'Kala Patthar 5,545 m',x:'Dark start for sunrise on Everest, then west toward the second pass.',at:'Dzongla'},
+ {t:'Dzongla → Cho La → Thagnak',a:4700,g:'+590 / −720 m',h:'7–9 h',k:'pass',v:'Cho La 5,420 m',x:'The technical one: a small glacier and often ice on the way up. Microspikes earn their place.',at:'Thagnak'},
+ {t:'Thagnak → Gokyo',a:4790,g:'+90 m',h:'3–4 h',v:'Ngozumpa glacier crossing',x:'Short day across the glacier to the lakes.',at:'Gokyo'},
+ {t:'Gokyo Ri and the lakes',a:4790,g:'+570 m up and down',h:'4–5 h',k:'acc',v:'Gokyo Ri 5,357 m',x:'The best viewpoint of the trek, then a rest afternoon.',at:'Gokyo'},
+ {t:'Gokyo → Renjo La → Lungden',a:4380,g:'+570 / −980 m',h:'7–8 h',k:'pass',v:'Renjo La 5,360 m',x:'The last pass, with the classic view back over the lakes to Everest.',at:'Lungden'},
+ {t:'Lungden → Namche',a:3440,g:'−940 m',h:'7–8 h',wp:['Thame'],v:'Thame, Thamo',x:'Long descent down the quiet Bhote Koshi valley.',at:'Namche'},
+ {t:'Namche → Lukla',a:2860,g:'−580 m',h:'7–8 h',wp:['Phakding'],v:'Monjo, Phakding',x:'Long last day back down the valley.',at:'Lukla'},
+ {t:'Lukla · buffer day',a:2860,g:'—',h:'—',k:'buffer',v:'Flight or weather day',x:'Keep one spare day here. Lukla flights are cancelled often enough that it matters.',at:'Lukla'}];
+function tpDays(){const o=OS('passes'),dir=o.dir||'cw';
+  let d=(dir==='ccw'?TPD_CCW:TPD_CW).slice();
+  if(o.island){let i=-1;d.forEach((x,j)=>{if(x.at==='Chhukung')i=j});d=d.slice(0,i+1).concat(TPD_ISLAND,d.slice(i+1))}
+  if(o.walkin)d=TPD_WALKIN.concat(d.slice(1));
+  return d.map((x,i)=>({...x,n:i+1}));
+}
+function tpRouteOrder(){const seen=[],ds=tpDays();
+  ds.forEach(x=>{ if(x.k==='pass'&&x.v){const p=Object.keys(TPN).find(n=>x.v.startsWith(n));if(p&&seen[seen.length-1]!==p)seen.push(p)}
+    (x.wp||[]).forEach(w=>{if(TPN[w]&&seen[seen.length-1]!==w)seen.push(w)});
+    if(TPN[x.at]&&seen[seen.length-1]!==x.at)seen.push(x.at)});
+  return seen}
+function tpMap(){
+  const order=tpRouteOrder(),o=OS('passes');
+  const line=[];for(let i=0;i<order.length-1;i++){const a=TPN[order[i]],b=TPN[order[i+1]];if(a&&b)line.push([a,b])}
+  const passes=['Renjo La','Cho La','Kongma La'];
+  return `<svg class="tpmap" viewBox="0 0 290 230" role="img" aria-label="Schematic map of the Three Passes loop">
+   <text x="30" y="128" class="mv">Bhote Koshi</text><text x="96" y="66" class="mv">Gokyo</text><text x="172" y="40" class="mv">Khumbu</text><text x="250" y="168" class="mv">Imja</text>
+   ${TPE.map(([a,b])=>`<line x1="${TPN[a][0]}" y1="${TPN[a][1]}" x2="${TPN[b][0]}" y2="${TPN[b][1]}" class="mtrail"/>`).join('')}
+   ${line.map(([a,b],i)=>`<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" class="mroute" style="animation-delay:${(i*.06).toFixed(2)}s"/>`).join('')}
+   ${line.filter((_,i)=>i%3===1).map(([a,b])=>{const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,ang=Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI;
+     return `<path d="M-4,-3 L4,0 L-4,3 Z" class="marrow" transform="translate(${mx.toFixed(1)},${my.toFixed(1)}) rotate(${ang.toFixed(1)})"/>`}).join('')}
+   ${Object.entries(TPN).map(([n,[x,y]])=>{const on=order.includes(n),pass=passes.includes(n);
+     if(n==='Island Peak'&&!o.island)return '';
+     return `<g class="mnode${on?' on':''}${pass?' mpass':''}" data-act="tpjump" data-v="${esc(n)}">
+       <circle cx="${x}" cy="${y-3}" r="13" class="mhit"/>
+       ${pass?`<path d="M${x-6},${y+4} L${x},${y-5} L${x+6},${y+4} Z"/>`:`<circle cx="${x}" cy="${y}" r="${on?4:3}"/>`}
+       <text x="${x}" y="${y-8}" text-anchor="${x>230?'end':x<60?'start':'middle'}">${esc(n)}</text></g>`}).join('')}
+  </svg>`;
+}
 /* ---------- Three Passes ---------- */
 const TP={
   cw:[['Lukla',2860],['Namche',3440],['Thame',3800],['Lungden',4380],['Renjo La',5360,1],['Gokyo',4790],['Gokyo Ri',5357,2],['Cho La',5420,1],['Dzongla',4830],['Lobuche',4940],['Kala Patthar',5545,2],['Gorak Shep',5164],['Kongma La',5535,1],['Chhukung',4730],['Dingboche',4410],['Namche',3440],['Lukla',2860]],
@@ -1736,6 +1851,22 @@ function renderPasses(){
      ${tpRoute(dir,prog)}
      <div class="tkfoot"><span>${dir==='cw'?'Renjo La → Cho La → Kongma La':'Kongma La → Cho La → Renjo La'}</span><button class="link" data-act="nepset">Set dates</button></div>
    </div>
+   <div class="tptog"><label class="chk2"><input type="checkbox" data-act="tptog" data-k="walkin"${o.walkin?' checked':''}><span>Walk in from Salleri <em>+5 days</em></span></label>
+     <label class="chk2"><input type="checkbox" data-act="tptog" data-k="island"${o.island?' checked':''}><span>Island Peak <em>+4 days, guided</em></span></label></div>
+   <div class="facts">${(()=>{const d=tpDays(),hi=Math.max(...d.map(x=>x.a)),long=d.reduce((m,x)=>(x.h.length>m.h.length?m:(parseInt(x.h)||0)>(parseInt(m.h)||0)?x:m),d[0]);
+     return [[d.length+' days','Lukla to Lukla'+(o.walkin?', walking in':'')],[hi.toLocaleString('en').replace(',',' ')+' m','highest night'],
+       [(o.island?'6 189 m':'5 545 m'),o.island?'Island Peak summit':'Kala Patthar, highest point'],['≈'+(115+(o.walkin?60:0)+(o.island?15:0))+' km','on foot'],
+       ['3 passes','all above 5,300 m'],[long.h,'longest day']].map(([a,b2])=>`<div><b>${esc(a)}</b><span>${esc(b2)}</span></div>`).join('')})()}</div>
+   <h2 class="objh">The loop</h2>
+   ${tpMap()}
+   <p class="hint">Schematic, not to scale. Tap a village to jump to its day.</p>
+   <h2 class="objh">Day by day</h2>
+   <div class="daystrip tpdays">${tpDays().map(x=>`<div class="dstep${x.k==='pass'?' hi':''}${x.k==='acc'?' acc':''}${x.k==='buffer'?' buf':''}" id="tpd-${esc(x.at.replace(/\s/g,''))}-${x.n}">
+      <em>Day ${x.n}${x.k==='acc'?' · acclimatisation':x.k==='buffer'?' · buffer':''}</em><b>${esc(x.t)}</b>
+      <span class="dmeta">${esc(x.a.toLocaleString('en').replace(',',' '))} m · ${esc(x.g)} · ${esc(x.h)}${x.v?' · '+esc(x.v):''}</span>
+      <p>${esc(x.x)}</p></div>`).join('')}</div>
+   <h2 class="objh">Villages worth knowing</h2>
+   <div class="crs">${TPVILL.map(([a,b2,c])=>`<div><b>${esc(a)} · ${esc(b2)}</b><span>${esc(c)}</span></div>`).join('')}</div>
    <h2 class="objh">Side trips and peaks</h2>
    <div class="crs">${TP.extras.map(([a,b2,c])=>`<div><b>${esc(a)} · ${esc(b2)}</b><span>${esc(c)}</span></div>`).join('')}</div>
    <p class="hint">Mera Peak (6,476 m) sits in the Hinku valley, a trip of its own unless you cross the Amphu Labtsa. Island Peak or Lobuche East fit this loop far better.</p>
@@ -2235,6 +2366,8 @@ function findByKey(key){
 }
 // Native controls fire 'change' reliably even where tap-to-click is unreliable.
 document.addEventListener('change',ev=>{
+  if(ev.target.matches&&ev.target.matches('input[data-act=tptog]')){const o=OS('passes');o[ev.target.dataset.k]=ev.target.checked||undefined;save();
+    const y=window.scrollY;render();window.scrollTo(0,y);return}
   if(ev.target.matches&&ev.target.matches('input[data-obj]')){const t=ev.target,o=OS(cur==='oslo'?'oslo':cur==='passes'?'passes':'toubkal'),g=t.dataset.obj;
     if(g==='goal'){o.goal=+t.dataset.k;save();const y=window.scrollY;render();window.scrollTo(0,y);return}o[g]=o[g]||{};
     if(t.checked)o[g][t.dataset.k]=1;else delete o[g][t.dataset.k];save();
@@ -2257,6 +2390,9 @@ document.getElementById('progs').addEventListener('click',e=>{const b=e.target.c
 document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;
   const v=b.dataset.view;go(v==='train'?lastTrain:v)});
 document.body.addEventListener('click',e=>{
+  const g=e.target.closest&&e.target.closest('g[data-act=tpjump]');
+  if(g){const el=[...document.querySelectorAll('.tpdays .dstep')].find(x=>x.id.includes('tpd-'+g.dataset.v.replace(/\s/g,'')+'-'));
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1400)}return}
   const b=e.target.closest('button[data-act]');if(!b||b.closest('#progs'))return;
   try{onAct(b)}catch(err){showErr('Action failed: '+err.message)}
 });
@@ -2285,6 +2421,8 @@ function onAct(b){
   if(act==='gorun'){go('run');return}
   if(act==='gonepal'){go('nepal');return}
   if(act==='objopen'||act==='objgo'){go(b.dataset.go);return}
+  if(act==='tpjump'){const el=[...document.querySelectorAll('.tpdays .dstep')].find(x=>x.id.includes('tpd-'+b.dataset.v.replace(/\s/g,'')+'-'));
+    if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1400)}return}
   if(act==='tpdir'){OS('passes').dir=b.dataset.d;save();const y=window.scrollY;render();window.scrollTo(0,y);return}
   if(act==='objplan'){calSel=dayOf(new Date());openPlan();setTimeout(()=>{const c=document.querySelector('#planOpts input[value="x:Hike"]');if(c){c.checked=true;const f=document.getElementById('planfrm');f.detail.value='Toubkal prep: 6–7 h, 1,200 m up, 10 kg';f.minutes.value=420;f.minutes.dataset.manual='1';planAuto()}},0);return}
   if(act==='nepset'){const f=document.getElementById('nepfrm'),n=NS();f.date.value=n.date;f.fixed.checked=!!n.fixed;document.getElementById('nepdlg').showModal();return}
