@@ -1303,7 +1303,7 @@ async function api(payload){
 const pad2=n=>String(n).padStart(2,'0');
 const dayOf=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-function localLog(){return lsGet(LKEY,[])}
+function localLog(){const seen=new Set();return lsGet(LKEY,[]).filter(r=>{if(seen.has(r.id))return false;seen.add(r.id);return true})}
 function setLocalLog(l){l.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));lsSet(LKEY,l.slice(0,2000))}
 function enqueue(op){op.qid=uid();const q=lsGet(QKEY,[]);q.push(op);lsSet(QKEY,q);scheduleFlush();setTimeout(updateSyncLine,0)}
 let flushT=null,flushing=false;
@@ -1397,13 +1397,28 @@ const plansCache=()=>lsGet(PKEY,[]);
 const setPlans=l=>lsSet(PKEY,l);
 let calMonth=null,calSel=null;
 const monthStart=d=>new Date(d.getFullYear(),d.getMonth(),1);
+const dupKey=p=>[p.date,p.start,String(p.minutes),tabName(p.tab),String(p.title).trim()].join('|');
+function dupGroups(list){const by={};(list||plansCache()).forEach(p=>{(by[dupKey(p)]=by[dupKey(p)]||[]).push(p)});
+  return Object.values(by).filter(g=>g.length>1)}
+const dupCount=()=>dupGroups().reduce((n,g)=>n+g.length-1,0);
+function cleanDuplicates(){
+  const groups=dupGroups();if(!groups.length)return 0;
+  const drop=[];groups.forEach(g=>{const keep=g.find(x=>!x.pending)||g[0];g.forEach(x=>{if(x.id!==keep.id)drop.push(x)})});
+  const ids=new Set(drop.map(x=>x.id));
+  setPlans(plansCache().filter(p=>!ids.has(p.id)));
+  const q=lsGet(QKEY,[]).filter(o=>!(o.op==='plan'&&drop.some(d=>d.id===o.plan.id&&d.pending)));lsSet(QKEY,q);
+  [...new Set(drop.filter(x=>!x.pending).map(x=>x.id))].forEach(id=>enqueue({op:'unplan',id}));
+  drop.forEach(x=>{delete S.planRefs[x.id];delete S.runMeta[x.id]});save();
+  scheduleFlush(300);render();return drop.length;
+}
 async function pullPlans(){
   if(!connected())return;
   const m=calMonth||monthStart(new Date());
   const from=dayOf(new Date(m.getFullYear(),m.getMonth(),-6)),to=dayOf(new Date(m.getFullYear(),m.getMonth()+1,7));
   try{await flushQueue();const j=await api({action:'plans',from,to});
     const keep=plansCache().filter(p=>p.pending||p.date<from||p.date>to);
-    setPlans(keep.concat(j.plans||[]));setSync({last:Date.now(),error:''})}
+    const merged=keep.concat(j.plans||[]),seen=new Set();
+    setPlans(merged.filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true}));setSync({last:Date.now(),error:''})}
   catch(e){setSync({error:e.message})}
   if(linkPlan){const p=plansCache().find(x=>x.id===linkPlan);if(p){calSel=p.date;calMonth=monthStart(new Date(p.date+'T12:00'))}linkPlan=null}
   if(cur==='history'||cur==='today')render();
@@ -1473,6 +1488,7 @@ function renderHistory(){
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
     <div class="legend">${[...new Set(BASETABS.concat(plans.map(p=>tabName(p.tab)),all.map(r=>tabName(r.tab))))].filter(t=>TABCOL[t]&&!DOTLESS.includes(t)&&isAct(t)).map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}
       <span><i class="small" style="background:var(--acc)"></i>training</span><span><i class="ring"></i>planned</span></div>
+    ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
     <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
@@ -2446,6 +2462,9 @@ function onAct(b){
   if(act==='calprev'||act==='calnext'){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(act==='calnext'?1:-1),1);render();pullPlans();return}
   if(act==='calday'){calSel=b.dataset.d;calPicked=true;if(cur!=='history'){calMonth=monthStart(new Date(calSel+'T12:00'));go('history');return}const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
   if(act==='pedit'){openPlanEdit(b.dataset.id);return}
+  if(act==='dupfix'){const n=dupCount();
+    ask(`Remove ${n} duplicate${n>1?'s':''}?`,'One of each session is kept. The extra events are deleted from your Training calendar.','Remove',true).then(ok=>{if(!ok)return;
+      const done=cleanDuplicates();undoBar(done+' duplicate'+(done>1?'s':'')+' removed',()=>{});});return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
