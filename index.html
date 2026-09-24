@@ -419,9 +419,36 @@ body.has-resume .wrap{padding-bottom:110px}
 .cd em i,.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
 .cd em i.small,.legend i.small{width:4.5px;height:4.5px;opacity:.85}
 .cd em i.ring,.legend i.ring{background:none!important;border:1.5px solid var(--muted);width:7px;height:7px;box-sizing:border-box}
+.ic{width:1.15em;height:1.15em;vertical-align:-.18em;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.otile .ic{width:22px;height:22px}
+.pgrp h4 .ic{width:18px;height:18px;color:var(--tc)}
+label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
+.tkkick .ic,.oskick .ic,.tpkick .ic{width:14px;height:14px;stroke-width:2}
 .legend .lbreak{flex-basis:100%;height:0}
 .legend .ltag{color:var(--muted);opacity:.8}
 .legend i.small{width:5px;height:5px}
+#selbar{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 84px);z-index:17;display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:14px;background:var(--ink);color:var(--bg);box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#selbar span{flex:1;font-size:15px}#selbar b{font-size:18px}
+#selbar .go.sm{background:var(--acc);color:#fff}#selbar .link{color:var(--bg)}
+.ex.selectable{position:relative;cursor:pointer}
+.ex.selectable .selmark{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;border:2px solid var(--rule);
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff}
+.ex.picked{outline:2px solid var(--acc);outline-offset:2px;border-radius:12px}
+.ex.picked .selmark{background:var(--acc);border-color:var(--acc)}
+.sdlist,.wbpicked{display:flex;flex-direction:column;gap:2px;max-height:26vh;overflow:auto}
+.sdrow{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--rule);font-size:15px}
+.sdrow b{flex:1}.sdrow span{color:var(--muted);font-size:13px}
+#weekdlg form{padding:18px;display:flex;flex-direction:column;gap:10px}
+.wbdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.wbday{background:var(--panel);border:1.5px solid transparent;border-radius:10px;padding:7px 0;display:flex;flex-direction:column;align-items:center;gap:1px}
+.wbday b{font-size:11px;color:var(--muted)}.wbday span{font-weight:700;font-size:15px}.wbday em{font-style:normal;font-size:9px;color:var(--acc)}
+.wbday.on{border-color:var(--acc)}.wbday.past{opacity:.45}
+.wblib{max-height:34vh;overflow:auto;border:1.5px solid var(--rule);border-radius:12px;padding:6px 10px}
+.wbrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--rule)}
+.wbrow div{flex:1;min-width:0}.wbrow b{display:block;font-size:14px;font-weight:600}.wbrow span{font-size:12px;color:var(--muted)}
+.wbadd{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:none;color:var(--ink);font-size:17px;font-weight:700}
+.wbadd.on{background:var(--acc);border-color:var(--acc);color:#fff}
 .planbtns{display:grid;gap:8px}
 .add.run{border-style:solid;border-color:var(--rule)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
@@ -603,6 +630,22 @@ button.chip::after{display:none}
   <div class="feelrow"><span>How was it?</span><label><input type="radio" name="feel" value="easy">Easy</label><label><input type="radio" name="feel" value="good">Good</label><label><input type="radio" name="feel" value="hard">Hard</label></div>
   <label>Note <span class="hint">optional</span><input name="note" autocomplete="off"></label>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save run</button></div>
+</form></dialog>
+
+<dialog id="seldaydlg"><form method="dialog" id="seldayfrm">
+  <h2>Add to a day</h2>
+  <p class="hint" id="sdSum"></p>
+  <div id="sdList" class="sdlist"></div>
+  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
+</form></dialog>
+
+<dialog id="weekdlg"><form method="dialog" id="weekfrm">
+  <h2>Build a week</h2><p class="hint" id="wbTitle"></p>
+  <div id="wbDays" class="wbdays"></div>
+  <div id="wbPicked" class="wbpicked"></div>
+  <div id="wbLib" class="wblib"></div>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save" id="wbSave">Add to the calendar</button></div>
 </form></dialog>
 
 <dialog id="editplandlg"><form method="dialog" id="editplanfrm">
@@ -1400,6 +1443,22 @@ const isAct=t=>ACTIVITY.includes(tabName(t));
 const isSession=r=>isAct(r.tab)&&(!r.exercise_id||tabName(r.tab)==='Run');
 const TRAINTABS=['Nepal','Ice','Climbing','Warm up'];
 const DOTLESS=['Stretch'];   // a guide, not a session of its own
+/* ---------- our own icons, in the app's line style ---------- */
+const ICONP={
+ Run:'<path d="M14 4.6a1.6 1.6 0 1 0 0-.1zM12.6 9.2 9 11.4l1.6 3.2L8 21M12.6 9.2l3.3-1.5 3 2.4 2.6.6M12.6 9.2 8.4 7.7 4.6 9.4M12.6 9.2l1.7 4.2 3.4 2.2 1.1 4.2"/>',
+ Climbing:'<path d="M15.5 4.3a1.5 1.5 0 1 0 0-.1zM14.6 8.4 10 11l-.6 4.2M14.6 8.4l3.6 1.5M14.6 8.4l-.4 4.6 3 2.3-.6 5M9.4 15.2 6 13.4M9.4 15.2l-.8 5.4M20.5 3v18"/>',
+ Bouldering:'<path d="M2.6 20.4h18.8"/><path d="M5 20.4c-.4-4.6 2-8.2 5.8-8.2 2.6 0 4.2 1.4 5.2 3 1 1.7 1.8 2.6 3.2 2.8"/><path d="M19.2 18c.6 0 1.2.8 1.2 2.4"/>',
+ 'Ice climbing':'<path d="M6.6 20.6 15.4 8"/><path d="M15.4 8c-2.1-1.4-4.6-1.8-6.6-1.4M15.4 8l3.1 1.6M15.4 8l1.5-2.8M5.4 21.6l1.4-2"/>',
+ Hike:'<path d="M3 20h18M5 20V9.4l4.6 2.2V20M9.6 11.6 15 6.6 21 20"/><path d="M12.7 5.3a1.5 1.5 0 1 0 0-.1z"/>',
+ Nepal:'<path d="M2 20h20M4.6 20 10 8.5l3.2 5.4 2-2.6L21.4 20"/><path d="M8.2 12.6 10 11l1.4 1.6"/>',
+ Ice:'<path d="M6.6 20.6 15.4 8"/><path d="M15.4 8c-2.1-1.4-4.6-1.8-6.6-1.4M15.4 8l3.1 1.6M15.4 8l1.5-2.8M5.4 21.6l1.4-2"/>',
+ 'Warm up':'<path d="M12 21c3.6 0 6-2.4 6-5.6 0-4.4-4.6-5.6-3.6-10.4C11.6 6 9.4 8.2 9.4 11c0 1.4.5 2.2.5 3 0 1.2-1 1.4-1.7.6C7 13.4 6 14.6 6 16.2 6 18.9 8.4 21 12 21z"/>',
+ Stretch:'<path d="M12 3.4a1.5 1.5 0 1 0 0-.1zM12 7v5.6M12 12.6 7.4 20M12 12.6 16.6 20M6.6 8.6 12 10l5.4-1.4"/>',
+ Other:'<path d="M12 4v16M4 12h16M6.3 6.3l11.4 11.4M17.7 6.3 6.3 17.7"/>',
+ flag:'<path d="M6 21V3M6 4.2h12.5L15.6 8l2.9 3.8H6"/>',
+ snow:'<path d="M12 2.6v18.8M3.8 7.3l16.4 9.4M20.2 7.3 3.8 16.7M12 6.2 9.4 4M12 6.2 14.6 4M12 17.8 9.4 20M12 17.8 14.6 20M7.4 9.9 7 7.1M7.4 14.1 7 16.9M16.6 9.9l.4-2.8M16.6 14.1l.4 2.8"/>'};
+const ICON=(name,cls)=>{const d=ICONP[name]||ICONP.Other;
+  return `<svg class="ic ${cls||''}" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`};
 const TABICON={'Nepal':'🏔','Ice':'🧊','Climbing':'🧗','Stretch':'🧘','Warm up':'🔥','Run':'🏃','Hike':'🥾','Bouldering':'🪨','Ice climbing':'⛏️','Other':'✳️'};
 const BASETABS=['Climbing','Bouldering','Ice climbing','Run','Hike'];
 const EXTRAS=[['Run',45],['Climbing',240],['Bouldering',180],['Ice climbing',360],['Hike',180],['Other',60]];
@@ -1513,7 +1572,8 @@ function renderHistory(){
       ${dayLog.map(logRow).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
-        <button class="add run" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">🏃 Plan the running week</button></div>
+        <button class="add" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Build a week of exercises</button>
+        <button class="add run" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Plan the running week</button></div>
     </div>
     ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(p.title)}</span></button>`).join('')}</div>`:''}
    </section>`;
@@ -1566,7 +1626,7 @@ function renderToday(){
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(p.title)}</span></button>`).join('')}`:''}
     <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
-      return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>🏃 ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
+      return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>${ICON('Run','inl')} ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
     <div class="weekstrip">${days}</div>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days</span></div><div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     <h3 class="tlabel">Quick start</h3>
@@ -1650,9 +1710,9 @@ const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco'
    ['Small but vital',['Headtorch + spare batteries','Glacier or cat. 3–4 sunglasses','Sunscreen and lip balm','2 L of insulated bottles','Snacks for summit day']],
    ['Papers',['Passport','Travel insurance covering 4,167 m and crampon use','Cash for tips and Imlil']]]};
 const OBJS=()=>[
-  {id:'toubkal',name:'Toubkal',icon:'❄',col:TK.col,date:TK.start,end:TK.end,go:'toubkal',kind:'winter'},
-  {id:'marathon',name:'Marathon',icon:'🏁',col:'#E2685A',date:RS().race,end:RS().race,go:'oslo',kind:'race'},
-  {id:'nepal',name:'Three Passes',icon:'🏔',col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),Math.max(1,tpDays().length-1))),go:'passes',kind:'trek'}];
+  {id:'toubkal',name:'Toubkal',icon:ICON('snow'),col:TK.col,date:TK.start,end:TK.end,go:'toubkal',kind:'winter'},
+  {id:'marathon',name:'Marathon',icon:ICON('flag'),col:'#E2685A',date:RS().race,end:RS().race,go:'oslo',kind:'race'},
+  {id:'nepal',name:'Three Passes',icon:ICON('Nepal'),col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),Math.max(1,tpDays().length-1))),go:'passes',kind:'trek'}];
 function objOn(ds){return OBJS().filter(o=>ds>=o.date&&ds<=o.end)}
 function tripDays(){const set=new Set();OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});return set}
 function OS(id){S.obj[id]=S.obj[id]||{};return S.obj[id]}
@@ -1704,7 +1764,7 @@ function renderObjective(){
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="tkhero" data-cdt="${go.toISOString().slice(0,10)}T06:00:00">
      <div class="snow" aria-hidden="true">${flakes}</div>
-     <div class="tkhead"><span class="tkkick">❄ Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Guided, 3 days · then 4 days in Morocco</span></div>
+     <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Guided, 3 days · then 4 days in Morocco</span></div>
      ${left>0?cdBlock(go.toISOString().slice(0,10)+'T06:00:00'):`<div class="cdbig"><b>${now<=parseDay(TK.end)?'You\u2019re there':'Done'}</b></div>`}
      ${tkRouteSVG(prog)}
      <div class="tkfoot"><span>Prep: <b>${wk} weeks</b> to go</span><span>${Math.round(prog*100)}% of the way</span></div>
@@ -1722,9 +1782,9 @@ function renderObjective(){
    <div class="gear">${TK.gear.map(([cat,items],gi)=>`<div class="gcat"><h4>${esc(cat)}</h4>${items.map((it,ii)=>{const k=gi+'.'+ii,on=(o.gear||{})[k];
       return `<label class="gitem${on?' on':''}"><input type="checkbox" data-obj="gear" data-k="${k}"${on?' checked':''}><span>${esc(it)}</span></label>`}).join('')}</div>`).join('')}</div>
    <h2 class="objh">After the mountain</h2>
-   <div class="after"><div><b>🐪 Sahara tour</b><span>Usually 2–3 days from Marrakech, long drives over the Atlas.</span></div>
-     <div><b>🕌 Marrakech</b><span>Medina, souks and gardens; an easy way to recover.</span></div>
-     <div><b>🚗 The coast</b><span>A rental car to a coastal town like Essaouira, a few hours west.</span></div></div>
+   <div class="after"><div><b>Sahara tour</b><span>Usually 2–3 days from Marrakech, long drives over the Atlas.</span></div>
+     <div><b>Marrakech</b><span>Medina, souks and gardens; an easy way to recover.</span></div>
+     <div><b>The coast</b><span>A rental car to a coastal town like Essaouira, a few hours west.</span></div></div>
   </section>`;
   document.getElementById('foot').innerHTML='';
 }
@@ -1746,7 +1806,7 @@ function renderOslo(){
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="oshero" data-cdt="${dayOf(race)}T09:00:00">
      <div class="oswave" aria-hidden="true"></div>
-     <div class="tkhead"><span class="oskick">🏁 Race day</span><b>Saturday 18 September 2027, 09:00</b><span>Two laps along the Oslofjord · booked</span></div>
+     <div class="tkhead"><span class="oskick">${ICON('flag','inl')} Race day</span><b>Saturday 18 September 2027, 09:00</b><span>Two laps along the Oslofjord · booked</span></div>
      ${left>0?cdBlock(dayOf(race)+'T09:00:00'):'<div class="cdbig"><b>Race day</b></div>'}
      <div class="tkfoot"><span>${W.phase.name} · week ${W.idx} of ${W.total}</span><span>Long run now: <b>${W.long} km</b></span></div>
    </div>
@@ -1908,7 +1968,7 @@ function renderPasses(){
   const gearAll=TP.gear.reduce((a,g)=>a+g[1].length,0),gearDone=Object.values(o.gear||{}).filter(Boolean).length;
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="tphero" data-cdt="${n.date}T06:00:00">
-     <div class="tkhead"><span class="tpkick">🏔 Three Passes</span><b>${n.fixed?parseDay(n.date).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'Around '+parseDay(n.date).toLocaleDateString(undefined,{month:'long',year:'numeric'})+' · dates not fixed'}</b>
+     <div class="tkhead"><span class="tpkick">${ICON('Nepal','inl')} Three Passes</span><b>${n.fixed?parseDay(n.date).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'Around '+parseDay(n.date).toLocaleDateString(undefined,{month:'long',year:'numeric'})+' · dates not fixed'}</b>
        <span>Kongma La 5,535 · Cho La 5,420 · Renjo La 5,360</span></div>
      ${cdBlock(n.date+'T06:00:00')}
      <div class="dirpick"><button class="${dir==='cw'?'on':''}" data-act="tpdir" data-d="cw">Clockwise</button><button class="${dir==='ccw'?'on':''}" data-act="tpdir" data-d="ccw">Counter-clockwise</button></div>
@@ -2135,7 +2195,7 @@ function drawRunWeek(){
   const W=RW.W,days=[...Array(7)].map((_,i)=>addDays(RW.ws,i)),today=dayOf(new Date());
   document.getElementById('rwTitle').textContent=`Week ${W.idx} · ${W.phase.name}${W.cutback?' · cutback':''}`;
   const haveKm=(RW.have||[]).reduce((a,x)=>a+(+x.km||0),0),tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0)+haveKm;
-  const others={};plansCache().filter(p=>p.tab!=='Run').forEach(p=>{(others[p.date]=others[p.date]||[]).push(TABICON[tabName(p.tab)]||'•')});
+  const others={};plansCache().filter(p=>p.tab!=='Run').forEach(p=>{(others[p.date]=others[p.date]||[]).push(ICON(tabName(p.tab))||'•')});
   const runDays=RS().days||[0,1,2,4];
   document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
   const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>${RW.have.map(x=>`<div class="rwh"><span>${x.done?'✓':'📅'}</span><b>${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</b><em>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</em><small>${x.done?'done':'in calendar'}</small></div>`).join('')}</div>`:'';
@@ -2170,12 +2230,12 @@ function openPlan(){
   document.getElementById('planOpts').innerHTML=Object.keys(byTab).map(t=>{
     const whole=byTab[t].filter(o=>!o.one),single=byTab[t].filter(o=>o.one),bySec={};
     single.forEach(o=>{(bySec[o.name]=bySec[o.name]||[]).push(o)});
-    return `<div class="pgrp"><h4 style="--tc:${colOf(t)}">${TABICON[tabName(t)]||''} ${esc(t)}</h4>
+    return `<div class="pgrp"><h4 style="--tc:${colOf(t)}">${ICON(tabName(t))} ${esc(t)}</h4>
       ${whole.map(prow).join('')}
       ${single.length?`<details class="pickex"><summary>Pick single exercises</summary>${Object.keys(bySec).map(sec=>`<div class="pxsec"><b>${esc(sec)}</b>${bySec[sec].map(prow).join('')}</div>`).join('')}</details>`:''}
     </div>`}).join('');
   document.getElementById('planOpts').insertAdjacentHTML('afterbegin',`<div class="pgrp"><h4 style="--tc:var(--muted)">Something else</h4>
-    ${EXTRAS.map(([t,m])=>`<label class="popt"><input type="checkbox" value="x:${esc(t)}" data-extra="1" data-tab="${esc(t)}" data-name="${esc(t)}" data-label="${esc(t)}" data-min="${m}"><span>${TABICON[t]} ${esc(t)}</span><em>${m>=60&&m%60===0?m/60+' h':m+' min'}</em></label>
+    ${EXTRAS.map(([t,m])=>`<label class="popt"><input type="checkbox" value="x:${esc(t)}" data-extra="1" data-tab="${esc(t)}" data-name="${esc(t)}" data-label="${esc(t)}" data-min="${m}"><span>${ICON(t)} ${esc(t)}</span><em>${m>=60&&m%60===0?m/60+' h':m+' min'}</em></label>
       ${t==='Run'?`<div class="runopts" hidden><select id="prType" aria-label="Run type">${Object.keys(RUNLBL).filter(k=>k!=='strides').map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('')}</select>
         <label class="kmin"><input id="prKm" type="number" inputmode="decimal" min="1" max="50" step="0.5" aria-label="Kilometres">km</label></div>`:''}`).join('')}</div>`);
   const ty=document.getElementById('prType'),km=document.getElementById('prKm'),W=weekInfo(parseDay(f.date.value));
@@ -2199,8 +2259,8 @@ function planAuto(){
     if(whole.length)parts.push(`${[...new Set(whole.map(x=>x.dataset.tab))].join(' + ')}: ${[...new Set(whole.map(x=>x.dataset.name))].join(' + ')}`);
     if(singles.length)parts.push(`${[...new Set(singles.map(x=>x.dataset.tab))].join(' + ')}: ${singles.length<=3?singles.map(x=>x.dataset.label).join(', '):singles.length+' exercises'}`);
     ext.forEach(x=>parts.push(x===run?`${RUNLBL[rt]||'Run'}${rk?' · '+rk+' km':''}`:x.dataset.name));
-    const icons=[...new Set(tabs.concat(ext.map(x=>x.dataset.tab)))].map(t=>TABICON[t]||'').join('');
-    f.title.value=ch.length?`${icons} ${parts.join(' + ')}${det?' · '+det:''}`:(det?det:'')}
+    const icons='';
+    f.title.value=(ch.length?`${parts.join(' + ')}${det?' · '+det:''}`:(det||'')).replace(/\s+/g,' ').trim()}
 }
 function openSync(){
   const c=syncCfg(),d=document.getElementById('syncdlg');
@@ -2335,7 +2395,9 @@ const playIcon='<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 0l9 5-9 
 const framesHTML=fr=>fr&&fr.length?`<ol class="frames" style="--n:${fr.length}">${fr.map((f,i)=>`<li>${frameSVG(f)}<div class="cap">${fr.length>1?`<span class="num">${i+1}</span>`:''}<span>${esc(f.cap)}</span></div></li>`).join('')}</ol>`:'';
 function card(e){
   const chips=paramsFor(e).length;
-  return `<article class="ex" data-id="${esc(e.id)}" data-sec="${e.sec}">
+  const sk=SEL.on?selKey(prog(),e.sec,e.id):null,son=sk&&SEL.keys.includes(sk);
+  return `<article class="ex${SEL.on?' selectable':''}${son?' picked':''}" data-id="${esc(e.id)}" data-sec="${e.sec}"${SEL.on?` data-act="seltoggle" data-key="${esc(sk)}"`:''}>
+   ${SEL.on?`<span class="selmark">${son?'✓':''}</span>`:''}
    <div class="exhead"><h3>${esc(e.name)}${e.custom?'<span class="tag">yours</span>':''}</h3><span class="dose">${esc(e.dose)}</span></div>
    ${framesHTML(e.frames)}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
@@ -2351,7 +2413,7 @@ function card(e){
 function render(){
   const p=prog();
   document.getElementById('ptitle').textContent=p.title;
-  document.getElementById('plede').textContent=p.lede;
+  document.getElementById('plede').innerHTML=esc(p.lede)+(TRAIN_IDS.includes(p.id)?` <button class="link selbtn" data-act="selmode">${SEL.on?'Done selecting':'Select exercises'}</button>`:'');
   document.title=p.title;
   const inTrain=TRAIN_IDS.includes(cur);
   document.body.dataset.view=inTrain?'train':['toubkal','oslo','passes'].includes(cur)?'obj':cur;
@@ -2463,6 +2525,8 @@ document.getElementById('progs').addEventListener('click',e=>{const b=e.target.c
 document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;
   const v=b.dataset.view;go(v==='train'?lastTrain:v)});
 document.body.addEventListener('click',e=>{
+  const art0=e.target.closest('article.ex[data-act=seltoggle]');
+  if(art0&&!e.target.closest('button,input,select,summary')){const k=art0.dataset.key;SEL.keys=SEL.keys.includes(k)?SEL.keys.filter(x=>x!==k):SEL.keys.concat([k]);selBar();refresh();return}
   const g=e.target.closest&&e.target.closest('g[data-act=tpjump]');
   if(g){const el=[...document.querySelectorAll('.tpdays .dstep')].find(x=>x.id.includes('tpd-'+g.dataset.v.replace(/\s/g,'')+'-'));
     if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1400)}return}
@@ -2491,6 +2555,11 @@ function onAct(b){
   if(act==='dupfix'){const n=dupCount();
     ask(`Remove ${n} duplicate${n>1?'s':''}?`,'One of each session is kept. The extra events are deleted from your Training calendar.','Remove',true).then(ok=>{if(!ok)return;
       const done=cleanDuplicates();undoBar(done+' duplicate'+(done>1?'s':'')+' removed',()=>{});});return}
+  if(act==='selmode'){SEL={on:!SEL.on,keys:SEL.on?[]:SEL.keys};selBar();refresh();return}
+  if(act==='seltoggle'){const k=b.dataset.key;SEL.keys=SEL.keys.includes(k)?SEL.keys.filter(x=>x!==k):SEL.keys.concat([k]);selBar();refresh();return}
+  if(act==='selend'){SEL={on:false,keys:[]};selBar();refresh();return}
+  if(act==='seladd'){openSelDay();return}
+  if(act==='weekbuild'){openWeekBuild(b.dataset.w);return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
@@ -2702,6 +2771,27 @@ addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
   S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
+/* ---------- select-to-day and week builder ---------- */
+(function(){
+  document.getElementById('seldayfrm').addEventListener('submit',ev=>{
+    const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
+    if(!connected()){ev.preventDefault();ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
+    const p=planFromKeys(SEL.keys,f.date.value,f.start.value);
+    SEL={on:false,keys:[]};selBar();calSel=f.date.value;calPicked=true;refresh();
+    if(p)undoBar('Added to '+niceDay(p.date),()=>{})});
+  const wf=document.getElementById('weekfrm');
+  wf.addEventListener('click',ev=>{
+    const d=ev.target.closest('[data-wb]');if(d){WB.day=+d.dataset.wb;drawWeekBuild();return}
+    const a=ev.target.closest('[data-wbadd]');if(a){const k=a.dataset.wbadd,list=WB.days[WB.day]=WB.days[WB.day]||[];
+      const i=list.indexOf(k);if(i>=0)list.splice(i,1);else list.push(k);drawWeekBuild('sel');return}
+    const r=ev.target.closest('[data-wbrm]');if(r){WB.days[WB.day].splice(+r.dataset.wbrm,1);drawWeekBuild('sel');return}});
+  wf.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    if(!connected()){ev.preventDefault();ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
+    let n=0;Object.keys(WB.days).forEach(i=>{const keys=WB.days[i];if(!keys||!keys.length)return;
+      if(planFromKeys(keys,dayOf(addDays(WB.ws,+i)),'17:00'))n++});
+    refresh();if(n)undoBar(n+' day'+(n>1?'s':'')+' planned',()=>{})});
+})();
 /* ---------- run dialogs ---------- */
 (function(){
   const wf=document.getElementById('runweekfrm');
@@ -2720,7 +2810,7 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
     const add=[];RW.runs.forEach(x=>{const id=uid(),km=Math.round((+x.km||0)*10)/10,lbl=RUNLBL[x.type]||'Run';
       const minutes=Math.max(15,Math.round(km*runPace(x.type)/5)*5);
       const ex=EX[RUNEX[x.type]],lv=ex&&ex.L?ex.L[Math.min(S.levels[RUNEX[x.type]]||0,4)]:null;
-      const plan={id,date:x.date,start:x.start||'14:00',minutes,title:`🏃 ${lbl} · ${km} km`,tab:'Run',
+      const plan={id,date:x.date,start:x.start||'14:00',minutes,title:`${lbl} · ${km} km`,tab:'Run',
         items:[`${lbl}: ${km} km`,zoneText(RUNZONE[x.type]||[2,2])].concat((x.type==='tempo'||x.type==='intervals')&&lv?[`Main set: ${lv.v}`]:[]),
         link:location.origin+location.pathname+'#plan='+id};
       S.runMeta[id]={type:x.type,km};add.push(plan)});
@@ -2759,8 +2849,8 @@ function openPlanEdit(id){
   const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
   EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=p.title;
   const app=(S.planRefs[p.id]||[]).length;
-  f.tab.innerHTML=EXTRAS.map(([t])=>`<option value="${t}">${TABICON[t]||''} ${t}</option>`).join('')
-    +(app||!EXTRAS.some(([t])=>t===tabName(p.tab))?`<option value="${esc(tabName(p.tab))}">${TABICON[tabName(p.tab)]||''} ${esc(tabName(p.tab))}</option>`:'');
+  f.tab.innerHTML=EXTRAS.map(([t])=>`<option value="${t}">${t}</option>`).join('')
+    +(app||!EXTRAS.some(([t])=>t===tabName(p.tab))?`<option value="${esc(tabName(p.tab))}">${esc(tabName(p.tab))}</option>`:'');
   f.tab.value=tabName(p.tab);
   document.getElementById('epTypeRow').hidden=!!app;
   const isRun=tabName(p.tab)==='Run',m=S.runMeta[p.id]||{};
@@ -2787,14 +2877,14 @@ function replacePlan(plan){
     if(ev.target===f.tab){
       const t=f.tab.value,det=(f.title.value.split(' · ').slice(1).join(' · ')||'').trim();
       document.getElementById('epRun').hidden=t!=='Run';
-      if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;f.title.value=`🏃 ${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
-      else f.title.value=`${TABICON[t]||''} ${t}${det?' · '+det:''}`.trim();
+      if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;f.title.value=`${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
+      else f.title.value=`${t}${det?' · '+det:''}`.trim();
       const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
       return}
     if(!EP||f.tab.value!=='Run')return;
     if(ev.target===f.rtype||ev.target===f.rkm){
       const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,lbl=RUNLBL[f.rtype.value]||'Run';
-      f.title.value=`🏃 ${lbl}${km?' · '+km+' km':''}`;
+      f.title.value=`${lbl}${km?' · '+km+' km':''}`;
       if(km)f.minutes.value=Math.max(15,Math.round(km*runPace(f.rtype.value)/5)*5);
     }});
   document.getElementById('epDel').addEventListener('click',()=>{
@@ -2815,6 +2905,76 @@ function replacePlan(plan){
     replacePlan(p);
   });
 })();
+/* ---------- picking exercises and planning them ---------- */
+const keyEx=k=>{const [pid,si,mode]=k.split('|'),p=PROGS.find(x=>x.id===pid);if(!p)return null;
+  const e=sectionItems(p,+si).find(x=>x.id===mode.slice(2));return e?{...e,prog:p}:null};
+function planFromKeys(keys,date,start){
+  if(!keys.length)return null;
+  const exs=keys.map(keyEx).filter(Boolean);if(!exs.length)return null;
+  const tabs=[...new Set(exs.map(e=>e.prog.chip))];
+  const mins=Math.max(10,Math.round(estimate(exs)/60/5)*5);
+  const id=uid(),title=`${tabs.join(' + ')}: ${exs.length<=3?exs.map(e=>e.name).join(', '):exs.length+' exercises'}`;
+  const plan={id,date,start:start||'17:00',minutes:mins,title,tab:tabs[0],
+    items:exs.map(e=>`${e.name} · ${e.dose}`),link:location.origin+location.pathname+'#plan='+id};
+  S.planRefs[id]=keys.slice();save();
+  setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
+  enqueue({op:'plan',plan});scheduleFlush(300);
+  return plan;
+}
+/* A: select exercises while browsing */
+let SEL={on:false,keys:[]};
+const selKey=(p,sec,id)=>`${p.id}|${sec}|x:${id}`;
+function selBar(){
+  let bar=document.getElementById('selbar');
+  if(!SEL.on){if(bar)bar.remove();document.body.classList.remove('selmode');return}
+  document.body.classList.add('selmode');
+  if(!bar){bar=document.createElement('div');bar.id='selbar';document.body.appendChild(bar)}
+  const n=SEL.keys.length;
+  bar.innerHTML=`<span><b>${n}</b> selected</span>
+    <button class="go sm" data-act="seladd"${n?'':' disabled'}>Add to a day</button>
+    <button class="link" data-act="selend">Cancel</button>`;
+}
+function openSelDay(){
+  const d=document.getElementById('seldaydlg'),f=document.getElementById('seldayfrm');
+  const exs=SEL.keys.map(keyEx).filter(Boolean);
+  f.date.value=calSel&&calSel>=dayOf(new Date())?calSel:dayOf(new Date());
+  if(!f.start.value)f.start.value='17:00';
+  document.getElementById('sdList').innerHTML=exs.map(e=>`<div class="sdrow"><b>${esc(e.name)}</b><span>${esc(e.dose)}</span></div>`).join('');
+  document.getElementById('sdSum').textContent=`${exs.length} exercise${exs.length>1?'s':''} · about ${Math.max(10,Math.round(estimate(exs)/60/5)*5)} min`;
+  d.showModal();
+}
+/* B: build a whole week */
+let WB=null;
+function openWeekBuild(offset){
+  const ws=addDays(mondayOf(new Date()),7*(+offset||0));
+  WB={ws,day:0,days:{}};drawWeekBuild();document.getElementById('weekdlg').showModal();
+}
+function drawWbPicked(){
+  const picked=WB.days[WB.day]||[],exs=picked.map(keyEx).filter(Boolean);
+  document.getElementById('wbPicked').innerHTML=picked.length
+    ? exs.map((e,i)=>`<div class="sdrow"><b>${esc(e.name)}</b><span>${esc(e.dose)}</span><button type="button" class="link hx" data-wbrm="${i}">✕</button></div>`).join('')
+      +`<p class="hint">About ${Math.max(10,Math.round(estimate(exs)/60/5)*5)} min</p>`
+    : '<p class="empty">Nothing on this day yet. Tap + below.</p>';
+  const days=[...Array(7)].map((_,i)=>addDays(WB.ws,i)),today=dayOf(new Date());
+  document.getElementById('wbDays').innerHTML=days.map((d,i)=>{const n=(WB.days[i]||[]).length,past=dayOf(d)<today;
+    return `<button type="button" class="wbday${i===WB.day?' on':''}${past?' past':''}" data-wb="${i}"><b>${d.toLocaleDateString(undefined,{weekday:'short'})}</b><span>${d.getDate()}</span><em>${n?n+' ex':''}</em></button>`}).join('');
+  document.querySelectorAll('[data-wbadd]').forEach(btn=>{const on=picked.includes(btn.dataset.wbadd);
+    btn.classList.toggle('on',on);btn.textContent=on?'✓':'+'});
+  const tot=Object.values(WB.days).filter(x=>x.length).length;
+  document.getElementById('wbSave').textContent=tot?`Add ${tot} day${tot>1?'s':''} to the calendar`:'Add to the calendar';
+}
+function drawWeekBuild(part){
+  const days=[...Array(7)].map((_,i)=>addDays(WB.ws,i));
+  if(part!=='sel'){
+    document.getElementById('wbTitle').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
+    const opts=sessionOptions().filter(o=>o.one),byTab={};
+    opts.forEach(o=>{(byTab[o.tab]=byTab[o.tab]||[]).push(o)});
+    document.getElementById('wbLib').innerHTML=Object.keys(byTab).map((t,i)=>`<details class="pickex"${i===0?' open':''}><summary>${ICON(tabName(t))} ${esc(t)}</summary>
+      ${byTab[t].map(o=>`<div class="wbrow"><div><b>${esc(o.label)}</b><span>${esc(o.dose||'')}</span></div>
+        <button type="button" class="wbadd" data-wbadd="${esc(o.key)}">+</button></div>`).join('')}</details>`).join('');
+  }
+  drawWbPicked();
+}
 /* ---------- plan dialog ---------- */
 (function(){
   const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),msg=document.getElementById('planMsg');
