@@ -465,6 +465,19 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .upc b{display:block;font-size:14px}.upc span{font-size:13px;color:var(--muted)}
 #editplandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #editplandlg label[hidden]{display:none}
+#editplandlg form{gap:6px}
+.epsec{display:flex;flex-direction:column;gap:8px;padding:12px 0 6px;border-top:1px solid var(--rule)}
+.epsec:first-of-type{border-top:0;padding-top:4px}
+.epsec[hidden]{display:none}
+.epsec h4{margin:0;font:600 12px/1 Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.epsec input,.epsec select{font-size:16px}
+.typechips{display:flex;flex-wrap:wrap;gap:6px}
+.tchip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--rule);background:none;color:var(--ink);
+  border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px}
+.tchip .ic{width:16px;height:16px;color:var(--tc)}
+.tchip.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 18%,transparent)}
+.minlab{max-width:9em}
+#editplandlg .link.del{align-self:center;color:var(--acc);margin-top:4px;padding:10px}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #plandlg input[type=date],#plandlg input[type=time]{font-size:16px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -650,16 +663,27 @@ button.chip::after{display:none}
 
 <dialog id="editplandlg"><form method="dialog" id="editplanfrm">
   <h2>Change this session</h2>
-  <label id="epTypeRow">What it is<select name="tab"></select></label>
-  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
-  <div class="runopts" id="epRun" hidden><select name="rtype" aria-label="Run type"></select>
-    <label class="kmin"><input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5" aria-label="Kilometres">km</label></div>
-  <div class="durrow"><label>Duration, minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label>
-    <div id="epChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div></div>
-  <label>Title in your calendar<input name="title" autocomplete="off" required></label>
+
+  <section class="epsec" id="epTypeRow"><h4>What it is</h4>
+    <div class="typechips" id="epTypes"></div></section>
+
+  <section class="epsec" id="epRun" hidden><h4>The run</h4>
+    <div class="row2"><label>Type<select name="rtype"></select></label>
+      <label>Distance, km<input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5"></label></div></section>
+
+  <section class="epsec"><h4>When</h4>
+    <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div></section>
+
+  <section class="epsec"><h4>How long</h4>
+    <div id="epChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div>
+    <label class="minlab">Minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label></section>
+
+  <section class="epsec"><h4>Title in your calendar</h4>
+    <input name="title" autocomplete="off" required></section>
+
   <p class="syncmsg" id="epMsg" role="status"></p>
-  <div class="dbtns"><button type="button" class="btn danger" id="epDel">Remove</button><span></span>
-    <button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
+  <button type="button" class="link del" id="epDel">Remove this session</button>
 </form></dialog>
 
 <dialog id="nepdlg"><form method="dialog" id="nepfrm">
@@ -1468,6 +1492,7 @@ const plansCache=()=>lsGet(PKEY,[]);
 const setPlans=l=>lsSet(PKEY,l);
 let calMonth=null,calSel=null;
 const monthStart=d=>new Date(d.getFullYear(),d.getMonth(),1);
+const cleanTitle=t=>String(t||'').replace(/^(?:[\p{Extended_Pictographic}\uFE0F\u200D\u20E3]|\s)+/u,'').trim();
 const dupKey=p=>[p.date,p.start,String(p.minutes),tabName(p.tab),String(p.title).trim()].join('|');
 function dupGroups(list){const by={};(list||plansCache()).forEach(p=>{(by[dupKey(p)]=by[dupKey(p)]||[]).push(p)});
   return Object.values(by).filter(g=>g.length>1)}
@@ -1542,7 +1567,7 @@ function renderHistory(){
   const upcoming=plans.filter(p=>p.date>=todayS).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
   const dayPlans=(planBy[calSel]||[]).sort((a,b)=>a.start.localeCompare(b.start)),dayLog=(logBy[calSel]||[]).sort((a,b)=>a.time.localeCompare(b.time));
   const doneDay=dayLog.some(r=>r.result==='done');
-  const planRow=p=>`<div class="prow" style="--tc:${colOf(p.tab)}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(p.title)}</b>
+  const planRow=p=>`<div class="prow" style="--tc:${colOf(p.tab)}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(cleanTitle(p.title))}</b>
       <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(p.status==='done'||(doneDay&&p.date<=todayS))?' · <em class="ok">✓ done</em>':''}</span>
       ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}<u>Tap to change time or day</u></button>
       <div class="pside">${(S.planRefs[p.id]||[]).length&&p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
@@ -1575,7 +1600,7 @@ function renderHistory(){
         <button class="add" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Build a week of exercises</button>
         <button class="add run" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Plan the running week</button></div>
     </div>
-    ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(p.title)}</span></button>`).join('')}</div>`:''}
+    ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}</div>`:''}
    </section>`;
   document.getElementById('foot').innerHTML='';
 }
@@ -1595,7 +1620,7 @@ function renderToday(){
   const refs=p=>(S.planRefs[p.id]||[]);
   const nextCard=next?`<div class="nextcard" style="--tc:${colOf(next.tab)}">
       <div class="nc-top"><span class="nc-when">${esc(when(next))} · ${esc(String(next.minutes))} min${next.pending?' · <em>waiting to reach the calendar</em>':''}</span></div>
-      <h2>${esc(next.title)}</h2>
+      <h2>${esc(cleanTitle(next.title))}</h2>
       ${(next.items||[]).length?`<p class="nc-items">${(next.items||[]).map(esc).join('<br>')}</p>`:''}
       <div class="nc-btns">${refs(next).length?`<button class="go" data-act="pstart" data-id="${esc(next.id)}">${playIcon}Start</button>`
         :(next.date<=todayS?`<button class="go" data-act="pdone" data-id="${esc(next.id)}">✓ Done</button>`:'')}
@@ -1623,7 +1648,7 @@ function renderToday(){
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
-    ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(p.title)}</span></button>`).join('')}`:''}
+    ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
     <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
       return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>${ICON('Run','inl')} ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
@@ -2843,17 +2868,17 @@ document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.targ
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null;
+let EP=null,EP_TYPE=null;
 function openPlanEdit(id){
   const p=plansCache().find(x=>x.id===id);if(!p)return;
   const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
-  EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=p.title;
+  EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=cleanTitle(p.title);
   const app=(S.planRefs[p.id]||[]).length;
-  f.tab.innerHTML=EXTRAS.map(([t])=>`<option value="${t}">${t}</option>`).join('')
-    +(app||!EXTRAS.some(([t])=>t===tabName(p.tab))?`<option value="${esc(tabName(p.tab))}">${esc(tabName(p.tab))}</option>`:'');
-  f.tab.value=tabName(p.tab);
+  const cur0=tabName(p.tab),types=EXTRAS.map(([t])=>t).concat(EXTRAS.some(([t])=>t===cur0)?[]:[cur0]);
+  document.getElementById('epTypes').innerHTML=types.map(t=>`<button type="button" class="tchip${t===cur0?' on':''}" data-type="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
+  EP_TYPE=cur0;
   document.getElementById('epTypeRow').hidden=!!app;
-  const isRun=tabName(p.tab)==='Run',m=S.runMeta[p.id]||{};
+  const isRun=cur0==='Run',m=S.runMeta[p.id]||{};
   document.getElementById('epRun').hidden=!isRun;
   f.rtype.innerHTML=Object.keys(RUNLBL).map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('');
   f.rtype.value=m.type||'easy';f.rkm.value=m.km||'';
@@ -2873,15 +2898,21 @@ function replacePlan(plan){
   document.getElementById('epChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
     f.minutes.value=b.dataset.min;document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',x===b))});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.touched='1';document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on'))});
-  f.addEventListener('change',ev=>{
-    if(ev.target===f.tab){
-      const t=f.tab.value,det=(f.title.value.split(' · ').slice(1).join(' · ')||'').trim();
+  document.getElementById('epTypes').addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-type]');if(!b)return;
+    document.querySelectorAll('#epTypes .tchip').forEach(x=>x.classList.toggle('on',x===b));
+    EP_TYPE=b.dataset.type;
+    {
+      const t=EP_TYPE;let det=(f.title.value.split(' · ').slice(1).join(' · ')||'').trim();
+      if(t!=='Run'&&/^[\d.]+\s*km$/i.test(det))det='';
       document.getElementById('epRun').hidden=t!=='Run';
       if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;f.title.value=`${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
       else f.title.value=`${t}${det?' · '+det:''}`.trim();
       const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
-      return}
-    if(!EP||f.tab.value!=='Run')return;
+      document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
+    }});
+  f.addEventListener('change',ev=>{
+    if(!EP||EP_TYPE!=='Run')return;
     if(ev.target===f.rtype||ev.target===f.rkm){
       const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,lbl=RUNLBL[f.rtype.value]||'Run';
       f.title.value=`${lbl}${km?' · '+km+' km':''}`;
@@ -2896,8 +2927,8 @@ function replacePlan(plan){
       scheduleFlush(300);document.getElementById('editplandlg').close('done');refresh()})});
   f.addEventListener('submit',ev=>{
     if(!ev.submitter||ev.submitter.value!=='save'||!EP)return;
-    const newTab=document.getElementById('epTypeRow').hidden?tabName(EP.tab):f.tab.value;
-    const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:f.title.value.trim()||EP.title};
+    const newTab=document.getElementById('epTypeRow').hidden?tabName(EP.tab):(EP_TYPE||tabName(EP.tab));
+    const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:cleanTitle(f.title.value)||cleanTitle(EP.title)};
     if(newTab!=='Run'){delete S.runMeta[p.id];const det=(p.title.split(' · ').slice(1).join(' · ')||'').trim();p.items=[newTab+(det?': '+det:'')]}
     if(newTab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
       S.runMeta[p.id]={type:ty,km};p.items=[`${RUNLBL[ty]}${km?': '+km+' km':''}`,zoneText(RUNZONE[ty]||[2,2])]}
