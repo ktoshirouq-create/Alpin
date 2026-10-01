@@ -204,6 +204,43 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .after{display:grid;grid-template-columns:1fr;gap:8px}
 .after div{background:var(--panel);border-radius:12px;padding:10px 12px}.after b{display:block;font-size:15px}.after span{font-size:13px;color:var(--muted)}
 .cd.trip{box-shadow:inset 0 -4px 0 var(--oc)}
+#tripdlg form,#tripnewdlg form{padding:0 0 14px;display:flex;flex-direction:column;gap:0}
+#tripnewdlg form{padding:20px;gap:6px}
+#tripdlg .thead{padding:20px 20px 14px}
+#tripdlg .kick{font:700 11px Barlow,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+#tripdlg h1{font:700 30px/1.04 "Barlow Condensed",sans-serif;margin:6px 0 4px}
+#tripdlg h1 .pen{background:none;border:0;color:var(--muted);font-size:15px;margin-left:6px}
+#tripdlg .meta{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:13px}
+#tripdlg .meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted);opacity:.6}
+#tripdlg .rail{display:flex;gap:6px;overflow-x:auto;padding:2px 20px 14px}
+#tripdlg .rail::-webkit-scrollbar{display:none}
+#tripdlg .day{flex:0 0 auto;min-width:56px;background:none;border:1.5px solid transparent;border-radius:14px;padding:8px 10px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted)}
+#tripdlg .day b{font:600 10.5px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.08em}
+#tripdlg .day span{font:700 20px/1.05 "Barlow Condensed",sans-serif;color:var(--ink);opacity:.75}
+#tripdlg .day em{font-style:normal;font-size:10.5px;height:13px}
+#tripdlg .day.on{background:color-mix(in srgb,var(--tc) 16%,transparent);border-color:color-mix(in srgb,var(--tc) 50%,transparent)}
+#tripdlg .day.on span{opacity:1}#tripdlg .day.on b,#tripdlg .day.on em{color:var(--tc)}
+#tripdlg .day.add{border-style:dashed;border-color:var(--rule)}
+.trpanel{padding:4px 20px 0;max-height:46vh;overflow:auto}
+.trpanel .dh{display:flex;flex-direction:column;gap:2px;margin:2px 0 16px}
+.trpanel .dh h2{font:700 24px/1.05 "Barlow Condensed",sans-serif;margin:0}
+.trpanel .dh span{font-size:12.5px;color:var(--muted)}
+.tl{position:relative;padding-left:78px}
+.tl::before{content:"";position:absolute;left:62px;top:8px;bottom:26px;width:1.5px;background:var(--rule)}
+.tl .ev{position:relative;margin-bottom:18px}
+.tl .ev .time{position:absolute;left:-78px;top:1px;width:46px;text-align:right;font:600 13px Barlow,sans-serif;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl .ev::before{content:"";position:absolute;left:-21px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--tc,var(--acc));box-shadow:0 0 0 3px var(--panel)}
+.tl .ev b{display:block;font-size:16px;font-weight:600;line-height:1.25}
+.tl .ev small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.tl .ev .edit{position:absolute;right:0;top:2px;color:var(--muted);background:none;border:0;font-size:14px}
+.tl .ghost{position:relative;color:var(--muted);font-weight:600;font-size:14.5px;background:none;border:0;padding:0;text-align:left}
+.tl .ghost::before{content:"+";position:absolute;left:-21px;top:-1px;width:11px;height:11px;border-radius:50%;border:1.5px dashed var(--rule);display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1}
+.trpanel .note{font-size:12.5px;color:var(--muted);line-height:1.5;margin:10px 0 0}
+.acts2{display:flex;flex-wrap:wrap;gap:16px;margin-top:10px}
+.acts2 .link{white-space:nowrap}
+.cd.trip{background:color-mix(in srgb,var(--oc) 22%,var(--panel));border-radius:0}
+.cd.trip.tstart{border-radius:11px 0 0 11px}.cd.trip.tend{border-radius:0 11px 11px 0}
+.cd.trip+.cd.trip{margin-left:-4px}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
 .oshero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#FFF1E8;
@@ -770,6 +807,23 @@ button.chip::after{display:none}
   <label>Easy pace, min/km<input name="easyPace" placeholder="7:20" pattern="\d{1,2}:\d{2}" required></label>
   <p class="hint">Changing current km or your recent long run re-anchors the plan from this week, up or down. The app also suggests this on its own when your logged runs drift from the plan.</p>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save</button></div>
+</form></dialog>
+
+<dialog id="tripdlg"><form method="dialog" id="tripfrm">
+  <div class="thead" id="trHead"></div>
+  <div class="rail" id="trRail"></div>
+  <div class="trpanel" id="trPanel"></div>
+  <div class="dbtns"><button type="button" class="link del" id="trDel">Remove trip</button><span></span>
+    <button class="btn" value="cancel" formnovalidate>Close</button></div>
+</form></dialog>
+
+<dialog id="tripnewdlg"><form method="dialog" id="tripnewfrm">
+  <h2>Plan a trip</h2>
+  <section class="epsec"><h4>Trip</h4><label>Name<input name="name" required placeholder="Rjukan · Gaustatoppen"></label></section>
+  <section class="epsec"><h4>Days</h4><div class="row2"><label>First day<input name="start" type="date" required></label><label>Last day<input name="end" type="date" required></label></div></section>
+  <section class="epsec"><h4>What kind</h4><div class="typechips" id="trKinds"></div></section>
+  <p class="syncmsg" id="trMsg" role="status"></p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add trip</button></div>
 </form></dialog>
 
 <dialog id="plandlg"><form method="dialog" id="planfrm">
@@ -1391,11 +1445,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},kinds:{},lastKind:{},places:[]});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=5;
   if(!S0.settings.readyV2){if(S0.settings.ready===10)S0.settings.ready=5;S0.settings.readyV2=1}
   if(!Array.isArray(S0.hidden))S0.hidden=[];
@@ -1625,7 +1679,7 @@ function renderHistory(){
     const dots=[...doneAct.slice(0,3).map(t=>`<i style="background:${colOf(t)}"></i>`),
       ...doneTrain.slice(0,2).map(t=>`<i class="small" style="background:${colOf(t)}"></i>`),
       ...planTabs.slice(0,2).map(t=>`<i class="ring" style="border-color:${colOf(t)}"></i>`)].slice(0,4).join('');
-    const ob=objOn(ds)[0];
+    const ob=objOn(ds)[0]||(()=>{const t=tripOn(ds);return t?{col:colOf(t.kind||'Hike'),date:t.start,end:t.end,id:t.id,name:t.name,icon:'',go:null,trip:t}:null})();
     cells+=`<button type="button" style="${ob?'--oc:'+ob.col:''}" class="cd${ob?' trip'+(ds===ob.date?' tstart':'')+(ds===ob.end?' tend':''):''}${inM?'':' out'}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
   }
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));const wkStart=dayOf(wk);
@@ -1634,7 +1688,8 @@ function renderHistory(){
   const dayPlans=(planBy[calSel]||[]).sort((a,b)=>a.start.localeCompare(b.start)),dayLog=(logBy[calSel]||[]).sort((a,b)=>a.time.localeCompare(b.time));
   const doneDay=dayLog.some(r=>r.result==='done');
   const planRow=p=>`<div class="prow" style="--tc:${colOf(p.tab)}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(cleanTitle(p.title))}</b>
-      <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(p.status==='done'||(doneDay&&p.date<=todayS))?' · <em class="ok">✓ done</em>':''}</span>
+      <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(()=>{const lg=(logBy[p.date]||[]).find(r=>r.plan_id===p.id);
+        return lg?` · <em class="ok">✓ done ${esc(lg.time)}${lg.completed?' · '+esc(lg.completed):''}</em>`:(p.status==='done'?' · <em class="ok">✓ done</em>':'')})()}</span>
       ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}<u>Tap to change time or day</u></button>
       <div class="pside">${(S.planRefs[p.id]||[]).length&&p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
         :(!(S.planRefs[p.id]||[]).length&&p.date<=todayS&&p.status!=='done'&&!(logBy[p.date]||[]).some(r=>r.plan_id===p.id)?`<button class="go sm alt" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`:'')}<button class="link hx" data-act="pdel" data-id="${esc(p.id)}" aria-label="Remove plan">✕</button></div></div>`;
@@ -1656,14 +1711,18 @@ function renderHistory(){
       <span><i class="ring"></i>planned</span></div>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
     <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
+      ${(()=>{const t=tripOn(calSel);if(!t)return'';const n=tripDayNo(t,calSel),sp=tripSpan(t),first=tripPlans(t,calSel)[0];
+        return `<button class="tripbar" data-act="tripopen" data-id="${esc(t.id)}" data-d="${esc(calSel)}" style="--oc:${colOf(t.kind||'Hike')}">
+          <b>${esc(t.name)}</b><span>day ${n} of ${sp}${first?' · '+esc(cleanTitle(first.title)):''}</span></button>`})()}
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
       ${dayPlans.map(planRow).join('')}
-      ${dayLog.map(logRow).join('')}
+      ${dayLog.filter(r=>!(r.plan_id&&dayPlans.some(p=>p.id===r.plan_id))).map(logRow).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
         <button class="add" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Build a week of exercises</button>
+        <button class="add" data-act="tripnew">+ Plan a trip</button>
         <button class="add run" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Plan the running week</button></div>
     </div>
     ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}</div>`:''}
@@ -1805,7 +1864,23 @@ const OBJS=()=>[
   {id:'marathon',name:'Marathon',icon:ICON('flag'),col:'#E2685A',date:RS().race,end:RS().race,go:'oslo',kind:'race'},
   {id:'nepal',name:'Three Passes',icon:ICON('Nepal'),col:'#E1B12C',date:NS().date,end:dayOf(addDays(parseDay(NS().date),Math.max(1,tpDays().length-1))),go:'passes',kind:'trek'}];
 function objOn(ds){return OBJS().filter(o=>ds>=o.date&&ds<=o.end)}
-function tripDays(){const set=new Set();OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});return set}
+const TRIPS=()=>Object.values(S.trips||{}).sort((a,b)=>a.start.localeCompare(b.start));
+const tripOn=ds=>TRIPS().find(t=>ds>=t.start&&ds<=t.end);
+const tripOfPlan=p=>(S.tripOf||{})[p.id]?(S.trips||{})[S.tripOf[p.id]]:null;
+const tripSpan=t=>Math.round((parseDay(t.end)-parseDay(t.start))/864e5)+1;
+const tripDayNo=(t,ds)=>Math.round((parseDay(ds)-parseDay(t.start))/864e5)+1;
+const tripPlans=(t,ds)=>plansCache().filter(p=>(S.tripOf||{})[p.id]===t.id&&(!ds||p.date===ds)).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+function saveTrip(t){S.trips={...(S.trips||{}),[t.id]:t};save()}
+function deleteTrip(id,alsoPlans){
+  const plans=plansCache().filter(p=>(S.tripOf||{})[p.id]===id);
+  if(alsoPlans)plans.forEach(p=>{setPlans(plansCache().filter(x=>x.id!==p.id));enqueue({op:'unplan',id:p.id});delete S.planRefs[p.id];delete S.runMeta[p.id]});
+  plans.forEach(p=>{delete S.tripOf[p.id]});
+  const t={...(S.trips||{})};delete t[id];S.trips=t;save();scheduleFlush(300);render();
+}
+function tripDays(){const set=new Set();
+  OBJS().filter(o=>o.kind!=='race').forEach(o=>{for(let d=parseDay(o.date);dayOf(d)<=o.end;d=addDays(d,1))set.add(dayOf(d))});
+  TRIPS().forEach(t=>{for(let d=parseDay(t.start);dayOf(d)<=t.end;d=addDays(d,1))set.add(dayOf(d))});
+  return set}
 function OS(id){S.obj[id]=S.obj[id]||{};return S.obj[id]}
 function cdBlock(targetISO){const ms=new Date(targetISO)-new Date(),p=cdParts(ms);
   return `<div class="cdbig"><b data-cdk="d">${p.d}</b><span>days</span></div>
@@ -2565,7 +2640,8 @@ function card(e){
    ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>edited</em>':''}</summary>
       <div class="chips">${chipsHTML(e)}${e.timed?`<span class="tot">≈${Math.max(1,Math.round(totalOf(e)/60))} min</span>`:''}</div>
       ${e.tuned?`<button class="link" data-act="untune" data-key="${esc(e.key)}">Reset ${e.L?'slot '+(e.lvl+1):'to the standard'} numbers</button>`:''}</details>`:''}
-   <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="go sm alt" data-act="logdone">✓ Done</button><button class="link" data-act="exday">+ Add to a day</button><button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
+   <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="go sm alt" data-act="logdone">✓ Done</button></div>
+   <div class="acts2"><button class="link" data-act="exday">Add to a day</button><button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
   </article>`;
 }
 function render(){
@@ -2743,6 +2819,8 @@ function onAct(b){
     const pl=planFromKeys(SEL.keys,dayOf(now),hh);SEL={on:false,keys:[]};selBar();refresh();
     if(pl)undoBar('Added to today at '+hh,()=>{});return}
   if(act==='weekbuild'){openWeekBuild(b.dataset.w);return}
+  if(act==='tripnew'){openTripNew();return}
+  if(act==='tripopen'){openTrip(b.dataset.id,b.dataset.d);return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
@@ -2957,6 +3035,36 @@ addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
   S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
+/* ---------- trip dialogs ---------- */
+(function(){
+  const nf=document.getElementById('tripnewfrm');
+  document.getElementById('trKinds').addEventListener('click',ev=>{const b=ev.target.closest('[data-trkind]');if(!b)return;
+    TR={kind:b.dataset.trkind};document.querySelectorAll('#trKinds .tchip').forEach(x=>x.classList.toggle('on',x===b))});
+  nf.addEventListener('submit',ev=>{
+    if(!ev.submitter||ev.submitter.value!=='save')return;
+    const msg=document.getElementById('trMsg');
+    if(nf.end.value<nf.start.value){ev.preventDefault();msg.textContent='The last day is before the first.';msg.className='syncmsg bad';return}
+    const t={id:uid(),name:nf.name.value.trim()||'Trip',start:nf.start.value,end:nf.end.value,kind:(TR&&TR.kind)||'Hike'};
+    saveTrip(t);calSel=t.start;calPicked=true;
+    setTimeout(()=>{refresh();openTrip(t.id,t.start)},0);
+  });
+  const tf=document.getElementById('tripfrm');
+  tf.addEventListener('click',ev=>{
+    const d=ev.target.closest('[data-trday]');if(d){TR.day=d.dataset.trday;drawTrip();return}
+    const b=ev.target.closest('[data-tr]');if(!b)return;
+    const t=(S.trips||{})[TR.id];
+    if(b.dataset.tr==='addday'){saveTrip({...t,end:dayOf(addDays(parseDay(t.end),1))});TR.day=dayOf(addDays(parseDay(t.end),1));drawTrip();refresh();return}
+    if(b.dataset.tr==='rename'){const n=prompt('Trip name',t.name);if(n&&n.trim()){saveTrip({...t,name:n.trim()});drawTrip();refresh()}return}
+    if(b.dataset.tr==='edit'){document.getElementById('tripdlg').close();openPlanEdit(b.dataset.id);return}
+    if(b.dataset.tr==='add'){PENDING_TRIP={id:TR.id,day:TR.day};document.getElementById('tripdlg').close();
+      calSel=TR.day;openPlan();setTimeout(()=>{const f=document.getElementById('planfrm');f.date.value=TR.day},30);return}
+  });
+  document.getElementById('trDel').addEventListener('click',()=>{
+    const t=(S.trips||{})[TR.id];if(!t)return;
+    ask('Remove '+t.name+'?','The trip is removed. Choose whether its sessions go too.','Remove trip and its sessions',true).then(ok=>{
+      deleteTrip(TR.id,ok);document.getElementById('tripdlg').close('done');refresh()})});
+})();
+let PENDING_TRIP=null;
 /* ---------- select-to-day and week builder ---------- */
 (function(){
   document.getElementById('seldayfrm').addEventListener('submit',ev=>{
@@ -3169,6 +3277,44 @@ function drawWeekBuild(part){
   }
   drawWbPicked();
 }
+/* ---------- trips ---------- */
+let TR=null;
+function openTripNew(){
+  if(!connected()){ask('Connect your Sheet first','Trips and their sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
+  const f=document.getElementById('tripnewfrm'),td=calSel&&calSel>=dayOf(new Date())?calSel:dayOf(new Date());
+  f.name.value='';f.start.value=td;f.end.value=dayOf(addDays(parseDay(td),1));
+  TR={kind:'Hike'};
+  document.getElementById('trKinds').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="tchip${t==='Hike'?' on':''}" data-trkind="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
+  document.getElementById('trMsg').textContent='';
+  document.getElementById('tripnewdlg').showModal();
+}
+function openTrip(id,day){
+  const t=(S.trips||{})[id];if(!t)return;
+  TR={id,day:day||t.start};drawTrip();document.getElementById('tripdlg').showModal();
+}
+function drawTrip(){
+  const t=(S.trips||{})[TR.id];if(!t)return;
+  const span=tripSpan(t),col=colOf(t.kind||'Hike'),all=tripPlans(t);
+  const mins=all.reduce((a,p)=>a+(+p.minutes||0),0);
+  document.getElementById('trHead').innerHTML=`<span class="kick" style="color:${col}">Trip · ${span} day${span>1?'s':''}</span>
+    <h1>${esc(t.name)}<button type="button" class="pen" data-tr="rename" aria-label="Rename">✎</button></h1>
+    <div class="meta"><span>${esc(parseDay(t.start).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}))} – ${esc(parseDay(t.end).toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}))}</span>
+      ${mins?`<i class="dot"></i><span>about ${Math.round(mins/60)} h planned</span>`:''}</div>`;
+  document.getElementById('trHead').style.background=`linear-gradient(165deg,${col}33,transparent 70%)`;
+  const days=[...Array(span)].map((_,i)=>dayOf(addDays(parseDay(t.start),i)));
+  document.getElementById('trRail').innerHTML=days.map(ds=>{const n=tripPlans(t,ds).length,on=ds===TR.day;
+    return `<button type="button" class="day${on?' on':''}" data-trday="${ds}" style="--tc:${col}">
+      <b>${parseDay(ds).toLocaleDateString(undefined,{weekday:'short'})}</b><span>${parseDay(ds).getDate()}</span><em>${n||''}</em></button>`}).join('')
+    +`<button type="button" class="day add" data-tr="addday"><b>add</b><span>+</span><em></em></button>`;
+  const list=tripPlans(t,TR.day),dmin=list.reduce((a,p)=>a+(+p.minutes||0),0);
+  document.getElementById('trPanel').innerHTML=`<div class="dh"><h2>${esc(parseDay(TR.day).toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))}</h2>
+      <span>${dmin?'about '+(dmin>=90?Math.round(dmin/60)+' h':dmin+' min'):'nothing planned yet'}</span></div>
+    <div class="tl">${list.map(p=>`<div class="ev" style="--tc:${colOf(p.tab)}"><span class="time">${esc(p.start||'')}</span>
+        <b>${esc(cleanTitle(p.title))}</b><small>${esc(String(p.minutes))} min${(p.items||[])[0]?' · '+esc(p.items[0]):''}</small>
+        <button type="button" class="edit" data-tr="edit" data-id="${esc(p.id)}">✎</button></div>`).join('')}
+      <button type="button" class="ghost" data-tr="add">Add something to this day</button></div>
+    <p class="note">An empty day still counts as part of the trip. No runs are planned into these days.</p>`;
+}
 /* ---------- plan dialog ---------- */
 (function(){
   const f=document.getElementById('planfrm');
@@ -3201,6 +3347,9 @@ function drawWeekBuild(part){
       items:[PA.tab==='Run'?`${RUNLBL[PA.kind]||'Run'}${km?': '+km+' km':''} · ${zoneText(RUNZONE[PA.kind]||[2,2])}`:`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}`],
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
+    if(PENDING_TRIP&&PENDING_TRIP.day===f.date.value){S.tripOf={...(S.tripOf||{}),[id]:PENDING_TRIP.id}}
+    const backTo=PENDING_TRIP;PENDING_TRIP=null;
+    if(backTo)setTimeout(()=>openTrip(backTo.id,backTo.day),60);
     if(PA.tab==='Run')S.runMeta[id]={type:PA.kind,km};
     rememberPlace(det);save();calSel=plan.date;calPicked=true;
     setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
