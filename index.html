@@ -494,6 +494,7 @@ body.has-resume .wrap{padding-bottom:110px}
 .syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
 .syncextra{display:flex;gap:18px;flex-wrap:wrap}
 .warn{color:var(--acc)}
+.todaybtn{float:right;margin:22px 0 -6px;border:1.5px solid var(--acc);background:none;color:var(--acc);border-radius:999px;padding:6px 14px;font:600 13px Barlow,sans-serif}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px}
 .calhead h2{font-size:26px;text-transform:capitalize}
 .cnav{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
@@ -502,6 +503,7 @@ body.has-resume .wrap{padding-bottom:110px}
 .cd{aspect-ratio:1/1.05;min-height:44px;border:0;border-radius:10px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px 7px;font-weight:600;font-size:15px}
 .cd.out{opacity:.35}
 .cd.today span{color:var(--acc)}
+.cd.today:not(.sel){box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--acc) 55%,transparent)}
 .cd.sel{outline:2px solid var(--ink);outline-offset:-2px}
 .cd em{display:flex;gap:3px;min-height:7px}
 .cd em i,.legend i{width:7px;height:7px;border-radius:50%;display:inline-block}
@@ -1702,6 +1704,7 @@ function renderHistory(){
    <section>${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}<p class="sub" id="syncline">${syncLine()}</p>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
       <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
+    ${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?`<button class="todaybtn" data-act="caltoday">Today</button>`:''}
     <div class="calhead"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
       <h2>${esc(calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
       <button class="cnav" data-act="calnext" aria-label="Next month">›</button></div>
@@ -2795,6 +2798,8 @@ function onAct(b){
   if(act==='unhide'){const kps=kpsOf(p);S.hidden=S.hidden.filter(h=>!kps.some(k=>h.startsWith(k+':')));save();refresh();return}
   if(act==='export'){exportData();return}
   if(act==='syncsetup'){openSync();return}
+  if(act==='caltoday'){calSel=dayOf(new Date());calMonth=monthStart(new Date());calPicked=false;render();pullPlans();
+    setTimeout(()=>{const el=document.querySelector('.cd.today');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})},40);return}
   if(act==='calprev'||act==='calnext'){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(act==='calnext'?1:-1),1);render();pullPlans();return}
   if(act==='calday'){calSel=b.dataset.d;calPicked=true;if(cur!=='history'){calMonth=monthStart(new Date(calSel+'T12:00'));go('history');return}const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
   if(act==='pedit'){openPlanEdit(b.dataset.id);return}
@@ -3031,6 +3036,13 @@ async function handleConnectHash(){const m=location.hash.match(/^#connect=([\w-]
   catch(e){lsSet(SYKEY,old);showErr('Could not connect: '+e.message)}
 }
 handleConnectHash();addEventListener('hashchange',handleConnectHash);
+(function(){let x0=null,y0=null;
+  document.addEventListener('touchstart',e=>{const g=e.target.closest&&e.target.closest('.calgrid');if(!g||e.touches.length!==1){x0=null;return}
+    x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  document.addEventListener('touchend',e=>{if(x0==null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;
+    if(Math.abs(dx)<55||Math.abs(dy)>45)return;
+    calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(dx<0?1:-1),1);render();pullPlans()},{passive:true});
+})();
 addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t!==cur){cur=t;if(TRAIN_IDS.includes(t))lastTrain=t;refresh();window.scrollTo(0,0)}});
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
@@ -3570,7 +3582,12 @@ document.addEventListener('visibilitychange',async()=>{if(document.visibilitySta
 
 refresh();
 if(cur==='history'||cur==='today'){pullHistory();pullPlans()}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(cur==='history'||cur==='today')&&!F.open){render();pullPlans()}});
+let hidAt=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){hidAt=Date.now();return}
+  if((cur==='history'||cur==='today')&&!F.open){
+    if(cur==='history'&&hidAt&&Date.now()-hidAt>5*60000){calSel=dayOf(new Date());calMonth=monthStart(new Date());calPicked=false}
+    render();pullPlans()}});
 setInterval(()=>{if((cur==='history'||cur==='today')&&!F.open&&calDay&&calDay!==dayOf(new Date()))render()},60000);
 if(connected())scheduleFlush(1500);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))
