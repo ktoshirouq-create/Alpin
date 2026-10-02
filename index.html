@@ -540,7 +540,20 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .wbrow div{flex:1;min-width:0}.wbrow b{display:block;font-size:14px;font-weight:600}.wbrow span{font-size:12px;color:var(--muted)}
 .wbadd{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:none;color:var(--ink);font-size:17px;font-weight:700}
 .wbadd.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.planbtns{display:grid;gap:8px}
+.planbtns{display:grid;gap:10px}
+.add.slim{padding:11px;font-size:15px}
+.planmore{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;padding:2px 0 4px}
+.planmore .link{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.wknav{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.wknav>div{flex:1;text-align:center}
+.wknav h2{margin:0}.wknav .hint{margin:2px 0 0}
+.cnav.sm{width:36px;height:36px;font-size:19px;flex:0 0 auto}
+.rwhave .tl{padding-left:70px}
+.rwhave .tl::before{left:56px}
+.rwhave .ev{margin-bottom:12px}
+.rwhave .ev .time{left:-70px;width:48px}
+.rwhave .ev small{display:inline;margin-left:6px}
+.rwhave .ev.done b{color:var(--rest)}
 .add.run{border-style:solid;border-color:var(--rule)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
@@ -733,7 +746,9 @@ button.chip::after{display:none}
 </nav>
 
 <dialog id="runweekdlg"><form method="dialog" id="runweekfrm">
-  <h2 id="rwTitle">Plan this week</h2><p class="hint" id="rwSub"></p>
+  <div class="wknav"><button type="button" class="cnav sm" data-rw="prev" aria-label="Previous week">‹</button>
+    <div><h2 id="rwTitle">Plan this week</h2><p class="hint" id="rwSub"></p></div>
+    <button type="button" class="cnav sm" data-rw="next" aria-label="Next week">›</button></div>
   <div id="rwRows" class="rwrows"></div>
   <button type="button" class="link" id="rwAdd">+ Add a run</button>
   <p class="syncmsg" id="rwMsg" role="status"></p>
@@ -1723,10 +1738,10 @@ function renderHistory(){
       ${dayPlans.map(planRow).join('')}
       ${dayLog.filter(r=>!(r.plan_id&&dayPlans.some(p=>p.id===r.plan_id))).map(logRow).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
-      <div class="planbtns"><button class="add" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
-        <button class="add" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Build a week of exercises</button>
-        <button class="add" data-act="tripnew">+ Plan a trip</button>
-        <button class="add run" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Plan the running week</button></div>
+      <div class="planbtns"><button class="add${dayPlans.length||dayLog.length?' slim':''}" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
+        <div class="planmore"><button class="link" data-act="tripnew">${ICON('Hike','inl')} Trip</button>
+          <button class="link" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Week of exercises</button>
+          <button class="link" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Running week</button></div></div>
     </div>
     ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}</div>`:''}
    </section>`;
@@ -2366,30 +2381,37 @@ function runDash(){
 let RW=null;
 function openRunWeek(offset){
   if(!connected()){ask('Connect your Sheet first','Planned runs go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
-  const base=addDays(mondayOf(new Date()),7*(+offset||0));
-  RW={ws:base,W:weekInfo(base),runs:[],have:[],loading:true};drawRunWeek();document.getElementById('runweekdlg').showModal();
+  loadRunWeek(addDays(mondayOf(new Date()),7*(+offset||0)));
+  document.getElementById('runweekdlg').showModal();
+}
+function loadRunWeek(base){
+  RW={ws:base,W:weekInfo(base),runs:[],have:[],loading:true};drawRunWeek();
   (async()=>{try{await pullPlans()}catch(e){}
     const sug=suggestWeek(base);RW={ws:base,W:sug.W,runs:sug.runs,have:sug.have,short:sug.short,loading:false};drawRunWeek()})();
 }
 function drawRunWeek(){
   const W=RW.W,days=[...Array(7)].map((_,i)=>addDays(RW.ws,i)),today=dayOf(new Date());
   document.getElementById('rwTitle').textContent=`Week ${W.idx} · ${W.phase.name}${W.cutback?' · cutback':''}`;
+  const thisW=dayOf(mondayOf(new Date()));
   const haveKm=(RW.have||[]).reduce((a,x)=>a+(+x.km||0),0),tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0)+haveKm;
   const others={};plansCache().filter(p=>p.tab!=='Run').forEach(p=>{(others[p.date]=others[p.date]||[]).push(ICON(tabName(p.tab))||'•')});
   const runDays=RS().days||[0,1,2,4];
-  document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
-  const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>${RW.have.map(x=>`<div class="rwh"><span>${x.done?'✓':'📅'}</span><b>${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</b><em>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</em><small>${x.done?'done':'in calendar'}</small></div>`).join('')}</div>`:'';
+  document.getElementById('rwSub').textContent=`${dayOf(RW.ws)===thisW?'this week · ':''}${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target ${W.target} km, planned ${Math.round(tot*10)/10} km`;
+  const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>
+    <div class="tl">${RW.have.map(x=>`<div class="ev${x.done?' done':''}" style="--tc:${x.done?'var(--rest)':colOf('Run')}">
+      <span class="time">${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</span>
+      <b>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</b><small>${x.done?'done':'planned'}</small></div>`).join('')}</div></div>`:'';
   const thin=!RW.loading&&RW.runs.length&&!RW.short&&tot<W.target*.9;
   const awayDays=days.map(dayOf).filter(ds=>tripDays().has(ds)),awayO=awayDays.length?objOn(awayDays[0])[0]:null;
   const awayNote=awayO&&!RW.loading?`<p class="hint">${awayO.icon} Away for ${esc(awayO.name)} on ${awayDays.length} day${awayDays.length>1?'s':''} this week, so no runs are planned then.</p>`:'';
-  const note=awayNote+(RW.loading?'<p class="empty">Checking your calendar…</p>':'')+(RW.loading?'':thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'');
+  const note=awayNote+(RW.loading?'<p class="empty">Checking your calendar…</p>':'')+(RW.loading?'':RW.short?`<p class="hint">Every run day this week already has a run. Step to another week with ‹ ›, or add one anyway.</p>`:thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'');
   document.getElementById('rwRows').innerHTML=haveHTML+note+(RW.loading?'':RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
     <select data-f="date" aria-label="Day">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}${rn?' · run planned':''}${o?' · '+o.join(''):''}${runDays.includes(di)?'':' · not a run day'}</option>`}).join('')}</select>
     <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
     <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
     <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
     <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
-    :((RW.have||[]).length?'<p class="empty">This week is already planned. Nothing to add.</p>':'<p class="empty">No run days left this week. Try next week.</p>'));
+    :((RW.have||[]).length?`<p class="empty">${dayOf(RW.ws)===dayOf(mondayOf(new Date()))?'This week':'That week'} is already planned. Step to another week with ‹ ›.</p>`:'<p class="empty">No run days left. Step to another week with ‹ ›.</p>'));
 }
 function openRunLog(pre){
   const d=document.getElementById('runlogdlg'),f=document.getElementById('runlogfrm');pre=pre||{};
@@ -2447,33 +2469,6 @@ function planAuto(){
       ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
       : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}`;
   }
-}
-function openRunWeek(offset){
-  if(!connected()){ask('Connect your Sheet first','Planned runs go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
-  const base=addDays(mondayOf(new Date()),7*(+offset||0));
-  RW={ws:base,W:weekInfo(base),runs:[],have:[],loading:true};drawRunWeek();document.getElementById('runweekdlg').showModal();
-  (async()=>{try{await pullPlans()}catch(e){}
-    const sug=suggestWeek(base);RW={ws:base,W:sug.W,runs:sug.runs,have:sug.have,short:sug.short,loading:false};drawRunWeek()})();
-}
-function drawRunWeek(){
-  const W=RW.W,days=[...Array(7)].map((_,i)=>addDays(RW.ws,i)),today=dayOf(new Date());
-  document.getElementById('rwTitle').textContent=`Week ${W.idx} · ${W.phase.name}${W.cutback?' · cutback':''}`;
-  const haveKm=(RW.have||[]).reduce((a,x)=>a+(+x.km||0),0),tot=RW.runs.reduce((a,x)=>a+(+x.km||0),0)+haveKm;
-  const others={};plansCache().filter(p=>p.tab!=='Run').forEach(p=>{(others[p.date]=others[p.date]||[]).push(ICON(tabName(p.tab))||'•')});
-  const runDays=RS().days||[0,1,2,4];
-  document.getElementById('rwSub').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})} · target about ${W.target} km, planned ${Math.round(tot*10)/10} km`;
-  const haveHTML=(RW.have||[]).length?`<div class="rwhave"><h4>Already this week</h4>${RW.have.map(x=>`<div class="rwh"><span>${x.done?'✓':'📅'}</span><b>${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short',day:'numeric'}))}</b><em>${esc(RUNLBL[x.type]||x.title)}${x.km?' · '+x.km+' km':''}</em><small>${x.done?'done':'in calendar'}</small></div>`).join('')}</div>`:'';
-  const thin=!RW.loading&&RW.runs.length&&!RW.short&&tot<W.target*.9;
-  const awayDays=days.map(dayOf).filter(ds=>tripDays().has(ds)),awayO=awayDays.length?objOn(awayDays[0])[0]:null;
-  const awayNote=awayO&&!RW.loading?`<p class="hint">${awayO.icon} Away for ${esc(awayO.name)} on ${awayDays.length} day${awayDays.length>1?'s':''} this week, so no runs are planned then.</p>`:'';
-  const note=awayNote+(RW.loading?'<p class="empty">Checking your calendar…</p>':'')+(RW.loading?'':thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'');
-  document.getElementById('rwRows').innerHTML=haveHTML+note+(RW.loading?'':RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
-    <select data-f="date" aria-label="Day">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}${rn?' · run planned':''}${o?' · '+o.join(''):''}${runDays.includes(di)?'':' · not a run day'}</option>`}).join('')}</select>
-    <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
-    <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
-    <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
-    <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
-    :((RW.have||[]).length?'<p class="empty">This week is already planned. Nothing to add.</p>':'<p class="empty">No run days left this week. Try next week.</p>'));
 }
 function openRunLog(pre){
   const d=document.getElementById('runlogdlg'),f=document.getElementById('runlogfrm');pre=pre||{};
@@ -3086,6 +3081,8 @@ let PENDING_TRIP=null;
     SEL={on:false,keys:[]};selBar();calSel=f.date.value;calPicked=true;refresh();
     if(p)undoBar('Added to '+niceDay(p.date),()=>{})});
   const wf=document.getElementById('weekfrm');
+  document.getElementById('runweekfrm').addEventListener('click',ev=>{
+    const n=ev.target.closest('[data-rw]');if(n){loadRunWeek(addDays(RW.ws,n.dataset.rw==='next'?7:-7));return}});
   wf.addEventListener('click',ev=>{
     const d=ev.target.closest('[data-wb]');if(d){WB.day=+d.dataset.wb;drawWeekBuild();return}
     const a=ev.target.closest('[data-wbadd]');if(a){const k=a.dataset.wbadd,list=WB.days[WB.day]=WB.days[WB.day]||[];
