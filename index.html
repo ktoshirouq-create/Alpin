@@ -59,6 +59,7 @@ body[data-view="train"] header{padding-top:14px}
 #progs button[aria-pressed="true"]{color:var(--ink)!important;font-weight:700}
 #progs button[aria-pressed="true"]::after{content:"";position:absolute;left:18%;right:18%;bottom:-1px;height:3px;border-radius:2px;background:var(--acc)}
 .zbar{display:flex;gap:3px;margin:12px 0 4px}
+.ex:not(.open) .zbar{display:none}
 .zbar span{flex:1;text-align:center;padding:5px 0 4px;border-radius:6px;background:var(--panel);color:var(--muted);font-size:11px;line-height:1.15}
 .zbar span b{display:block;font-size:12px}.zbar span i{font-style:normal;opacity:.8}
 .zbar .z1.on{background:#8FB9D6;color:#10202b}.zbar .z2.on{background:#3DAE74;color:#fff}.zbar .z3.on{background:#E1B12C;color:#241c02}
@@ -98,7 +99,7 @@ body[data-view="train"] header{padding-top:14px}
 .nephead b{font-size:15px}
 .nephead .link{white-space:nowrap}
 .cdbig{display:flex;align-items:baseline;gap:10px;margin:10px 0 0}
-.cdbig b{font:700 clamp(64px,22vw,96px)/.9 "Barlow Condensed",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cdbig b{font:700 clamp(60px,20vw,88px)/.9 "Barlow Condensed",sans-serif;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .cdbig span{font:600 22px/1 "Barlow Condensed",sans-serif;color:var(--muted)}
 .cdsmall{display:flex;gap:14px;margin:6px 0 4px;color:var(--muted);font-size:13px}
 .cdsmall b{font:700 20px/1 "Barlow Condensed",sans-serif;color:var(--ink);font-variant-numeric:tabular-nums;margin-right:2px}
@@ -151,7 +152,7 @@ body[data-view="train"] header{padding-top:14px}
 .otile.winter{background:linear-gradient(160deg,#16304A,#0B1726);color:#EAF6FF}.otile.winter span{color:#A9CBE4}
 body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .objpage{padding-top:8px}
-.tkhero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#EAF6FF;
+.tkhero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 14px;color:#EAF6FF;
   background:radial-gradient(120% 80% at 70% 0%,#24476A 0%,#10223A 45%,#081322 100%)}
 .tkhero .snow{position:absolute;inset:0;pointer-events:none}
 .tkhero .snow i{position:absolute;top:-8px;width:5px;height:5px;border-radius:50%;background:#fff;opacity:.75}
@@ -161,8 +162,10 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
   .tkroute .tkline{stroke-dasharray:1100;stroke-dashoffset:1100;animation:draw 1.8s ease-out forwards}}
 @media (prefers-reduced-motion:reduce){.tkhero .snow{display:none}}
 .tkhead{position:relative;display:flex;flex-direction:column;gap:2px}
-.tkkick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8EC9F0}
-.tkhead b{font-size:16px}.tkhead span:last-child{font-size:13px;color:#A9CBE4}
+.tkkick,.oskick,.tpkick{font:700 11px Barlow,sans-serif;letter-spacing:.14em;text-transform:uppercase}
+.tkkick{color:#8EC9F0}
+.tkhead b{font-size:16px;line-height:1.25}
+.tkhead{gap:3px}.tkhead span:last-child{font-size:13px;color:#A9CBE4}
 .tkhero .cdbig{position:relative}.tkhero .cdbig span,.tkhero .cdsmall{color:#A9CBE4}.tkhero .cdsmall b{color:#EAF6FF}
 .tkroute{position:relative;display:block;width:100%;height:auto;margin-top:6px;overflow:visible}
 .tkroute .star{fill:#fff}.tkroute .moon{fill:#F4F1DE}.tkroute .moonbite{fill:#14294A}
@@ -243,11 +246,12 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .cd.trip+.cd.trip{margin-left:-4px}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
-.oshero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#FFF1E8;
+.oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 14px;color:#FFF1E8;
   background:linear-gradient(165deg,#7A2E22 0%,#3A1B1B 55%,#1A1216 100%)}
 .oshero .oswave{position:absolute;left:-10%;right:-10%;bottom:-30px;height:120px;border-radius:50%;background:rgba(255,160,120,.12)}
-.oskick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#FFB59B}
-.oshero .tkhead b{font-size:16px}.oshero .tkhead span:last-child,.oshero .cdbig span,.oshero .cdsmall,.oshero .tkfoot{color:#F0C3B3}
+.oskick{color:#FFB59B}
+.oshero .tkhead b{font-size:16px;line-height:1.25}
+.tkhead{gap:3px}.oshero .tkhead span:last-child,.oshero .cdbig span,.oshero .cdsmall,.oshero .tkfoot{color:#F0C3B3}
 .oshero .cdsmall b,.oshero .tkfoot b{color:#FFF1E8}
 .goalpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gopt{position:relative;display:block;text-align:center;padding:12px 6px;border-radius:14px;background:var(--panel);border:1.5px solid var(--rule)}
@@ -264,9 +268,9 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .wklist2 b{display:inline-block;min-width:44px;color:var(--acc)}
 .tline{list-style:none;margin:0;padding:0;font-size:15px}.tline li{padding:8px 0 8px 0;border-top:1px solid var(--rule)}
 .tline b{display:inline-block;min-width:66px;color:var(--acc);font-variant-numeric:tabular-nums}
-.tphero{position:relative;overflow:hidden;border-radius:22px;padding:18px 16px 12px;color:#F3ECDD;
+.tphero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 14px;color:#F3ECDD;
   background:linear-gradient(170deg,#2C3E57 0%,#1B2636 55%,#121A26 100%)}
-.tpkick{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#E8C46A}
+.tpkick{color:#E8C46A}
 .tphero .tkhead span:last-child,.tphero .cdbig span,.tphero .cdsmall,.tphero .tkfoot{color:#C3CBD8}
 .tphero .cdsmall b,.tphero .tkfoot b{color:#F3ECDD}
 .dirpick{display:flex;gap:6px;margin:10px 0 2px}
@@ -469,6 +473,10 @@ dialog .chk input{width:20px;height:20px}
 .fastep{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .skipex{white-space:nowrap;flex:0 0 auto;margin-left:auto;margin-right:12px;color:var(--muted);text-decoration:none;font-weight:600;font-size:14px;padding:8px 4px}
 .faprog i.on{background:var(--acc)}
+.faadj{margin:6px 0 2px}
+.faadj summary{list-style:none;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;padding:8px 0;text-align:center}
+.faadj summary::-webkit-details-marker{display:none}
+.faadj summary::after{content:' ▾'}.faadj[open] summary::after{content:' ▴'}
 .fabody{flex:1;overflow:auto;max-width:760px;width:100%;margin:0 auto;padding-top:14px}
 .faname{font:600 32px/1.05 "Barlow Condensed",sans-serif;margin:0}
 .fadose{margin:2px 0 12px;font-size:17px}
@@ -555,6 +563,15 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .rwhave .ev small{display:inline;margin-left:6px}
 .rwhave .ev.done b{color:var(--rest)}
 .add.run{border-style:solid;border-color:var(--rule)}
+.legendlink{display:block;margin:10px auto 2px;background:none;border:0;color:var(--muted);font:600 13px Barlow,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.legend2{display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:10px;color:var(--ink);font-size:14px}
+.legend2 span{display:inline-flex;align-items:center;gap:7px}
+.legend2 i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.legend2 i.small{width:6px;height:6px}
+.legend2 i.ring{background:none!important;border:1.5px solid var(--muted);box-sizing:border-box}
+.legend2.small{font-size:13px;color:var(--muted)}
+.legnote{display:block;font-size:13px;line-height:1.5;color:var(--muted)}
+h1 .hdate{display:block;font:400 14px/1.3 Barlow,sans-serif;color:var(--muted);margin-top:2px;letter-spacing:0}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .prow{display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;border-radius:12px;background:var(--panel);border-left:4px solid var(--tc)}
@@ -684,7 +701,11 @@ button.chip::after{display:none}
 #fa.ph-rest .falbl{color:var(--rest)}
 /* running view: the number takes over */
 #fa.running .fabody .frames,#fa.running .fabody .cue,#fa.running .fabody .sub{display:none}
-#fa.running .fabody{flex:0 0 auto}
+#fa.running .faadj{margin:6px 0 2px}
+.faadj summary{list-style:none;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;padding:8px 0;text-align:center}
+.faadj summary::-webkit-details-marker{display:none}
+.faadj summary::after{content:' ▾'}.faadj[open] summary::after{content:' ▴'}
+.fabody{flex:0 0 auto}
 #fa.running .fatimer{flex:1;display:flex;flex-direction:column;justify-content:center}
 #fa.running .fanum{font-size:min(42vw,200px)}
 #fa.running .falbl{font-size:20px}
@@ -1724,9 +1745,7 @@ function renderHistory(){
       <h2>${esc(calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
       <button class="cnav" data-act="calnext" aria-label="Next month">›</button></div>
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
-    <div class="legend">${[...new Set(BASETABS.concat(plans.map(p=>tabName(p.tab)),all.map(r=>tabName(r.tab))))].filter(t=>TABCOL[t]&&!DOTLESS.includes(t)&&isAct(t)).map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}
-      <span class="lbreak"></span><span class="ltag">training:</span>${TRAINTABS.filter(t=>!DOTLESS.includes(t)).map(t=>`<span><i class="small" style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}
-      <span><i class="ring"></i>planned</span></div>
+    <button class="legendlink" data-act="legend">What the dots mean</button>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
     <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
       ${(()=>{const t=tripOn(calSel);if(!t)return'';const n=tripDayNo(t,calSel),sp=tripSpan(t),first=tripPlans(t,calSel)[0];
@@ -1751,8 +1770,8 @@ function renderToday(){
   const now=new Date(),todayS=dayOf(now),tom=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1));
   calDay=calDay||todayS;
   const hh=now.getHours(),greet=hh<5?'Late night':hh<12?'Good morning':hh<18?'Good afternoon':'Good evening';
-  document.getElementById('ptitle').textContent=greet;
-  document.getElementById('plede').textContent=now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('ptitle').innerHTML=`${esc(greet)}<small class="hdate">${esc(now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))}</small>`;
+  document.getElementById('plede').textContent='';
   document.title='Training guide';
   const all=localLog(),plans=plansCache(),logBy={};all.forEach(r=>{(logBy[r.date]=logBy[r.date]||[]).push(r)});
   const nowHM=`${pad2(hh)}:${pad2(now.getMinutes())}`;
@@ -2367,7 +2386,7 @@ function runDash(){
         <li><b>Quality</b> ${esc(qtxt)}</li>
         <li><b>Easy runs</b> fill the rest, 30–50 min, all conversational</li>
       </ul>
-      <div class="wkbtns"><button class="go" data-act="runlog">Log a run</button><button class="go alt" data-act="gocal">Plan runs in the calendar</button></div>
+      <div class="wkbtns"><button class="go" data-act="runlog">Log a run</button><button class="link" data-act="gocal">Plan runs in the calendar</button></div>
     </div>
     ${(()=>{const bars=[...Array(8)].map((_,i)=>{const ws=addDays(W.w,-7*(7-i)),wi=weekInfo(ws);
       return {km:runKmIn(ws),t:wi.target,lab:ws.toLocaleDateString(undefined,{day:'numeric',month:'short'})}});
@@ -2665,7 +2684,7 @@ function render(){
     const rows=l=>l.map(row).join('');
     const grp=(list,name,note)=>list.length?`<div class="grp"><h4>${name}</h4><span>${note}</span></div>${rows(list)}`:'';
     const doneN=items.filter(loggedToday).length;
-    return `<section id="sec-${si}"><div class="sechead"><div>${head}${items.length?`<span class="donecount">${doneN} of ${items.length} done today</span>`:''}</div>${items.length&&!s.noPlay?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="go alt" data-act="start" data-mode="all" data-sec="${si}">${playIcon}Full</button></div>`:''}</div>
+    return `<section id="sec-${si}"><div class="sechead"><div>${head}${items.length?`<span class="donecount">${doneN} of ${items.length} done today</span>`:''}</div>${items.length&&!s.noPlay?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="link" data-act="start" data-mode="all" data-sec="${si}">Full routine</button></div>`:''}</div>
       ${s.flat?rows(items):grp(ess,'Essential','Do these every time')+grp(ext,'Extra','When you have time')}
       <button class="add" data-act="add" data-sec="${si}">+ Add exercise${p.routine?'':' to '+s.title.toLowerCase().replace('pre-','pre-')}</button></section>`;
   }).join('');
@@ -2795,6 +2814,17 @@ function onAct(b){
   if(act==='syncsetup'){openSync();return}
   if(act==='caltoday'){calSel=dayOf(new Date());calMonth=monthStart(new Date());calPicked=false;render();pullPlans();
     setTimeout(()=>{const el=document.querySelector('.cd.today');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})},40);return}
+  if(act==='legend'){const base=BASETABS.concat(['Hike']).filter((t,k,a)=>a.indexOf(t)===k);
+    document.getElementById('askT').textContent='What the dots mean';
+    document.getElementById('askB').innerHTML=`<span class="legend2">${base.map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}</span>
+      <span class="legend2 small">${TRAINTABS.filter(t=>!DOTLESS.includes(t)).map(t=>`<span><i class="small" style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}<span><i class="ring"></i>planned</span></span>
+      <span class="legnote">Big dots are sessions you went out and did. Small dots are training. A ring means planned.</span>`;
+    const d=document.getElementById('ask'),y=document.getElementById('askYes'),n=document.getElementById('askNo');
+    y.textContent='Close';y.classList.remove('danger-fill');n.style.display='none';
+    y.onclick=()=>{n.style.display='';document.getElementById('askB').textContent='';d.close()};
+    d.onclose=()=>{n.style.display=''};
+    try{d.showModal()}catch(e){}
+    return}
   if(act==='calprev'||act==='calnext'){calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(act==='calnext'?1:-1),1);render();pullPlans();return}
   if(act==='calday'){calSel=b.dataset.d;calPicked=true;if(cur!=='history'){calMonth=monthStart(new Date(calSel+'T12:00'));go('history');return}const d=new Date(calSel+'T12:00');if(d.getMonth()!==calMonth.getMonth()||d.getFullYear()!==calMonth.getFullYear()){calMonth=monthStart(d);pullPlans()}render();return}
   if(act==='pedit'){openPlanEdit(b.dataset.id);return}
@@ -3232,7 +3262,7 @@ function planFromKeys(keys,date,start){
 }
 /* A: select exercises while browsing */
 let SEL={on:false,keys:[]};
-let OPENEX=null;
+let OPENEX=null,FA_ADJ=false;
 const selKey=(p,sec,id)=>`${p.id}|${sec}|x:${id}`;
 function selBar(){
   let bar=document.getElementById('selbar');
@@ -3442,7 +3472,7 @@ function clearSession(sid){try{const j=loadSession();if(!sid||!j||j.sid===sid)lo
 function showFA(){fa.classList.add('open');document.body.style.overflow='hidden';
   if(!histPushed){try{history.pushState({fa:1},'');histPushed=true}catch(e){}}
   (async()=>{try{F.lock=await navigator.wakeLock?.request('screen')}catch(e){}})()}
-function openFA(list,title){
+function openFA(list,title){FA_ADJ=false;
   if(!list.length)return;
   F.src=list.map(srcOf);F.i=0;F.title=title;F.sid=Date.now().toString(36);F.logged={};F.open=true;setEx();showFA();
 }
@@ -3479,8 +3509,10 @@ function drawFA(){
     const total=e.timed?totalOf(e):0;
     document.getElementById('faBody').innerHTML=`<h3 class="faname">${esc(e.name)}</h3>
       <p class="dose fadose">${esc(e.dose)}${total?` <span class="muted">· ≈${Math.max(1,Math.round(total/60))} min</span>`:''}</p>
+      ${ready&&(e.L||paramsFor(e).length||e.timed)?`<details class="faadj"${FA_ADJ?' open':''}><summary>Adjust${e.L?` · slot ${e.lvl+1}`:''}</summary>` :''}
       ${ready&&e.L?`<div class="lv falv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'f')}</div>`:(e.L?`<p class="sub">Slot ${e.lvl+1} · ${esc(e.version)}${e.note?' · '+esc(e.note):''}</p>`:'')}
       ${ready&&(paramsFor(e).length||e.timed)?`<div class="chips">${e.timed?readyChip():''}${chipsHTML(e)}</div>`:''}
+      ${ready&&(e.L||paramsFor(e).length||e.timed)?'</details>':''}
       ${framesHTML(e.frames)}
       ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}`;
   }
@@ -3541,6 +3573,7 @@ document.getElementById('faNext').addEventListener('click',()=>{
 document.getElementById('faPrev').addEventListener('click',()=>{
   if(F.ph&&started()&&F.p>0){stop();F.p--;F.left=F.ph[F.p].t;F.done=false;drawFA();saveSession();return}
   if(F.i>0){F.i--;setEx();saveSession()}else closeFA('exit')});
+document.getElementById('faBody').addEventListener('toggle',ev=>{if(ev.target.classList&&ev.target.classList.contains('faadj'))FA_ADJ=ev.target.open},true);
 document.getElementById('faLive').addEventListener('click',ev=>{
   const b=ev.target.closest('[data-live]');if(!b||!F.ph)return;const e=curEx();
   if(b.dataset.live==='rest30'){F.left+=30;drawFA();saveSession();return}
