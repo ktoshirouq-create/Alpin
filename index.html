@@ -148,6 +148,11 @@ body[data-view="train"] header{padding-top:14px}
 .objtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:11px 11px 10px;display:flex;flex-direction:column;gap:1px;border-top:4px solid var(--oc);
   background:linear-gradient(165deg,color-mix(in srgb,var(--oc) 24%,var(--panel)),var(--panel) 72%)}
+.otile.t-marathon{background:#F2F0EB;color:#121212;border-top-color:#121212}
+.otile.t-marathon .ic,.otile.t-marathon span,.otile.t-marathon i{color:#4A4A4A}
+.otile.t-marathon b{color:#121212}
+.otile.t-nepal{background:linear-gradient(165deg,#2C3E57,#1B2636 72%)}
+.otile.t-toubkal{background:linear-gradient(165deg,#24476A,#10223A 72%)}
 .otile i{font-style:normal;font-size:10.5px;color:var(--muted);margin-top:-2px}
 .otile .ic{color:var(--oc)}
 .otile em{font-style:normal;font-size:18px}.otile b{font:700 28px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
@@ -166,7 +171,11 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 @media (prefers-reduced-motion:reduce){.tkhero .snow{display:none}}
 .tkhead{position:relative;display:flex;flex-direction:column;gap:2px}
 .tkkick,.oskick,.tpkick{font:700 11px Barlow,sans-serif;letter-spacing:.14em;text-transform:uppercase}
-.tkkick{color:#8EC9F0}
+.tkkick{color:#E3B457}
+.tkhero .ic{color:#E3B457}
+.zband{position:absolute;top:0;left:0;right:0;width:100%;height:16px;fill:none;stroke:#E3B457;stroke-width:.9;opacity:.5}
+.tkhero{padding-top:28px}
+.tkhero .facts b,.objpage .facts b{letter-spacing:-.01em}
 .tkhead b{font-size:16px;line-height:1.25}
 .tkhead{gap:3px}.tkhead span:last-child{font-size:13px;color:#A9CBE4}
 .tkhero .cdbig{position:relative}.tkhero .cdbig span,.tkhero .cdsmall{color:#A9CBE4}.tkhero .cdsmall b{color:#EAF6FF}
@@ -182,7 +191,8 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .tkroute .you{fill:#FF8A70;stroke:#081322;stroke-width:1.5}.tkroute .youglow{fill:#FF8A70;opacity:.28}
 .tkfoot{position:relative;display:flex;justify-content:space-between;font-size:12px;color:#A9CBE4;margin-top:4px}.tkfoot b{color:#EAF6FF}
 .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.facts div{background:var(--panel);border-radius:12px;padding:10px}.facts b{display:block;white-space:nowrap;font:700 19px/1.05 "Barlow Condensed",sans-serif}
+.facts div{background:var(--panel);border-radius:12px;padding:10px}
+body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--objc,var(--muted)) 60%,transparent)}.facts b{display:block;white-space:nowrap;font:700 19px/1.05 "Barlow Condensed",sans-serif}
 .facts span{font-size:11px;line-height:1.25;color:var(--muted)}
 .objh{font-size:26px;margin:26px 0 10px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .gcount{font:600 13px Barlow,sans-serif;color:var(--muted)}
@@ -249,13 +259,28 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .cd.trip+.cd.trip{margin-left:-4px}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
-.oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 14px;color:#FFF1E8;
-  background:linear-gradient(165deg,#7A2E22 0%,#3A1B1B 55%,#1A1216 100%)}
+.oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 12px;color:#121212;background:#F2F0EB}
+#oslo-badge-placeholder{}
+.oshero .tkhead{padding-right:92px}
+.oskick{align-self:flex-start}
+.osbadge{position:absolute;top:14px;right:14px;width:76px;height:76px;border-radius:22px;background:#121212;color:#F2F0EB;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.osbadge b{font:700 30px/1 "Barlow Condensed",sans-serif}
+.osbadge span{font:700 9.5px/1.15 Barlow,sans-serif;letter-spacing:.1em;text-align:center;margin-top:2px}
+.oshero .tkhead b{font-size:17px;color:#121212}
+.oshero .tkhead span:last-child{color:#5A5A5A;font-size:13px}
+.oshero .cdbig b{color:#121212;letter-spacing:-.03em}
+.oshero .cdbig span,.oshero .cdsmall{color:#5A5A5A}
+.oshero .cdsmall b{color:#121212}
+.oshero .tkfoot{color:#5A5A5A;border-top:1px solid rgba(0,0,0,.12);padding-top:8px;margin-top:2px}
+.oshero .tkfoot b{color:#121212}
+.osline{display:block;width:100%;height:auto;margin:2px 0 6px}
+.osline .ob{fill:none;stroke:#121212;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.osline .ow{fill:none;stroke:#121212;stroke-width:1.5;opacity:.45;stroke-linecap:round}
 .oshero .oswave{position:absolute;left:-10%;right:-10%;bottom:-30px;height:120px;border-radius:50%;background:rgba(255,160,120,.12)}
-.oskick{color:#FFB59B}
+.oskick{color:#121212;background:#121212;color:#F2F0EB;display:inline-block;padding:4px 9px;border-radius:999px}
 .oshero .tkhead b{font-size:16px;line-height:1.25}
-.tkhead{gap:3px}.oshero .tkhead span:last-child,.oshero .cdbig span,.oshero .cdsmall,.oshero .tkfoot{color:#F0C3B3}
-.oshero .cdsmall b,.oshero .tkfoot b{color:#FFF1E8}
+.tkhead{gap:3px}
 .goalpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .gopt{position:relative;display:block;text-align:center;padding:12px 6px;border-radius:14px;background:var(--panel);border:1.5px solid var(--rule)}
 .gopt input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
@@ -303,7 +328,11 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .tpdays .dstep.flash{background:color-mix(in srgb,var(--acc) 14%,transparent);border-radius:10px}
 .tproute{display:block;width:100%;height:auto;margin-top:8px;overflow:visible}
 .tproute .grid{stroke:rgba(255,255,255,.15);stroke-dasharray:2 4}.tproute .galt{fill:#9AA7B8;font:600 8px Barlow,sans-serif}
-.tproute .tpfill{fill:rgba(232,196,106,.14)}.tproute .tpline{fill:none;stroke:#F3ECDD;stroke-width:2;stroke-linejoin:round}
+.tproute .tpfill{fill:rgba(232,196,106,.14)}
+.tpflags{position:absolute;top:0;left:0;right:0;width:100%;height:22px}
+.tphero{padding-top:30px}
+.tproute .tpline{stroke:#F3ECDD;stroke-width:1.8}
+.tproute .tkname{letter-spacing:.06em;text-transform:uppercase;font-size:7.5px}.tproute .tpline{fill:none;stroke:#F3ECDD;stroke-width:2;stroke-linejoin:round}
 .tproute .pole{stroke:#F3ECDD;stroke-width:1}
 .tproute .tkname{fill:#F3ECDD;font:700 8px Barlow,sans-serif}.tproute .tkalt2{fill:#C3CBD8;font:600 7px Barlow,sans-serif}
 .tproute .tkpt{fill:#C3CBD8;font:600 8px Barlow,sans-serif}
@@ -1822,7 +1851,7 @@ function renderToday(){
   document.getElementById('main').innerHTML=`<section class="todaysec">
     ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
-      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
+      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile t-${o.id}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
@@ -1970,7 +1999,14 @@ function tkRouteSVG(prog){
    <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="9" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/>
   </svg>`;
 }
+function zellige(){
+  const star=(x)=>`<g transform="translate(${x},0)">
+    <path d="M9 2 L11.6 6.4 L16 9 L11.6 11.6 L9 16 L6.4 11.6 L2 9 L6.4 6.4 Z"/>
+    <path d="M9 4.6 L13.4 9 L9 13.4 L4.6 9 Z"/></g>`;
+  return `<svg class="zband" viewBox="0 0 340 18" preserveAspectRatio="none" aria-hidden="true">
+    ${[...Array(19)].map((_,i)=>star(i*18)).join('')}</svg>`}
 function renderObjective(){
+  document.body.style.setProperty('--objc','#8EC9F0');
   const now=new Date(),o=OS('toubkal'),start=parseDay(TK.prepStart),go=parseDay(TK.start);
   const prog=Math.max(0,Math.min(1,(now-start)/(go-start))),left=go-now;
   document.getElementById('ptitle').textContent='Toubkal';
@@ -1983,6 +2019,7 @@ function renderObjective(){
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="tkhero" data-cdt="${go.toISOString().slice(0,10)}T06:00:00">
      <div class="snow" aria-hidden="true">${flakes}</div>
+     ${zellige()}
      <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Guided, 3 days · then 4 days in Morocco</span></div>
      ${left>0?cdBlock(go.toISOString().slice(0,10)+'T06:00:00'):`<div class="cdbig"><b>${now<=parseDay(TK.end)?'You\u2019re there':'Done'}</b></div>`}
      ${tkRouteSVG(prog)}
@@ -2014,7 +2051,22 @@ function paceTable(goal){const sec=goal[0].split(':').reduce((a,b)=>a*60+ +b,0),
   const ks=[5,10,15,20,21.1,25,30,35,40,42.195];
   return `<table class="ptab"><thead><tr><th>km</th><th>split</th></tr></thead><tbody>${ks.map(k=>{const t=Math.round(per*k);
     return `<tr><td>${k===21.1?'half':k===42.195?'finish':k}</td><td>${Math.floor(t/3600)}:${pad2(Math.floor(t/60)%60)}:${pad2(t%60)}</td></tr>`}).join('')}</tbody></table>`}
+function osloSkyline(){
+  return `<svg class="osline" viewBox="0 0 340 104" role="img" aria-label="Oslo City Hall above the fjord">
+    <g class="ob">
+      <path d="M96 100V34h26v66M150 100V34h26v66"/>
+      <path d="M122 100V54h28v46"/>
+      <path d="M96 34h26M150 34h26"/>
+      <path d="M103 44h12M103 56h12M103 68h12M157 44h12M157 56h12M157 68h12"/>
+      <path d="M60 100V78h36v22M176 100V78h40v22"/>
+      <path d="M109 34V22M163 34V22"/><path d="M109 22l12 4-12 4M163 22l12 4-12 4"/>
+      <path d="M232 100V60l20-10 20 10v40"/><path d="M240 100V76h10v24"/>
+      <path d="M24 100V84h28v16"/>
+    </g>
+    <g class="ow"><path d="M0 92q18-7 36 0t36 0"/><path d="M268 96q18-7 36 0t36 0"/><path d="M8 102q22-7 44 0"/></g>
+  </svg>`}
 function renderOslo(){
+  document.body.style.setProperty('--objc','#121212');
   const now=new Date(),race=parseDay(RS().race),o=OS('oslo');race.setHours(9,0,0,0);
   const left=race-now,W=weekInfo(now);
   const goal=(o.goal==null?1:+o.goal),g=OSLO.goals[goal]||OSLO.goals[1];
@@ -2024,9 +2076,10 @@ function renderOslo(){
   const kitDone=Object.values(o.kit||{}).filter(Boolean).length;
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="oshero" data-cdt="${dayOf(race)}T09:00:00">
-     <div class="oswave" aria-hidden="true"></div>
-     <div class="tkhead"><span class="oskick">${ICON('flag','inl')} Race day</span><b>Saturday 18 September 2027, 09:00</b><span>Two laps along the Oslofjord · booked</span></div>
+     <div class="osbadge"><b>18</b><span>SEPT<br>2027</span></div>
+     <div class="tkhead"><span class="oskick">Race day</span><b>Saturday, 09:00</b><span>Two laps along the Oslofjord · booked</span></div>
      ${left>0?cdBlock(dayOf(race)+'T09:00:00'):'<div class="cdbig"><b>Race day</b></div>'}
+     ${osloSkyline()}
      <div class="tkfoot"><span>${W.phase.name} · week ${W.idx} of ${W.total}</span><span>Long run now: <b>${W.long} km</b></span></div>
    </div>
    <h2 class="objh">Your goal</h2>
@@ -2178,7 +2231,15 @@ function tpRoute(dir,prog){
    <text x="${x0}" y="${H-6}" class="tkpt">${R[0][0]}</text><text x="${x1}" y="${H-6}" text-anchor="end" class="tkpt">${R[R.length-1][0]}</text>
    <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="8" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/></svg>`;
 }
+function tpFlags(){
+  const cols=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'];
+  return `<svg class="tpflags" viewBox="0 0 340 22" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 5 Q85 16 170 10 Q255 4 340 13" fill="none" stroke="#C3CBD8" stroke-width="1"/>
+    ${[...Array(17)].map((_,i)=>{const x=6+i*20,y=5+Math.sin(i/2.2)*3+i*.35;
+      return `<rect x="${x}" y="${y}" width="11" height="9" fill="${cols[i%5]}" opacity=".85" transform="rotate(${(i%3)-1} ${x} ${y})"/>`}).join('')}
+  </svg>`}
 function renderPasses(){
+  document.body.style.setProperty('--objc','#E8C46A');
   const now=new Date(),o=OS('passes'),n=NS(),go=parseDay(n.date),start=parseDay(n.prepStart);
   const dir=o.dir||'cw',prog=Math.max(0,Math.min(1,(now-start)/(go-start)));
   document.getElementById('ptitle').textContent='Three Passes';
@@ -2187,6 +2248,7 @@ function renderPasses(){
   const gearAll=TP.gear.reduce((a,g)=>a+g[1].length,0),gearDone=Object.values(o.gear||{}).filter(Boolean).length;
   document.getElementById('main').innerHTML=`<section class="objpage">
    <div class="tphero" data-cdt="${n.date}T06:00:00">
+     ${tpFlags()}
      <div class="tkhead"><span class="tpkick">${ICON('Nepal','inl')} Three Passes</span><b>${n.fixed?parseDay(n.date).toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}):'Around '+parseDay(n.date).toLocaleDateString(undefined,{month:'long',year:'numeric'})+' · dates not fixed'}</b>
        <span>Kongma La 5,535 · Cho La 5,420 · Renjo La 5,360</span></div>
      ${cdBlock(n.date+'T06:00:00')}
