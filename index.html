@@ -219,7 +219,10 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .after{display:grid;grid-template-columns:1fr;gap:8px}
 .after div{background:var(--panel);border-radius:12px;padding:10px 12px}.after b{display:block;font-size:15px}.after span{font-size:13px;color:var(--muted)}
 .cd.trip{box-shadow:inset 0 -4px 0 var(--oc)}
-#tripdlg form,#tripnewdlg form{padding:0 0 14px;display:flex;flex-direction:column;gap:0}
+#tripdlg form{padding:0;display:flex;flex-direction:column;gap:0;max-height:88vh}
+#tripdlg .trpanel{flex:1;min-height:0;max-height:none}
+#tripdlg .dbtns{padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule);background:var(--panel);position:sticky;bottom:0}
+#tripnewdlg form{padding:20px;display:flex;flex-direction:column;gap:0}
 #tripnewdlg form{padding:20px;gap:6px}
 #tripdlg .thead{padding:20px 20px 14px}
 #tripdlg .kick{font:700 11px Barlow,sans-serif;letter-spacing:.14em;text-transform:uppercase}
@@ -229,13 +232,13 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 #tripdlg .meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted);opacity:.6}
 #tripdlg .rail{display:flex;gap:6px;overflow-x:auto;padding:2px 20px 14px}
 #tripdlg .rail::-webkit-scrollbar{display:none}
-#tripdlg .day{flex:0 0 auto;min-width:56px;background:none;border:1.5px solid transparent;border-radius:14px;padding:8px 10px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted)}
+#tripdlg .day{flex:0 0 auto;width:56px;min-width:56px;background:none;border:1.5px solid transparent;border-radius:14px;padding:8px 10px 7px;display:flex;flex-direction:column;align-items:center;gap:1px;color:var(--muted)}
 #tripdlg .day b{font:600 10.5px Barlow,sans-serif;text-transform:uppercase;letter-spacing:.08em}
 #tripdlg .day span{font:700 20px/1.05 "Barlow Condensed",sans-serif;color:var(--ink);opacity:.75}
 #tripdlg .day em{font-style:normal;font-size:10.5px;height:13px}
 #tripdlg .day.on{background:color-mix(in srgb,var(--tc) 16%,transparent);border-color:color-mix(in srgb,var(--tc) 50%,transparent)}
 #tripdlg .day.on span{opacity:1}#tripdlg .day.on b,#tripdlg .day.on em{color:var(--tc)}
-#tripdlg .day.add{border-style:dashed;border-color:var(--rule)}
+#tripdlg .day.add{border-style:dashed;border-color:var(--rule);width:56px}
 .trpanel{padding:4px 20px 0;max-height:46vh;overflow:auto}
 .trpanel .dh{display:flex;flex-direction:column;gap:2px;margin:2px 0 16px}
 .trpanel .dh h2{font:700 24px/1.05 "Barlow Condensed",sans-serif;margin:0}
@@ -644,18 +647,29 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 #editplandlg .link.del{align-self:center;color:var(--acc);margin-top:4px;padding:10px}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
 #plandlg input[type=date],#plandlg input[type=time]{font-size:16px}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+[hidden]{display:none!important}
+.row2>label{min-width:0}
+.row2 input,.row2 select{width:100%;max-width:100%;box-sizing:border-box}
 .pickex{margin:2px 0 4px}
 .pickex summary{list-style:none;cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;padding:6px 0}
 .pickex summary::-webkit-details-marker{display:none}
 .pickex summary::before{content:'▸ '}.pickex[open] summary::before{content:'▾ '}
 .pxsec{padding:2px 0 6px}.pxsec b{display:block;font-size:12px;color:var(--muted);padding:4px 0}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
-.pagrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#plandlg form{padding:18px 20px calc(10px + env(safe-area-inset-bottom,0px));max-height:90vh}
+#plandlg .epsec{padding:10px 0 4px}
+#plandlg .pacard{padding:11px 4px;gap:4px;font-size:12.5px}
+#plandlg .pacard .ic{width:21px;height:21px}
+.titlesec{display:flex;flex-direction:column;gap:8px;padding:10px 0 4px;border-top:1px solid var(--rule)}
+.titlesec>summary{list-style:none;cursor:pointer;font:600 12px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:2px 0}
+.titlesec>summary::-webkit-details-marker{display:none}
+.titlesec>summary::after{content:' ▾'}.titlesec[open]>summary::after{content:' ▴'}
 .pacard{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 6px;border:1.5px solid var(--rule);border-radius:14px;background:none;color:var(--ink);font-weight:600;font-size:13px}
 .pacard .ic{width:24px;height:24px;color:var(--muted)}
-.pacard.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
-.pacard.on .ic{color:var(--acc)}
+.pacard.on{border-color:var(--tc,var(--acc));background:color-mix(in srgb,var(--tc,var(--acc)) 14%,transparent)}
+.pacard.on .ic{color:var(--tc,var(--acc))}
 #paPlaces button{border:1.5px solid var(--rule);background:none;color:var(--muted);border-radius:999px;padding:7px 11px;font-weight:600;font-size:13px}
 #paWhen button.on,#durChips button.on{background:var(--acc);border-color:var(--acc);color:#fff}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:6px}
@@ -913,7 +927,8 @@ button.chip::after{display:none}
   <h2>Plan a session</h2>
   <section class="epsec"><h4>What</h4><div class="pagrid" id="paGrid"></div></section>
   <section class="epsec" id="paKindSec" hidden><h4>Kind</h4><div class="typechips" id="paKinds"></div>
-    <label class="minlab" id="paKmLab" hidden>Distance, km<input name="km" type="number" inputmode="decimal" min="1" max="60" step="0.5"></label></section>
+    <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"></label>
+      <label id="paUpLab" hidden>Ascent, m<input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"></label></div></section>
   <section class="epsec"><h4>When</h4>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
     <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div></section>
@@ -923,7 +938,7 @@ button.chip::after{display:none}
   <section class="epsec"><h4>Where <span class="hint">optional</span></h4>
     <input name="detail" autocomplete="off" placeholder="Grønmo, Kolsås, Nordmarka…">
     <div class="durchips" id="paPlaces"></div></section>
-  <section class="epsec"><h4>Title in your calendar</h4><input name="title" autocomplete="off" required></section>
+  <details class="titlesec"><summary>Title in your calendar</summary><input name="title" autocomplete="off" required></details>
   <p class="syncmsg" id="planMsg" role="status"></p>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
 </form></dialog>
@@ -2518,23 +2533,33 @@ function openRunLog(pre){
   f.querySelectorAll('[name=feel]').forEach(x=>x.checked=false);
   d.showModal();setTimeout(()=>{try{f.km.focus()}catch(e){}},50);
 }
-const KINDS={Run:[['easy','Easy'],['long','Long'],['recovery','Recovery'],['tempo','Tempo'],['intervals','Intervals'],['mp','Marathon pace'],['trail','Trail'],['race','Race']],
-  Climbing:[['indoor','Indoor'],['sport','Sport'],['trad','Trad'],['multi','Multipitch']],
-  Bouldering:[['indoor','Indoor'],['outdoor','Outdoor']],
-  'Ice climbing':[['crag','Crag'],['multi','Multipitch'],['alpine','Alpine']],
-  Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak']],
-  Other:[]};
+const KINDS={Run:[['easy','Easy'],['long','Long'],['recovery','Recovery'],['tempo','Tempo'],['intervals','Intervals'],['hills','Hills'],['mp','Marathon pace'],['trail','Trail'],['race','Race']],
+  Climbing:[['indoor','Indoor'],['toprope','Top rope'],['sport','Sport'],['trad','Trad'],['multi','Multipitch'],['alpine','Alpine']],
+  Bouldering:[['indoor','Indoor'],['outdoor','Outdoor'],['board','Board'],['circuits','Circuits']],
+  'Ice climbing':[['crag','Ice cragging'],['multi','Multipitch'],['mixed','Mixed'],['alpine','Alpine']],
+  Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak'],['hut','Hut to hut'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe'],['approach','Approach']],
+  Other:[['gym','Gym'],['mobility','Mobility'],['skitour','Ski touring'],['ski','Skiing'],['bike','Cycling'],['swim','Swim'],['rest','Rest'],['travel','Travel']]};
+const KINDMIN={day:180,pack:300,peak:480,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
+  indoor:180,toprope:150,sport:300,trad:420,multi:480,alpine:600,board:90,circuits:120,crag:360,mixed:360,
+  gym:60,mobility:20,skitour:300,ski:240,bike:120,swim:60,rest:0,travel:240};
+const needsKm=t=>t==='Run'||t==='Hike';
+const needsUp=t=>t==='Hike';
 const kindLabel=(tab,k)=>((KINDS[tab]||[]).find(x=>x[0]===k)||[])[1]||'';
 let PA={tab:null,kind:null};
-const places=()=>(S.places||[]).slice(0,8);
-function rememberPlace(x){x=(x||'').trim();if(!x)return;S.places=[x].concat((S.places||[]).filter(y=>y!==x)).slice(0,8);save()}
+const places=tab=>{const l=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y);
+  const mine=l.filter(y=>!tab||!y.tab||y.tab===tab).map(y=>y.name),rest=l.map(y=>y.name).filter(n=>mine.indexOf(n)<0);
+  return [...new Set(mine.concat(rest))].slice(0,8)};
+function rememberPlace(x,tab){x=(x||'').trim();if(!x)return;
+  const list=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y).filter(y=>!(y.name===x&&y.tab===tab));
+  S.places=[{name:x,tab}].concat(list).slice(0,16);save()}
 function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
   PA={tab:null,kind:null};
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';
-  f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';
-  document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
+  f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';f.up.value='';
+  document.getElementById('paNums').hidden=true;
+  document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
   document.getElementById('paKindSec').hidden=true;
   document.getElementById('paPlaces').innerHTML=places().map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
   document.querySelectorAll('#durChips button,#paWhen button').forEach(x=>x.classList.remove('on'));
@@ -2548,23 +2573,31 @@ function paPick(tab){
   const ks=KINDS[tab]||[];
   document.getElementById('paKindSec').hidden=!ks.length;
   document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${colOf(tab)}">${esc(l)}</button>`).join('');
-  document.getElementById('paKmLab').hidden=tab!=='Run';
-  if(tab==='Run'&&!f.km.value)f.km.value=PA.kind==='long'||PA.kind==='mp'?weekInfo(new Date()).long:PA.kind==='race'?42.2:'';
+  document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
+  document.getElementById('paNums').hidden=!needsKm(tab);
+  document.getElementById('paUpLab').hidden=!needsUp(tab);
+  if(tab==='Run'&&!f.km.value)f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:'';
+  if(!needsKm(tab)){f.km.value='';f.up.value=''}
   planAuto();
 }
 function planAuto(){
   const f=document.getElementById('planfrm');if(!PA.tab)return;
   const det=f.detail.value.trim(),km=parseFloat(f.km.value)||0;
   if(f.minutes.dataset.manual!=='1'){
-    const base=(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
-    f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5):base;
+    const base=KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
+    const upm=parseInt(f.up.value,10)||0;
+    f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5)
+      :PA.tab==='Hike'&&(km||upm)?Math.max(30,Math.round((km*12+upm/9+(PA.kind==='pack'?km*3:0))/15)*15)
+      :base||60;
     document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
   }
   if(f.title.dataset.auto==='1'){
     const kl=kindLabel(PA.tab,PA.kind);
+    const upt=parseInt(f.up.value,10)||0;
+    const nums=PA.tab==='Hike'&&(km||upt)?' · '+[km?km+' km':'',upt?upt+' m up':''].filter(Boolean).join(', '):'';
     f.title.value=PA.tab==='Run'
       ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
-      : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}`;
+      : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
   }
 }
 function openRunLog(pre){
@@ -3460,6 +3493,7 @@ function drawTrip(){
     if(+b.dataset.min>=480&&f.start.value>'10:00')f.start.value='08:00'});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'))});
   f.km.addEventListener('input',()=>{f.km.dataset.auto='0';planAuto()});
+  f.up.addEventListener('input',planAuto);
   f.detail.addEventListener('input',planAuto);
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
   f.addEventListener('submit',ev=>{
@@ -3469,14 +3503,15 @@ function drawTrip(){
     const id=uid(),det=f.detail.value.trim(),km=Math.round((parseFloat(f.km.value)||0)*10)/10,kl=kindLabel(PA.tab,PA.kind);
     const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),
       title:cleanTitle(f.title.value)||PA.tab,tab:PA.tab,
-      items:[PA.tab==='Run'?`${RUNLBL[PA.kind]||'Run'}${km?': '+km+' km':''} · ${zoneText(RUNZONE[PA.kind]||[2,2])}`:`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}`],
+      items:[PA.tab==='Run'?`${RUNLBL[PA.kind]||'Run'}${km?': '+km+' km':''} · ${zoneText(RUNZONE[PA.kind]||[2,2])}`
+        :`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}${PA.tab==='Hike'&&(km||(parseInt(f.up.value,10)||0))?' · '+[km?km+' km':'',(parseInt(f.up.value,10)||0)?(parseInt(f.up.value,10))+' m up':''].filter(Boolean).join(', '):''}`],
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
     if(PENDING_TRIP&&PENDING_TRIP.day===f.date.value){S.tripOf={...(S.tripOf||{}),[id]:PENDING_TRIP.id}}
     const backTo=PENDING_TRIP;PENDING_TRIP=null;
     if(backTo)setTimeout(()=>openTrip(backTo.id,backTo.day),60);
     if(PA.tab==='Run')S.runMeta[id]={type:PA.kind,km};
-    rememberPlace(det);save();calSel=plan.date;calPicked=true;
+    rememberPlace(det,PA.tab);save();calSel=plan.date;calPicked=true;
     setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
     enqueue({op:'plan',plan});scheduleFlush(300);
     setTimeout(()=>{try{document.getElementById('plandlg').close()}catch(_){}refresh()},0);
