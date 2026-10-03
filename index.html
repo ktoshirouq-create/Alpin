@@ -146,10 +146,13 @@ body[data-view="train"] header{padding-top:14px}
 .nocon p{margin:0;font-size:14px;line-height:1.45;flex:1}.nocon b{display:block}
 .syncextra{display:flex;flex-wrap:wrap;gap:6px 16px}
 .objtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
-.otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:10px 10px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px;border-top:4px solid var(--oc)}
+.otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:11px 11px 10px;display:flex;flex-direction:column;gap:1px;border-top:4px solid var(--oc);
+  background:linear-gradient(165deg,color-mix(in srgb,var(--oc) 24%,var(--panel)),var(--panel) 72%)}
+.otile i{font-style:normal;font-size:10.5px;color:var(--muted);margin-top:-2px}
+.otile .ic{color:var(--oc)}
 .otile em{font-style:normal;font-size:18px}.otile b{font:700 28px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
 .otile span{font-size:11px;line-height:1.2;color:var(--muted)}
-.otile.winter{background:linear-gradient(160deg,#16304A,#0B1726);color:#EAF6FF}.otile.winter span{color:#A9CBE4}
+
 body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .objpage{padding-top:8px}
 .tkhero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 14px;color:#EAF6FF;
@@ -331,6 +334,9 @@ body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .nextcard.empty .nc-when{color:var(--muted)}
 .nc-items{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.5}
 .nc-btns{display:flex;align-items:center;gap:16px}
+.nc-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px}
+.nc-links{display:flex;gap:14px}
+.nc-links .link{font-size:13px}
 .rcard{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;background:var(--panel);border:1.5px solid var(--acc);margin-top:14px}
 .rcard>div{flex:1;min-width:0;font-size:15px;line-height:1.3}.rcard span{display:block;color:var(--muted);font-size:13px}
 .weekstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -543,7 +549,10 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .wbday{background:var(--panel);border:1.5px solid transparent;border-radius:10px;padding:7px 0;display:flex;flex-direction:column;align-items:center;gap:1px}
 .wbday b{font-size:11px;color:var(--muted)}.wbday span{font-weight:700;font-size:15px}.wbday em{font-style:normal;font-size:9px;color:var(--acc)}
 .wbday.on{border-color:var(--acc)}.wbday.past{opacity:.45}
-.wblib{max-height:34vh;overflow:auto;border:1.5px solid var(--rule);border-radius:12px;padding:6px 10px}
+.wblib{max-height:34vh;overflow:auto;padding:2px 0}
+.pickex.lib>summary{color:var(--tc);border-top:1px solid var(--rule);padding:10px 0 8px}
+.pickex.lib:first-child>summary{border-top:0}
+.pickex.lib .ic{color:var(--tc)}
 .wbrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--rule)}
 .wbrow div{flex:1;min-width:0}.wbrow b{display:block;font-size:14px;font-weight:600}.wbrow span{font-size:12px;color:var(--muted)}
 .wbadd{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:none;color:var(--ink);font-size:17px;font-weight:700}
@@ -572,6 +581,11 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .legend2.small{font-size:13px;color:var(--muted)}
 .legnote{display:block;font-size:13px;line-height:1.5;color:var(--muted)}
 h1 .hdate{display:block;font:400 14px/1.3 Barlow,sans-serif;color:var(--muted);margin-top:2px;letter-spacing:0}
+body[data-view="today"] header{padding-bottom:4px}
+body[data-view="today"] h1{font-size:clamp(30px,8vw,42px)}
+body[data-view="today"] #plede{display:none}
+body[data-view="today"] .objtiles{margin-top:10px}
+body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
 .prow{display:flex;gap:10px;align-items:flex-start;padding:12px;margin:8px 0;border-radius:12px;background:var(--panel);border-left:4px solid var(--tc)}
@@ -794,7 +808,9 @@ button.chip::after{display:none}
 </form></dialog>
 
 <dialog id="weekdlg"><form method="dialog" id="weekfrm">
-  <h2>Build a week</h2><p class="hint" id="wbTitle"></p>
+  <div class="wknav"><button type="button" class="cnav sm" data-wbnav="prev" aria-label="Previous week">‹</button>
+    <div><h2>Build a week</h2><p class="hint" id="wbTitle"></p></div>
+    <button type="button" class="cnav sm" data-wbnav="next" aria-label="Next week">›</button></div>
   <div id="wbDays" class="wbdays"></div>
   <div id="wbPicked" class="wbpicked"></div>
   <div id="wbLib" class="wblib"></div>
@@ -1781,13 +1797,13 @@ function renderToday(){
   const when=p=>(p.date===todayS?(p.start<nowHM?'Today, planned for ':'Today ')+p.start:p.date===tom?'Tomorrow '+p.start:niceDay(p.date)+' · '+p.start);
   const refs=p=>(S.planRefs[p.id]||[]);
   const nextCard=next?`<div class="nextcard" style="--tc:${colOf(next.tab)}">
-      <div class="nc-top"><span class="nc-when">${esc(when(next))} · ${esc(String(next.minutes))} min${next.pending?' · <em>waiting to reach the calendar</em>':''}</span></div>
+      <div class="nc-top"><span class="nc-when">${esc(when(next))} · ${esc(String(next.minutes))} min${next.pending?' · <em>waiting to reach the calendar</em>':''}</span>
+        <span class="nc-links"><button class="link" data-act="pedit" data-id="${esc(next.id)}">Change</button><button class="link" data-act="calday" data-d="${next.date}">Calendar</button></span></div>
       <h2>${esc(cleanTitle(next.title))}</h2>
       ${(next.items||[]).length?`<p class="nc-items">${(next.items||[]).map(esc).join('<br>')}</p>`:''}
       <div class="nc-btns">${refs(next).length?`<button class="go" data-act="pstart" data-id="${esc(next.id)}">${playIcon}Start</button>`
         :(next.date<=todayS?`<button class="go" data-act="pdone" data-id="${esc(next.id)}">✓ Done</button>`:'')}
-        <button class="link" data-act="pedit" data-id="${esc(next.id)}">Change</button>
-        <button class="link" data-act="calday" data-d="${next.date}">Calendar</button></div></div>`
+        </div></div>`
     :`<div class="nextcard empty" style="--tc:var(--rule)"><h2>Nothing planned</h2><p class="nc-items">Plan your next session and it shows up here and in your Training calendar.</p></div>`;
   const quick=[['warmup|2|e','Pre-climb'],['warmup|3|e','Stretch'],['warmup|0|e','Pre-run'],['ice|0|e','Ice tools']];
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
@@ -1806,7 +1822,7 @@ function renderToday(){
   document.getElementById('main').innerHTML=`<section class="todaysec">
     ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
-      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile ${o.kind}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><span>${o.left>0?'days to ':''}${esc(o.name)}</span></button>`).join('')}</div>
+      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
@@ -3114,6 +3130,7 @@ let PENDING_TRIP=null;
   document.getElementById('runweekfrm').addEventListener('click',ev=>{
     const n=ev.target.closest('[data-rw]');if(n){loadRunWeek(addDays(RW.ws,n.dataset.rw==='next'?7:-7));return}});
   wf.addEventListener('click',ev=>{
+    const nv=ev.target.closest('[data-wbnav]');if(nv){weekBuildStep(nv.dataset.wbnav==='next'?1:-1);return}
     const d=ev.target.closest('[data-wb]');if(d){WB.day=+d.dataset.wb;drawWeekBuild();return}
     const a=ev.target.closest('[data-wbadd]');if(a){const k=a.dataset.wbadd,list=WB.days[WB.day]=WB.days[WB.day]||[];
       const i=list.indexOf(k);if(i>=0)list.splice(i,1);else list.push(k);drawWeekBuild('sel');return}
@@ -3290,6 +3307,12 @@ function openWeekBuild(offset){
   const ws=addDays(mondayOf(new Date()),7*(+offset||0));
   WB={ws,day:0,days:{}};drawWeekBuild();document.getElementById('weekdlg').showModal();
 }
+function weekBuildStep(dir){
+  const keep=Object.keys(WB.days).some(k=>(WB.days[k]||[]).length);
+  const move=()=>{WB={ws:addDays(WB.ws,dir*7),day:0,days:{}};drawWeekBuild()};
+  if(!keep)return move();
+  ask('Leave this week?','What you picked for '+parseDay(dayOf(WB.ws)).toLocaleDateString(undefined,{day:'numeric',month:'short'})+' is not in the calendar yet.','Discard and move',true).then(ok=>{if(ok)move()});
+}
 function drawWbPicked(){
   const picked=WB.days[WB.day]||[],exs=picked.map(keyEx).filter(Boolean);
   document.getElementById('wbPicked').innerHTML=picked.length
@@ -3307,10 +3330,11 @@ function drawWbPicked(){
 function drawWeekBuild(part){
   const days=[...Array(7)].map((_,i)=>addDays(WB.ws,i));
   if(part!=='sel'){
-    document.getElementById('wbTitle').textContent=`${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
+    const thisW=dayOf(mondayOf(new Date()));
+    document.getElementById('wbTitle').textContent=`${dayOf(WB.ws)===thisW?'this week · ':''}${days[0].toLocaleDateString(undefined,{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString(undefined,{day:'numeric',month:'short'})}`;
     const opts=sessionOptions().filter(o=>o.one),byTab={};
     opts.forEach(o=>{(byTab[o.tab]=byTab[o.tab]||[]).push(o)});
-    document.getElementById('wbLib').innerHTML=Object.keys(byTab).map((t,i)=>`<details class="pickex"${i===0?' open':''}><summary>${ICON(tabName(t))} ${esc(t)}</summary>
+    document.getElementById('wbLib').innerHTML=Object.keys(byTab).map((t,i)=>`<details class="pickex lib"${i===0?' open':''} style="--tc:${colOf(t)}"><summary>${ICON(tabName(t))} ${esc(t)}</summary>
       ${byTab[t].map(o=>`<div class="wbrow"><div><b>${esc(o.label)}</b><span>${esc(o.dose||'')}</span></div>
         <button type="button" class="wbadd" data-wbadd="${esc(o.key)}">+</button></div>`).join('')}</details>`).join('');
   }
