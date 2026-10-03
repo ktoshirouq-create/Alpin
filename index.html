@@ -148,9 +148,8 @@ body[data-view="train"] header{padding-top:14px}
 .objtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
 .otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:11px 11px 10px;display:flex;flex-direction:column;gap:1px;border-top:4px solid var(--oc);
   background:linear-gradient(165deg,color-mix(in srgb,var(--oc) 24%,var(--panel)),var(--panel) 72%)}
-.otile.t-marathon{background:#F2F0EB;color:#121212;border-top-color:#121212}
-.otile.t-marathon .ic,.otile.t-marathon span,.otile.t-marathon i{color:#4A4A4A}
-.otile.t-marathon b{color:#121212}
+.otile.t-marathon{background:linear-gradient(165deg,#223040,#141B23 72%);border-top-color:#F2F0EB}
+.otile.t-marathon .ic{color:#F2F0EB}
 .otile.t-nepal{background:linear-gradient(165deg,#2C3E57,#1B2636 72%)}
 .otile.t-toubkal{background:linear-gradient(165deg,#24476A,#10223A 72%)}
 .otile i{font-style:normal;font-size:10.5px;color:var(--muted);margin-top:-2px}
@@ -259,26 +258,27 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .cd.trip+.cd.trip{margin-left:-4px}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
-.oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 12px;color:#121212;background:#F2F0EB}
+.oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 12px;color:#F2F0EB;
+  background:linear-gradient(168deg,#1D2630 0%,#141B23 60%,#10151B 100%)}
 #oslo-badge-placeholder{}
 .oshero .tkhead{padding-right:92px}
 .oskick{align-self:flex-start}
-.osbadge{position:absolute;top:14px;right:14px;width:76px;height:76px;border-radius:22px;background:#121212;color:#F2F0EB;
+.osbadge{position:absolute;top:14px;right:14px;width:76px;height:76px;border-radius:22px;background:#F2F0EB;color:#10151B;
   display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
 .osbadge b{font:700 30px/1 "Barlow Condensed",sans-serif}
 .osbadge span{font:700 9.5px/1.15 Barlow,sans-serif;letter-spacing:.1em;text-align:center;margin-top:2px}
-.oshero .tkhead b{font-size:17px;color:#121212}
-.oshero .tkhead span:last-child{color:#5A5A5A;font-size:13px}
-.oshero .cdbig b{color:#121212;letter-spacing:-.03em}
-.oshero .cdbig span,.oshero .cdsmall{color:#5A5A5A}
-.oshero .cdsmall b{color:#121212}
-.oshero .tkfoot{color:#5A5A5A;border-top:1px solid rgba(0,0,0,.12);padding-top:8px;margin-top:2px}
-.oshero .tkfoot b{color:#121212}
+.oshero .tkhead b{font-size:17px;color:#F2F0EB}
+.oshero .tkhead span:last-child{color:#9BA7B4;font-size:13px}
+.oshero .cdbig b{color:#F2F0EB;letter-spacing:-.03em}
+.oshero .cdbig span,.oshero .cdsmall{color:#9BA7B4}
+.oshero .cdsmall b{color:#F2F0EB}
+.oshero .tkfoot{color:#9BA7B4;border-top:1px solid rgba(242,240,235,.16);padding-top:8px;margin-top:2px}
+.oshero .tkfoot b{color:#F2F0EB}
 .osline{display:block;width:100%;height:auto;margin:2px 0 6px}
-.osline .ob{fill:none;stroke:#121212;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-.osline .ow{fill:none;stroke:#121212;stroke-width:1.5;opacity:.45;stroke-linecap:round}
+.osline .ob{fill:none;stroke:#F2F0EB;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.osline .ow{fill:none;stroke:#F2F0EB;stroke-width:1.5;opacity:.4;stroke-linecap:round}
 .oshero .oswave{position:absolute;left:-10%;right:-10%;bottom:-30px;height:120px;border-radius:50%;background:rgba(255,160,120,.12)}
-.oskick{color:#121212;background:#121212;color:#F2F0EB;display:inline-block;padding:4px 9px;border-radius:999px}
+.oskick{background:#F2F0EB;color:#10151B;display:inline-block;padding:4px 10px;border-radius:999px}
 .oshero .tkhead b{font-size:16px;line-height:1.25}
 .tkhead{gap:3px}
 .goalpick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -2010,7 +2010,7 @@ function renderObjective(){
   const now=new Date(),o=OS('toubkal'),start=parseDay(TK.prepStart),go=parseDay(TK.start);
   const prog=Math.max(0,Math.min(1,(now-start)/(go-start))),left=go-now;
   document.getElementById('ptitle').textContent='Toubkal';
-  document.getElementById('plede').textContent=TK.sub;
+  document.getElementById('plede').textContent='';
   document.title='Toubkal · Training guide';
   const wk=Math.max(0,Math.ceil((d0(go)-d0(now))/(7*864e5)));
   const fmt=(ds,opt)=>parseDay(ds).toLocaleDateString(undefined,opt||{weekday:'short',day:'numeric',month:'short'});
@@ -2071,7 +2071,7 @@ function renderOslo(){
   const left=race-now,W=weekInfo(now);
   const goal=(o.goal==null?1:+o.goal),g=OSLO.goals[goal]||OSLO.goals[1];
   document.getElementById('ptitle').textContent='Oslo Marathon';
-  document.getElementById('plede').textContent='Saturday 18 September 2027 · 42.195 km';
+  document.getElementById('plede').textContent='';
   document.title='Oslo Marathon · Training guide';
   const kitDone=Object.values(o.kit||{}).filter(Boolean).length;
   document.getElementById('main').innerHTML=`<section class="objpage">
@@ -2243,7 +2243,7 @@ function renderPasses(){
   const now=new Date(),o=OS('passes'),n=NS(),go=parseDay(n.date),start=parseDay(n.prepStart);
   const dir=o.dir||'cw',prog=Math.max(0,Math.min(1,(now-start)/(go-start)));
   document.getElementById('ptitle').textContent='Three Passes';
-  document.getElementById('plede').textContent='Khumbu, Nepal · with a friend, teahouses, no guide';
+  document.getElementById('plede').textContent='';
   document.title='Three Passes · Training guide';
   const gearAll=TP.gear.reduce((a,g)=>a+g[1].length,0),gearDone=Object.values(o.gear||{}).filter(Boolean).length;
   document.getElementById('main').innerHTML=`<section class="objpage">
@@ -2742,7 +2742,7 @@ function card(e){
 function render(){
   const p=prog();
   document.getElementById('ptitle').textContent=p.title;
-  document.getElementById('plede').textContent=p.lede;
+  document.getElementById('plede').textContent=TRAIN_IDS.includes(p.id)?p.lede:'';
   document.title=p.title;
   const inTrain=TRAIN_IDS.includes(cur);
   document.body.dataset.view=inTrain?'train':['toubkal','oslo','passes'].includes(cur)?'obj':cur;
