@@ -38,7 +38,7 @@ button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:tran
 :focus-visible{outline:3px solid var(--acc);outline-offset:2px}
 .wrap{max-width:760px;margin:0 auto;padding:0 18px 48px}
 .flags{display:block;width:100%;height:auto}
-#bnav{position:fixed;left:0;right:0;bottom:0;top:auto!important;overflow:visible!important;border-bottom:0!important;z-index:18;display:flex;justify-content:space-around;
+#bnav{position:relative;flex:0 0 auto;left:auto;right:auto;bottom:auto;top:auto!important;overflow:visible!important;border-bottom:0!important;z-index:18;display:flex;justify-content:space-around;
   background:var(--bg);border-top:1px solid var(--rule);
   padding:7px 8px max(env(safe-area-inset-bottom,0px),10px);transform:translateZ(0)}
 #bnav button{flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:6px 0;
@@ -47,8 +47,13 @@ button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:tran
 #bnav button[aria-current="page"]{color:var(--ink)}
 #bnav button[aria-current="page"] svg{color:var(--acc);fill:var(--acc)}
 #bnav button[aria-current="page"] rect,#bnav button[aria-current="page"] path[stroke]{stroke:var(--acc);fill:none}
-body{padding-bottom:calc(max(env(safe-area-inset-bottom,0px),10px) + 82px);min-height:100svh}
-html{scroll-padding-bottom:calc(max(env(safe-area-inset-bottom,0px),10px) + 100px);overscroll-behavior-y:none}
+body{height:100dvh;min-height:100dvh;overflow:hidden;padding-bottom:0;padding-top:env(safe-area-inset-top,0px)}
+.wrap{height:100%;display:flex;flex-direction:column;min-height:0}
+.wrap>header{flex:0 0 auto}
+#progs{flex:0 0 auto}
+#main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding-bottom:18px;scroll-padding-top:8px}
+html{height:100%;overscroll-behavior-y:none}
 body:not([data-view="today"]) #flags{display:none}
 body:not([data-view="train"]) #progs{display:none}
 body[data-view="train"] h1{font-size:clamp(34px,9vw,52px)}
@@ -2883,6 +2888,9 @@ function render(){
     +'<span id="syncline">'+syncLine()+'</span><br>'
     +'<button class="link" data-act="export">Back up</button> · <button class="link" data-act="import">Restore</button>';
 }
+const scrollEl=()=>document.getElementById('main')||document.scrollingElement;
+const scrollY_=()=>scrollEl().scrollTop;
+const scrollTo_=y=>{try{scrollEl().scrollTop=y}catch(e){}};
 function refresh(){try{render()}catch(err){showErr('Page error: '+err.message)}if(fa.classList.contains('open'))reloadFA()}
 
 /* ---------- errors + diagnostics ---------- */
@@ -2934,11 +2942,11 @@ function findByKey(key){
 // Native controls fire 'change' reliably even where tap-to-click is unreliable.
 document.addEventListener('change',ev=>{
   if(ev.target.matches&&ev.target.matches('input[data-act=tptog]')){const o=OS('passes');o[ev.target.dataset.k]=ev.target.checked||undefined;save();
-    const y=window.scrollY;render();window.scrollTo(0,y);return}
+    const y=scrollY_();render();scrollTo_(y);return}
   if(ev.target.matches&&ev.target.matches('input[data-obj]')){const t=ev.target,o=OS(cur==='oslo'?'oslo':cur==='passes'?'passes':'toubkal'),g=t.dataset.obj;
-    if(g==='goal'){o.goal=+t.dataset.k;save();const y=window.scrollY;render();window.scrollTo(0,y);return}o[g]=o[g]||{};
+    if(g==='goal'){o.goal=+t.dataset.k;save();const y=scrollY_();render();scrollTo_(y);return}o[g]=o[g]||{};
     if(t.checked)o[g][t.dataset.k]=1;else delete o[g][t.dataset.k];save();
-    const y=window.scrollY;render();window.scrollTo(0,y);return}
+    const y=scrollY_();render();scrollTo_(y);return}
   const t=ev.target;
   
   try{
@@ -2951,7 +2959,7 @@ document.addEventListener('toggle',ev=>{const d=ev.target;if(d.matches&&d.matche
 function go(id){
   cur=id;if(TRAIN_IDS.includes(id)){lastTrain=id;try{localStorage.setItem('tpg:prog',id)}catch(_){}}
   try{history.replaceState(null,'','#'+cur)}catch(_){}
-  refresh();window.scrollTo(0,0);if(cur==='history'||cur==='today'){pullHistory();pullPlans()}
+  refresh();scrollTo_(0);if(cur==='history'||cur==='today'){pullHistory();pullPlans()}
 }
 document.getElementById('progs').addEventListener('click',e=>{const b=e.target.closest('[data-prog]');if(b)go(b.dataset.prog)});
 document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;
@@ -3042,7 +3050,7 @@ function onAct(b){
   if(act==='objopen'||act==='objgo'){go(b.dataset.go);return}
   if(act==='tpjump'){const el=[...document.querySelectorAll('.tpdays .dstep')].find(x=>x.id.includes('tpd-'+b.dataset.v.replace(/\s/g,'')+'-'));
     if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1400)}return}
-  if(act==='tpdir'){OS('passes').dir=b.dataset.d;save();const y=window.scrollY;render();window.scrollTo(0,y);return}
+  if(act==='tpdir'){OS('passes').dir=b.dataset.d;save();const y=scrollY_();render();scrollTo_(y);return}
   if(act==='objplan'){calSel=dayOf(new Date());openPlan();setTimeout(()=>{paPick('Hike');const f=document.getElementById('planfrm');f.detail.value=(cur==='toubkal'?'Toubkal prep: 6–7 h, 1,200 m up, 10 kg':'Nepal prep: two long days with the pack');f.minutes.value=420;f.minutes.dataset.manual='1';planAuto()},30);return}
   if(act==='nepset'){const f=document.getElementById('nepfrm'),n=NS();f.date.value=n.date;f.fixed.checked=!!n.fixed;document.getElementById('nepdlg').showModal();return}
   if(act==='runadj'){const prev=JSON.parse(JSON.stringify(RS()));const c=runCheck();if(!c)return;
@@ -3253,7 +3261,7 @@ handleConnectHash();addEventListener('hashchange',handleConnectHash);
     if(Math.abs(dx)<55||Math.abs(dy)>45)return;
     calMonth=new Date(calMonth.getFullYear(),calMonth.getMonth()+(dx<0?1:-1),1);render();pullPlans()},{passive:true});
 })();
-addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t!==cur){cur=t;if(TRAIN_IDS.includes(t))lastTrain=t;refresh();window.scrollTo(0,0)}});
+addEventListener('hashchange',()=>{const t=tabId(location.hash.slice(1));if(t&&t!==cur){cur=t;if(TRAIN_IDS.includes(t))lastTrain=t;refresh();scrollTo_(0)}});
 /* ---------- trek date ---------- */
 document.getElementById('nepfrm').addEventListener('submit',ev=>{const f=ev.target;if(!ev.submitter||ev.submitter.value!=='save')return;
   S.nepal={...NS(),date:f.date.value,fixed:f.fixed.checked};save();refresh()});
