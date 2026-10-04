@@ -47,12 +47,12 @@ button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:tran
 #bnav button[aria-current="page"]{color:var(--ink)}
 #bnav button[aria-current="page"] svg{color:var(--acc);fill:var(--acc)}
 #bnav button[aria-current="page"] rect,#bnav button[aria-current="page"] path[stroke]{stroke:var(--acc);fill:none}
-body{height:100dvh;min-height:100dvh;overflow:hidden;padding-bottom:0;padding-top:env(safe-area-inset-top,0px)}
-.wrap{height:100%;display:flex;flex-direction:column;min-height:0}
-.wrap>header{flex:0 0 auto}
-#progs{flex:0 0 auto}
-#main{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
-  padding-bottom:18px;scroll-padding-top:8px}
+body{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+  padding-bottom:0;padding-top:env(safe-area-inset-top,0px)}
+.wrap{flex:1 1 auto;min-height:0;width:100%;max-width:760px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+body{width:100%;max-width:100%;overflow-x:hidden}
+body>nav#bnav{flex:0 0 auto}
+body>dialog{flex:0 0 auto}
 html{height:100%;overscroll-behavior-y:none}
 body:not([data-view="today"]) #flags{display:none}
 body:not([data-view="train"]) #progs{display:none}
@@ -2888,7 +2888,7 @@ function render(){
     +'<span id="syncline">'+syncLine()+'</span><br>'
     +'<button class="link" data-act="export">Back up</button> · <button class="link" data-act="import">Restore</button>';
 }
-const scrollEl=()=>document.getElementById('main')||document.scrollingElement;
+const scrollEl=()=>document.querySelector('.wrap')||document.scrollingElement;
 const scrollY_=()=>scrollEl().scrollTop;
 const scrollTo_=y=>{try{scrollEl().scrollTop=y}catch(e){}};
 function refresh(){try{render()}catch(err){showErr('Page error: '+err.message)}if(fa.classList.contains('open'))reloadFA()}
