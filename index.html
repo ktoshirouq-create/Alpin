@@ -2586,7 +2586,7 @@ function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
   PA={tab:null,kind:null};
-  f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';
+  f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
   f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';f.up.value='';
   document.getElementById('paNums').hidden=true;
   document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
@@ -3340,7 +3340,7 @@ let EP=null,EP_TYPE=null;
 function openPlanEdit(id){
   const p=plansCache().find(x=>x.id===id);if(!p)return;
   const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
-  EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.minutes.value=p.minutes;f.title.value=cleanTitle(p.title);
+  EP=p;f.date.value=p.date;f.start.value=p.start||'14:00';f.start.dataset.touched='1';f.minutes.value=p.minutes;f.title.value=cleanTitle(p.title);
   const app=(S.planRefs[p.id]||[]).length;
   const cur0=tabName(p.tab),types=EXTRAS.map(([t])=>t).concat(EXTRAS.some(([t])=>t===cur0)?[]:[cur0]);
   document.getElementById('epTypes').innerHTML=types.map(t=>`<button type="button" class="tchip${t===cur0?' on':''}" data-type="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
@@ -3539,8 +3539,9 @@ function drawTrip(){
   document.getElementById('durChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
     f.minutes.value=b.dataset.min;f.minutes.dataset.manual='1';
     document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',x===b));
-    if(+b.dataset.min>=480&&f.start.value>'10:00')f.start.value='08:00'});
+    if(+b.dataset.min>=480&&f.start.dataset.touched!=='1'&&f.start.value>'10:00')f.start.value='08:00'});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'))});
+  f.start.addEventListener('input',()=>{f.start.dataset.touched='1'});
   f.km.addEventListener('input',()=>{f.km.dataset.auto='0';planAuto()});
   f.up.addEventListener('input',planAuto);
   f.detail.addEventListener('input',planAuto);
@@ -3572,7 +3573,7 @@ function drawTrip(){
   document.getElementById('durChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
     f.minutes.value=b.dataset.min;f.minutes.dataset.manual='1';
     document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',x===b));
-    if(+b.dataset.min>=480&&f.start.value>'10:00')f.start.value='08:00';});
+    if(+b.dataset.min>=480&&f.start.dataset.touched!=='1'&&f.start.value>'10:00')f.start.value='08:00';});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'))});
   f.detail.addEventListener('input',planAuto);
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
