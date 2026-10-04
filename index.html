@@ -259,6 +259,13 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .cd.trip{background:color-mix(in srgb,var(--oc) 22%,var(--panel));border-radius:0}
 .cd.trip.tstart{border-radius:11px 0 0 11px}.cd.trip.tend{border-radius:0 11px 11px 0}
 .cd.trip+.cd.trip{margin-left:-4px}
+.dayhead.trip{display:flex;align-items:flex-end;gap:10px;width:100%;background:none;border:0;border-bottom:2px solid var(--ink);
+  padding:0 0 6px;margin-bottom:6px;text-align:left;color:var(--ink)}
+.dayhead.trip>span{flex:1;min-width:0}
+.dayhead.trip h3{margin:0;padding:0;border:0}
+.dayhead.trip small{display:flex;align-items:center;gap:6px;color:var(--oc);font:600 13.5px Barlow,sans-serif;margin-top:2px}
+.dayhead.trip .ic{width:14px;height:14px;color:var(--oc)}
+.dayhead.trip em{font-style:normal;font-size:19px;line-height:1;color:var(--oc);opacity:.8;padding-bottom:3px}
 .tripbar{display:block;width:100%;text-align:left;border:0;border-radius:12px;padding:10px 12px;margin:8px 0;background:color-mix(in srgb,var(--oc) 18%,var(--panel));border-left:4px solid var(--oc)}
 .tripbar b{display:block;font-size:15px}.tripbar span{font-size:13px;color:var(--muted)}
 .oshero{position:relative;overflow:hidden;border-radius:22px;padding:20px 18px 12px;color:#F2F0EB;
@@ -1816,10 +1823,13 @@ function renderHistory(){
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
     <button class="legendlink" data-act="legend">What the dots mean</button>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
-    <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
-      ${(()=>{const t=tripOn(calSel);if(!t)return'';const n=tripDayNo(t,calSel),sp=tripSpan(t),cnt=tripPlans(t,calSel).length;
-        return `<button class="tripbar" data-act="tripopen" data-id="${esc(t.id)}" data-d="${esc(calSel)}" style="--oc:${colOf(t.kind||'Hike')}">
-          <b>${esc(t.name)}</b><span>day ${n} of ${sp} · ${cnt?'see the whole trip':'nothing planned on this day yet'}</span></button>`})()}
+    <div class="hday">${(()=>{const t=tripOn(calSel);
+      if(!t)return `<h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>`;
+      const n=tripDayNo(t,calSel),sp=tripSpan(t);
+      return `<button class="dayhead trip" data-act="tripopen" data-id="${esc(t.id)}" data-d="${esc(calSel)}" style="--oc:${colOf(t.kind||'Hike')}">
+        <span><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
+        <small>${ICON(t.kind||'Hike','inl')} ${esc(t.name)} · day ${n} of ${sp}</small></span><em>›</em></button>`})()}
+
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
