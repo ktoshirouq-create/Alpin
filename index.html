@@ -17,7 +17,7 @@
   --bg:#E8EEF1;--panel:#F7FAFB;--ink:#1C2A36;--far:#97A7B4;--prop:#C5D1D9;
   --acc:#B8352A;--muted:#566674;--rule:#CAD5DC;
   box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-top:env(safe-area-inset-top,0px);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
@@ -39,16 +39,16 @@ button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:tran
 .wrap{max-width:760px;margin:0 auto;padding:0 18px 48px}
 .flags{display:block;width:100%;height:auto}
 #bnav{position:fixed;left:0;right:0;bottom:0;top:auto!important;overflow:visible!important;border-bottom:0!important;z-index:18;display:flex;justify-content:space-around;
-  background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-  border-top:1px solid var(--rule);padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px)}
+  background:var(--bg);border-top:1px solid var(--rule);
+  padding:7px 8px max(env(safe-area-inset-bottom,0px),10px);transform:translateZ(0)}
 #bnav button{flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:6px 0;
   color:var(--muted);font:600 12px Barlow,sans-serif;border-radius:12px}
 #bnav svg{width:24px;height:24px;fill:currentColor}
 #bnav button[aria-current="page"]{color:var(--ink)}
 #bnav button[aria-current="page"] svg{color:var(--acc);fill:var(--acc)}
 #bnav button[aria-current="page"] rect,#bnav button[aria-current="page"] path[stroke]{stroke:var(--acc);fill:none}
-body{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 78px)}
-html{scroll-padding-bottom:calc(env(safe-area-inset-bottom,0px) + 96px)}
+body{padding-bottom:calc(max(env(safe-area-inset-bottom,0px),10px) + 82px);min-height:100svh}
+html{scroll-padding-bottom:calc(max(env(safe-area-inset-bottom,0px),10px) + 100px);overscroll-behavior-y:none}
 body:not([data-view="today"]) #flags{display:none}
 body:not([data-view="train"]) #progs{display:none}
 body[data-view="train"] h1{font-size:clamp(34px,9vw,52px)}
