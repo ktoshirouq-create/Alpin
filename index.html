@@ -2429,8 +2429,18 @@ function runCheck(){
   if(ratio>1.15&&!last4.some(x=>x.feel==='hard'))return {kind:'up',avg,avgP,longest,text:`You're ahead: about ${Math.round(avg)} km a week against ${Math.round(avgP)} planned, and nothing felt hard. Move the plan up to match?`,btn:'Move the plan up'};
   return null;
 }
-function runKmIn(ws){const a=dayOf(ws),b=dayOf(addDays(ws,6));
-  return localLog().filter(r=>r.tab==='Run'&&r.result!=='skipped'&&r.date>=a&&r.date<=b).reduce((x,r)=>x+(parseFloat(r.completed)||0),0)}
+const planKm=p=>{const m=String((p&&p.title)||'').match(/([\d.]+)\s*km/);return m?parseFloat(m[1]):0};
+function logKm(r){
+  const c=parseFloat(r.completed);if(c)return c;
+  const m=(S.runMeta||{})[r.plan_id];if(m&&+m.km)return +m.km;
+  const pl=r.plan_id?plansCache().find(p=>p.id===r.plan_id):null;
+  return pl?planKm(pl):(parseFloat(r.dose)||0)}
+function runKmIn(ws){const a=dayOf(ws),b=dayOf(addDays(ws,6)),log=localLog();
+  const fromLog=log.filter(r=>tabName(r.tab)==='Run'&&r.result!=='skipped'&&r.date>=a&&r.date<=b).reduce((x,r)=>x+logKm(r),0);
+  // a run ticked done elsewhere (or on another device) has no log row: count what it planned
+  const fromPlans=plansCache().filter(p=>tabName(p.tab)==='Run'&&p.date>=a&&p.date<=b&&p.status==='done'
+      &&!log.some(r=>r.plan_id===p.id)).reduce((x,p)=>x+((+((S.runMeta[p.id]||{}).km))||planKm(p)||0),0);
+  return fromLog+fromPlans}
 const MONTHGOAL=['Race month: taper, keep a little speed, then the marathon on the 18th. After that, two easy weeks and Nepal hiking takes over.',
  'Peak month: two or three long runs of 28–32 km, your biggest weeks. One cutback week in the middle.',
  'Long runs up to 28 km with marathon-pace sections. One quality run a week. Heat: slow down and drink.',
@@ -2990,8 +3000,11 @@ function onAct(b){
   if(act==='pdone'&&(plansCache().find(x=>x.id===b.dataset.id)||{}).tab==='Run'){const pl=plansCache().find(x=>x.id===b.dataset.id),m=S.runMeta[pl.id]||{};
     openRunLog({planId:pl.id,date:pl.date,type:m.type||'easy',km:m.km||''});return}
   if(act==='pdone'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
-    const now=new Date(),row={id:uid(),date:pl.date,time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,tab:pl.tab,section:'',exercise_id:'',
-      exercise:pl.title.replace(/^[^A-Za-z0-9]+/,''),slot:'',slot_name:'',dose:pl.minutes+' min',result:'done',completed:'',seconds:String(pl.minutes*60),feel:'',note:'',plan_id:pl.id};
+    const meta=S.runMeta[pl.id]||{},km=tabName(pl.tab)==='Run'?(+meta.km||planKm(pl)):0;
+    const now=new Date(),row={id:uid(),date:pl.date,time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,tab:pl.tab,section:'',
+      exercise_id:km?(RUNEX[meta.type]||'runeasy'):'',
+      exercise:pl.title.replace(/^[^A-Za-z0-9]+/,''),slot:'',slot_name:'',dose:pl.minutes+' min',result:'done',
+      completed:km?km+' km':'',seconds:String(pl.minutes*60),feel:'',note:'',plan_id:pl.id};
     const l=localLog();l.push(row);setLocalLog(l);if(connected()){enqueue({op:'log',row});scheduleFlush(300)}
     setPlans(plansCache().map(x=>x.id===pl.id?{...x,status:'done'}:x));render();return}
   if(act==='pstart'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
