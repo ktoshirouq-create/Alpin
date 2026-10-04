@@ -657,6 +657,11 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .pickex summary::before{content:'▸ '}.pickex[open] summary::before{content:'▾ '}
 .pxsec{padding:2px 0 6px}.pxsec b{display:block;font-size:12px;color:var(--muted);padding:4px 0}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
+.tripline{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid var(--acc);
+  padding:6px 0 6px 10px;margin:2px 0 4px;color:var(--muted);font-weight:600;font-size:13.5px}
+.nudge{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--muted);background:color-mix(in srgb,var(--acc) 10%,transparent);
+  border-radius:10px;padding:8px 10px}
+.nudge .link{font-size:13px}
 .pagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 #plandlg form{padding:18px 20px calc(10px + env(safe-area-inset-bottom,0px));max-height:90vh}
 #plandlg .epsec{padding:10px 0 4px}
@@ -925,8 +930,10 @@ button.chip::after{display:none}
 
 <dialog id="plandlg"><form method="dialog" id="planfrm">
   <h2>Plan a session</h2>
+  <button type="button" class="tripline" data-act="toTrip">Out for more than one day? Plan a trip →</button>
   <section class="epsec"><h4>What</h4><div class="pagrid" id="paGrid"></div></section>
   <section class="epsec" id="paKindSec" hidden><h4>Kind</h4><div class="typechips" id="paKinds"></div>
+    <p class="nudge" id="paNudge" hidden></p>
     <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"></label>
       <label id="paUpLab" hidden>Ascent, m<input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"></label></div></section>
   <section class="epsec"><h4>When</h4>
@@ -2547,12 +2554,13 @@ const KINDS={Run:[['easy','Easy'],['long','Long'],['recovery','Recovery'],['temp
   Climbing:[['indoor','Indoor'],['toprope','Top rope'],['sport','Sport'],['trad','Trad'],['multi','Multipitch'],['alpine','Alpine']],
   Bouldering:[['indoor','Indoor'],['outdoor','Outdoor'],['board','Board'],['circuits','Circuits']],
   'Ice climbing':[['crag','Ice cragging'],['multi','Multipitch'],['mixed','Mixed'],['alpine','Alpine']],
-  Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak'],['hut','Hut to hut'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe'],['approach','Approach']],
+  Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak'],['overnight','Overnight'],['hut','Hut to hut'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe'],['approach','Approach']],
   Other:[['gym','Gym'],['mobility','Mobility'],['skitour','Ski touring'],['ski','Skiing'],['bike','Cycling'],['swim','Swim'],['rest','Rest'],['travel','Travel']]};
-const KINDMIN={day:180,pack:300,peak:480,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
+const KINDMIN={day:180,pack:300,peak:480,overnight:420,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
   indoor:180,toprope:150,sport:300,trad:420,multi:480,alpine:600,board:90,circuits:120,crag:360,mixed:360,
   gym:60,mobility:20,skitour:300,ski:240,bike:120,swim:60,rest:0,travel:240};
 const needsKm=t=>t==='Run'||t==='Hike';
+const MULTIDAY=['overnight','hut','alpine','multi','skitour','travel'];
 const needsUp=t=>t==='Hike';
 const kindLabel=(tab,k)=>((KINDS[tab]||[]).find(x=>x[0]===k)||[])[1]||'';
 let PA={tab:null,kind:null};
@@ -2584,11 +2592,17 @@ function paPick(tab){
   document.getElementById('paKindSec').hidden=!ks.length;
   document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${colOf(tab)}">${esc(l)}</button>`).join('');
   document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
+  paNudge();
   document.getElementById('paNums').hidden=!needsKm(tab);
   document.getElementById('paUpLab').hidden=!needsUp(tab);
   if(tab==='Run'&&!f.km.value)f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:'';
   if(!needsKm(tab)){f.km.value='';f.up.value=''}
   planAuto();
+}
+function paNudge(){
+  const n=document.getElementById('paNudge'),multi=MULTIDAY.includes(PA.kind);
+  n.hidden=!multi;
+  if(multi)n.innerHTML=`Staying out overnight? <button type="button" class="link" data-act="toTrip">Plan this as a trip</button> and each day gets its own plan.`;
 }
 function planAuto(){
   const f=document.getElementById('planfrm');if(!PA.tab)return;
@@ -2971,6 +2985,15 @@ function onAct(b){
     if(pl)undoBar('Added to today at '+hh,()=>{});return}
   if(act==='weekbuild'){openWeekBuild(b.dataset.w);return}
   if(act==='tripnew'){openTripNew();return}
+  if(act==='toTrip'){const f=document.getElementById('planfrm');
+    const carry={name:(f.detail.value||'').trim(),start:f.date.value,kind:PA.tab||'Hike'};
+    try{document.getElementById('plandlg').close()}catch(_){}
+    setTimeout(()=>{openTripNew();const nf=document.getElementById('tripnewfrm');
+      if(carry.name)nf.name.value=carry.name;
+      if(carry.start){nf.start.value=carry.start;nf.end.value=dayOf(addDays(parseDay(carry.start),1))}
+      TR={kind:carry.kind};
+      document.querySelectorAll('#trKinds .tchip').forEach(x=>x.classList.toggle('on',x.dataset.trkind===carry.kind));
+    },40);return}
   if(act==='tripopen'){openTrip(b.dataset.id,b.dataset.d);return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
@@ -3493,6 +3516,7 @@ function drawTrip(){
   document.getElementById('paKinds').addEventListener('click',ev=>{const b=ev.target.closest('[data-kind]');if(!b)return;
     PA.kind=b.dataset.kind;S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
     document.querySelectorAll('#paKinds .tchip').forEach(x=>x.classList.toggle('on',x===b));
+    paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0')f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:f.km.value;
     planAuto()});
   document.getElementById('paWhen').addEventListener('click',ev=>{const b=ev.target.closest('[data-day]');if(!b)return;
