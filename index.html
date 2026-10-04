@@ -1795,7 +1795,9 @@ function renderHistory(){
   const planRow=p=>`<div class="prow" style="--tc:${colOf(p.tab)}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(cleanTitle(p.title))}</b>
       <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(()=>{const lg=(logBy[p.date]||[]).find(r=>r.plan_id===p.id);
         return lg?` · <em class="ok">✓ done ${esc(lg.time)}${lg.completed?' · '+esc(lg.completed):''}</em>`:(p.status==='done'?' · <em class="ok">✓ done</em>':'')})()}</span>
-      ${(p.items||[]).length?`<small>${(p.items||[]).map(esc).join('<br>')}</small>`:''}<u>Tap to change time or day</u></button>
+      ${(()=>{const norm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+        const rest=(p.items||[]).filter(x=>norm(x)!==norm(cleanTitle(p.title)));
+        return rest.length?`<small>${rest.map(esc).join('<br>')}</small>`:''})()}<u>Tap to change time or day</u></button>
       <div class="pside">${(S.planRefs[p.id]||[]).length&&p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
         :(!(S.planRefs[p.id]||[]).length&&p.date<=todayS&&p.status!=='done'&&!(logBy[p.date]||[]).some(r=>r.plan_id===p.id)?`<button class="go sm alt" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`:'')}<button class="link hx" data-act="pdel" data-id="${esc(p.id)}" aria-label="Remove plan">✕</button></div></div>`;
   const logRow=r=>`<div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b><i class="tdot" style="background:${colOf(r.tab)}"></i>${esc(r.exercise)}</b>
@@ -1815,9 +1817,9 @@ function renderHistory(){
     <button class="legendlink" data-act="legend">What the dots mean</button>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
     <div class="hday"><h3>${esc(niceDay(calSel,true))}${calSel===todayS?' · today':''}</h3>
-      ${(()=>{const t=tripOn(calSel);if(!t)return'';const n=tripDayNo(t,calSel),sp=tripSpan(t),first=tripPlans(t,calSel)[0];
+      ${(()=>{const t=tripOn(calSel);if(!t)return'';const n=tripDayNo(t,calSel),sp=tripSpan(t),cnt=tripPlans(t,calSel).length;
         return `<button class="tripbar" data-act="tripopen" data-id="${esc(t.id)}" data-d="${esc(calSel)}" style="--oc:${colOf(t.kind||'Hike')}">
-          <b>${esc(t.name)}</b><span>day ${n} of ${sp}${first?' · '+esc(cleanTitle(first.title)):''}</span></button>`})()}
+          <b>${esc(t.name)}</b><span>day ${n} of ${sp} · ${cnt?'see the whole trip':'nothing planned on this day yet'}</span></button>`})()}
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
