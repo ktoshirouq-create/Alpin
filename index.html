@@ -727,6 +727,7 @@ label.popt span{flex:1}label.popt em{font-style:normal;color:var(--muted);font-s
 .fatimer{text-align:center;padding:10px 0 4px}
 .fanum{font:700 88px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
 .falbl{color:var(--muted);font-weight:600;min-height:1.5em}
+.fanote{margin:2px 16px 10px;text-align:center;font-size:14.5px;line-height:1.45;color:var(--muted);max-width:30em;margin-left:auto;margin-right:auto}
 .falive{display:none;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
 .falive .chip{border:1.5px solid var(--rule);background:none;color:var(--ink);border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px}
 .falive .lslots{display:flex;gap:4px}
@@ -791,7 +792,8 @@ button.chip::after{display:none}
 .faadj summary{list-style:none;cursor:pointer;color:var(--muted);font-weight:600;font-size:14px;padding:8px 0;text-align:center}
 .faadj summary::-webkit-details-marker{display:none}
 .faadj summary::after{content:' ▾'}.faadj[open] summary::after{content:' ▴'}
-.fabody{flex:0 0 auto}
+#fa:not(.running) .fabody{flex:1 1 auto;min-height:0;overflow-y:auto}
+#fa.running .fabody{flex:0 0 auto}
 #fa.running .fatimer{flex:1;display:flex;flex-direction:column;justify-content:center}
 #fa.running .fanum{font-size:min(42vw,200px)}
 #fa.running .falbl{font-size:20px}
@@ -986,6 +988,7 @@ button.chip::after{display:none}
   <div class="fabody" id="faBody"></div>
   <div class="fatimer"><div class="fanum" id="faNum"></div><div class="falbl" id="faLbl"></div>
     <button class="link" id="faSkip" style="display:none">Skip</button><div class="feelrow" id="faFeel" style="display:none"></div></div>
+  <p id="faNote" class="fanote" hidden></p>
   <div id="faLive" class="falive"></div>
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
@@ -1051,6 +1054,7 @@ function front(p){
   if(p.circles){[al.end,ar.end].forEach(h=>{s+=`<circle class="acc" cx="${h[0].toFixed(1)}" cy="${h[1].toFixed(1)}" r="11" stroke-dasharray="52 18"/>`+`<polygon class="accf" points="${f1([h[0]+11,h[1]-9])} ${f1([h[0]+4,h[1]-14])} ${f1([h[0]+13,h[1]-17])}"/>`})}
   return s;
 }
+const steps=(n=4)=>[...Array(n)].map((_,i)=>box(40+i*26,124-i*18,26)).join('');
 const box=(x,top,w)=>`<rect class="prop" x="${x}" y="${top}" width="${w}" height="${145-top}" rx="2"/>`;
 const wall=x=>`<rect class="prop" x="${x}" y="8" width="7" height="137"/>`;
 const bar=`<rect class="prop" x="36" y="5" width="88" height="6" rx="3"/>`;
@@ -1291,6 +1295,42 @@ const LV={
   {v:'Steady uphill, walk down easy',p:{reps:8}},
   {v:'5 kg pack',p:{reps:8,work:240,rest:240}},
   {v:'10 kg pack',p:{reps:10,work:240,rest:240}}]},
+ stair44:{name:'Stair 4 × 4 · guided',kind:'iv',P:{reps:4,work:240,rest:180,sets:1,setRest:0,warm:600,cool:480,lap:150},
+  cue:'The whole Norwegian session, start to finish: ten minutes easy, then four minutes hard and three minutes easy, four times, then eight minutes easy down. Press Start at the bottom of the stairs and follow it. Hard means you cannot say more than a word or two by the end of the four minutes; with your max around 185 that is roughly 157–176 bpm. Keep walking through the easy parts, never sit down.',
+  phaseCue:{warm:'Easy up and down, or a walk around the block. Loose and unhurried: you should be able to talk the whole way.',
+    first:'Start steadier than feels right. The first minute should feel almost easy; the work is in minutes three and four.',
+    work:'Up hard, down easy, straight back up. The clock decides, not the flights. Breathing hard, one or two words only.',
+    last:'Last one. Same pace as the first: if you have something left, spend it in the final minute.',
+    rest:'Keep moving. Amble down, walk at the bottom, let the heart rate fall to about 120–130. Drink if you have water.',
+    cool:'Easy walking until the breathing settles. Finish on flat ground, not slumped on the steps.'},
+  L:[{v:'Two intervals, finding the pace',p:{reps:2,warm:600,cool:360}},
+     {v:'Three intervals',p:{reps:3}},
+     {v:'The full four',p:{}},
+     {v:'Four, with a 5 kg pack',p:{}},
+     {v:'Five intervals',p:{reps:5}}],
+  frames:[
+   {cap:'Up hard, drive the knee',props:[steps()],pose:{hip:[86,78],torso:14,far:[70,124],near:[104,88],pack:false},arrows:[[34,104,34,66]]},
+   {cap:'Walk down easy, keep moving',props:[steps()],pose:{hip:[74,92],torso:6,far:[86,106],near:[62,124]},arrows:[[34,70,34,108]]}]},
+ vo2:{name:'4 × 4 intervals',kind:'iv',P:{reps:4,work:240,rest:180,sets:1,setRest:0},
+  cue:'The Norwegian 4 × 4. Warm up 10 minutes easy, then four hard efforts of four minutes with three minutes easy between. Hard means 85–95% of max heart rate: by the end of each four minutes you should be unable to say more than a word or two. Uphill, stairs or a treadmill all work; stairs are the easiest way to get your heart rate up without hammering your knees. Twice a week is plenty, and it is the single most reliable way to raise VO2 max. With a max around 185 that means 157–176 bpm by the end of each interval; the first minute always feels easy, the work is in minutes three and four.',
+  L:[{v:'Three intervals, four minutes',p:{reps:3}},
+     {v:'The classic: four by four',p:{}},
+     {v:'Five intervals',p:{reps:5}},
+     {v:'Four by four, 5 kg pack',p:{}},
+     {v:'Four by four, 10 kg pack',p:{}}],
+  frames:[
+   {cap:'Four minutes hard: 85–95% of max',pose:{hip:[70,96],torso:12,far:[44,142],near:[98,128]},arrows:[[126,120,126,84]]},
+   {cap:'Three minutes easy, keep moving',pose:{hip:[74,100],torso:4,far:[62,142],near:[88,142]}}]},
+ stairs:{name:'Stair intervals',kind:'iv',P:{reps:4,work:240,rest:180,sets:1,setRest:0,lap:150},
+  cue:'The 4 × 4 done on your stairs. Up hard, walk down easy, and keep going up and down until the four minutes are over: the clock decides, not the number of flights. Set how long one trip up and down takes under Adjust numbers and the app works out roughly how many laps that is. Pick a pace you can hold for all four minutes, not a sprint up the first flight, and keep walking at the bottom.',
+  L:[{v:'Three intervals, no pack',p:{reps:3}},
+     {v:'Four intervals, no pack',p:{}},
+     {v:'Five intervals, no pack',p:{reps:5}},
+     {v:'Four intervals, 5 kg pack',p:{}},
+     {v:'Four intervals, 10 kg pack',p:{}}],
+  frames:[
+   {cap:'Up hard, drive the knee',props:[steps()],pose:{hip:[86,78],torso:14,far:[70,124],near:[104,88],pack:false},arrows:[[34,104,34,66]]},
+   {cap:'Walk down easy, keep moving',props:[steps()],pose:{hip:[74,92],torso:6,far:[86,106],near:[62,124]},arrows:[[34,70,34,108]]}]},
  z2:{kind:'text',P:{dose:''},L:[
   {v:'Easy pace, you can talk in full sentences',p:{dose:'2 × 20 min a week'}},
   {v:'Easy pace',p:{dose:'2 × 30 min a week'}},
@@ -1552,7 +1592,7 @@ const TRAIN_IDS=['nepal','ice','climb','run','warmup'];
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
-  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','hills','z2'],extra:['z2']}]},
+  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','stair44','hills','stairs','vo2','z2'],extra:['z2','vo2']}]},
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
   {title:'Tools and grip',sub:'Twice a week, never on back-to-back days.',items:['toolhang','tooltraverse','lockoff'],extra:['lockoff']},
   {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
@@ -2695,15 +2735,18 @@ function doseOf(kind,p){
   return p.dose||'';
 }
 function phasesOf(e){
-  const p=e.p,ph=[];
+  const p=e.p,ph=[],cue=e.phaseCue||{};
   if(e.kind==='iv'){
+    if(p.warm)ph.push({t:p.warm,l:'Warm up · easy',work:false,kind:'rest',note:cue.warm||''});
     for(let st=1;st<=p.sets;st++){
       for(let r=1;r<=p.reps;r++){
-        ph.push({t:p.work,l:`Rep ${r} of ${p.reps}${p.sets>1?` · set ${st} of ${p.sets}`:''}`,work:true,kind:'work'});
-        if(r<p.reps&&p.rest)ph.push({t:p.rest,l:'Rest',work:false,kind:'rest'});
+        ph.push({t:p.work,l:`Rep ${r} of ${p.reps}${p.sets>1?` · set ${st} of ${p.sets}`:''}`,work:true,kind:'work',
+          note:(r===1?cue.first:r===p.reps?cue.last:cue.work)||cue.work||''});
+        if(r<p.reps&&p.rest)ph.push({t:p.rest,l:p.warm?'Easy · keep moving':'Rest',work:false,kind:'rest',note:cue.rest||''});
       }
       if(st<p.sets&&p.setRest)ph.push({t:p.setRest,l:`Rest before set ${st+1}`,work:false,kind:'rest'});
     }
+    if(p.cool)ph.push({t:p.cool,l:'Cool down · easy',work:false,kind:'rest',note:cue.cool||''});
   }else if(e.kind==='hold'){
     for(let st=1;st<=p.sets;st++){
       const lab=p.sets>1?`Set ${st} of ${p.sets}`:'Hold';
@@ -2741,7 +2784,7 @@ function resolve(item,pid){
     p={...preset,...(o.p||{})};tuned=!!(o.p&&Object.keys(o.p).length);
     slotName=o.name||L[lvl].v;slotNote=o.note||'';slotEdited=tuned||!!o.name||!!o.note}
   else{const tune=S.tune[key]||{};p={...preset,...tune};tuned=Object.keys(tune).length>0}
-  return {id:it.id,pid,name:b.name,cue:b.cue,frames:b.frames||[],kind:b.kind,P:preset,p,L,lvl,key,warm,
+  return {id:it.id,pid,name:b.name,cue:b.cue,phaseCue:b.phaseCue,frames:b.frames||[],kind:b.kind,P:preset,p,L,lvl,key,warm,
     tuned,slotEdited,note:slotNote,warmP:it.warm||null,version:slotName,defName:L?L[lvl].v:'',dose:doseOf(b.kind,p),
     timed:b.kind==='hold'||b.kind==='iv',custom:!!b.custom,edited:!!S.edits[it.id]};
 }
@@ -2763,6 +2806,7 @@ const estimate=items=>Math.max(1,Math.round(items.reduce((a,e)=>a+(e.timed?total
 /* ---------- tuning options (native selects) ---------- */
 const rng=(a,b,s)=>{const o=[];for(let v=a;v<=b;v+=s)o.push(v);return o};
 const OPTS={
+  lap:rng(20,240,10),
   sets:rng(1,10,1),
   reps:rng(1,30,1).concat([35,40,50]),
   time:rng(5,60,5).concat([75,90,105,120,150,180,240,300,360,420,480,540,600]),
@@ -2770,14 +2814,17 @@ const OPTS={
   rest:[0].concat(rng(5,60,5),[75,90,105,120,150,180,210,240,300]),
   setRest:[0].concat(rng(30,600,30))
 };
-const LABEL={sets:'sets',reps:'reps',time:'hold',work:'work',rest:'rest',setRest:'set rest'};
+const LABEL={sets:'sets',reps:'reps',time:'hold',work:'work',rest:'rest',setRest:'set rest',lap:'up and down'};
 function paramsFor(e){
+  if(e.id==='stairs'||e.id==='stair44')return['reps','work','rest','lap'];
   if(e.kind==='reps')return['sets','reps'];
   if(e.kind==='hold')return e.p.sets>1?['sets','time','rest']:['sets','time'];
   if(e.kind==='iv')return e.p.sets>1?['reps','work','rest','sets','setRest']:['reps','work','rest','sets'];
   return[];
 }
 const showVal=(k,v)=>(k==='sets'||k==='reps')?String(v):fmtS(v);
+const LAPDEF=150;
+const lapOf=e=>(e.p&&e.p.lap)||LAPDEF;
 let openChip=null;
 function readyChip(){const v=S.settings.ready,txt=v?`<b>${v} s</b> get ready`:'<b>No</b> countdown';
   if(openChip!=='__ready')return `<button class="chip ready-chip" data-act="tsel" data-chip="__ready">${txt}</button>`;
@@ -2825,6 +2872,7 @@ function card(e){
    ${SEL.on?`<span class="selmark">${son?'✓':''}</span>`:''}
    <div class="exhead"><h3><button type="button" class="collapse" data-act="collapse" aria-label="Collapse">▾</button>${esc(e.name)}${e.custom?'<span class="tag">yours</span>':''}</h3><span class="dose">${esc(e.dose)}</span></div>
    ${lgc?`<p class="loggedline">✓ Logged ${esc(lgc.time)} · <button class="link undo" data-act="unlog" data-id="${esc(lgc.id)}">Undo</button></p>`:''}
+   ${(e.id==='stairs'||e.id==='stair44')?`<p class="lapline">About <b>${Math.max(1,Math.round(e.p.work/lapOf(e)*10)/10)}</b> trips up and down per interval, at ${fmtS(lapOf(e))} a trip.</p>`:''}
    ${framesHTML(e.frames)}
    ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}
    ${EX[e.id]&&EX[e.id].zone?zoneBar(EX[e.id].zone):''}
@@ -3720,7 +3768,8 @@ function drawFA(){
       ${ready&&e.L?`<div class="lv falv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'f')}</div>`:(e.L?`<p class="sub">Slot ${e.lvl+1} · ${esc(e.version)}${e.note?' · '+esc(e.note):''}</p>`:'')}
       ${ready&&(paramsFor(e).length||e.timed)?`<div class="chips">${e.timed?readyChip():''}${chipsHTML(e)}</div>`:''}
       ${ready&&(e.L||paramsFor(e).length||e.timed)?'</details>':''}
-      ${framesHTML(e.frames)}
+      ${(e.id==='stairs'||e.id==='stair44')?`<p class="lapline">About <b>${Math.max(1,Math.round(e.p.work/lapOf(e)*10)/10)}</b> trips up and down per interval, at ${fmtS(lapOf(e))} a trip.</p>`:''}
+   ${framesHTML(e.frames)}
       ${e.cue?`<p class="cue">${esc(e.cue)}</p>`:''}`;
   }
   const num=document.getElementById('faNum'),lbl=document.getElementById('faLbl'),go=document.getElementById('faGo'),skip=document.getElementById('faSkip');
@@ -3735,6 +3784,9 @@ function drawFA(){
     skip.style.display=!F.done&&(F.run||started())?'':'none';
     skip.textContent=F.done?'':F.ph[F.p].kind==='ready'?'Skip countdown':F.ph[F.p].kind==='rest'?'Skip rest':'Skip';
   }else{num.textContent='';['ready','work','rest','done','running'].forEach(k=>fa.classList.remove(k==='running'?k:'ph-'+k));lbl.textContent='Tap Done when you\u2019ve finished';go.style.display='none';skip.style.display='none'}
+  {const n=document.getElementById('faNote');
+    const note=(F.ph&&!F.done&&started()&&F.ph[F.p]&&F.ph[F.p].note)||'';
+    if(n){n.textContent=note;n.hidden=!note}}
   const lc=document.getElementById('faLive');
   if(F.ph&&!F.done&&started()&&!(F.run&&F.ph[F.p].work)){
     const isRest=F.ph[F.p].kind==='rest'||F.ph[F.p].kind==='ready';
