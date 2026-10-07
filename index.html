@@ -2633,7 +2633,14 @@ const KINDMIN={day:180,pack:300,peak:480,overnight:420,hut:480,scramble:360,ferr
 const needsKm=t=>t==='Run'||t==='Hike';
 const MULTIDAY=['overnight','hut','alpine','multi','skitour','travel'];
 const needsUp=t=>t==='Hike';
-const kindLabel=(tab,k)=>((KINDS[tab]||[]).find(x=>x[0]===k)||[])[1]||'';
+const kindLabel=(tab,k)=>((KINDS[tab]||[]).find(x=>x[0]===k)||[])[1]||trainKinds().reduce((a,x)=>x[0]===k?x[1]:a,'');
+function trainKinds(){
+  const out=[];
+  TRAIN_IDS.forEach(pid=>{const p=PROGS.find(x=>x.id===pid);if(!p||pid==='run')return;
+    p.sections.forEach((sec,i)=>{if(!sectionItems(p,i).length)return;
+      out.push([`${pid}|${i}`,p.sections.length>1?`${p.chip} · ${sec.title}`:p.chip])})});
+  return out}
+const trainRef=k=>`${k}|e`;
 let PA={tab:null,kind:null};
 const places=tab=>{const l=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y);
   const mine=l.filter(y=>!tab||!y.tab||y.tab===tab).map(y=>y.name),rest=l.map(y=>y.name).filter(n=>mine.indexOf(n)<0);
@@ -2648,7 +2655,8 @@ function openPlan(){
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
   f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';f.up.value='';
   document.getElementById('paNums').hidden=true;
-  document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
+  document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('')
+    +`<button type="button" class="pacard" data-pa="Training" style="--tc:var(--acc)">${ICON('Climbing')}<span>Training</span></button>`;
   document.getElementById('paKindSec').hidden=true;
   document.getElementById('paPlaces').innerHTML=places().map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
   document.querySelectorAll('#durChips button,#paWhen button').forEach(x=>x.classList.remove('on'));
@@ -2657,9 +2665,9 @@ function openPlan(){
 }
 function paPick(tab){
   const f=document.getElementById('planfrm');
-  PA.tab=tab;PA.kind=(S.lastKind||{})[tab]||((KINDS[tab]||[])[0]||[])[0]||null;
+  PA.tab=tab;const kl=tab==='Training'?trainKinds():(KINDS[tab]||[]);PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
-  const ks=KINDS[tab]||[];
+  const ks=tab==='Training'?trainKinds():(KINDS[tab]||[]);
   document.getElementById('paKindSec').hidden=!ks.length;
   document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${colOf(tab)}">${esc(l)}</button>`).join('');
   document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
@@ -2679,7 +2687,8 @@ function planAuto(){
   const f=document.getElementById('planfrm');if(!PA.tab)return;
   const det=f.detail.value.trim(),km=parseFloat(f.km.value)||0;
   if(f.minutes.dataset.manual!=='1'){
-    const base=KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
+    const base=PA.tab==='Training'?Math.max(10,Math.round(estimate(refsToList([trainRef(PA.kind)]))/5)*5)
+      :KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
     const upm=parseInt(f.up.value,10)||0;
     f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5)
       :PA.tab==='Hike'&&(km||upm)?Math.max(30,Math.round((km*12+upm/9+(PA.kind==='pack'?km*3:0))/15)*15)
@@ -2700,7 +2709,8 @@ function planAuto(){
     const kl=kindLabel(PA.tab,PA.kind);
     const upt=parseInt(f.up.value,10)||0;
     const nums=PA.tab==='Hike'&&(km||upt)?' · '+[km?km+' km':'',upt?upt+' m up':''].filter(Boolean).join(', '):'';
-    f.title.value=PA.tab==='Run'
+    if(PA.tab==='Training'){f.title.value=`${kindLabel('Training',PA.kind)}${det?' · '+det:''}`;}
+    else f.title.value=PA.tab==='Run'
       ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
       : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
   }
@@ -3641,6 +3651,11 @@ function drawTrip(){
         :`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}${PA.tab==='Hike'&&(km||(parseInt(f.up.value,10)||0))?' · '+[km?km+' km':'',(parseInt(f.up.value,10)||0)?(parseInt(f.up.value,10))+' m up':''].filter(Boolean).join(', '):''}`],
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
+    if(PA.tab==='Training'){const refs=[trainRef(PA.kind)],list=refsToList(refs);
+      S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===PA.kind.split('|')[0])||{}).chip||'Climbing';
+      plan.title=cleanTitle(f.title.value)||kindLabel('Training',PA.kind);
+      plan.items=list.slice(0,6).map(e=>`${e.name} · ${e.dose}`);
+      if(list.length>6)plan.items.push(`+ ${list.length-6} more`);}
     if(PENDING_TRIP&&PENDING_TRIP.day===f.date.value){S.tripOf={...(S.tripOf||{}),[id]:PENDING_TRIP.id}}
     const backTo=PENDING_TRIP;PENDING_TRIP=null;
     if(backTo)setTimeout(()=>openTrip(backTo.id,backTo.day),60);
