@@ -675,6 +675,10 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .row2 input,.row2 select{width:100%;max-width:100%;box-sizing:border-box}
 .pickex{margin:2px 0 4px}
 .pickex summary{list-style:none;cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;padding:6px 0}
+.pickex.single{width:100%;margin-top:2px}
+.pickex.single .pxsec b{display:block;font:600 11.5px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:8px 0 6px}
+.tchip.sm{font-size:13px;padding:7px 11px;flex-direction:column;align-items:flex-start;gap:1px;line-height:1.2}
+.tchip.sm em{font-style:normal;font-size:11px;color:var(--muted)}
 .pickex summary::-webkit-details-marker{display:none}
 .pickex summary::before{content:'▸ '}.pickex[open] summary::before{content:'▾ '}
 .pxsec{padding:2px 0 6px}.pxsec b{display:block;font-size:12px;color:var(--muted);padding:4px 0}
@@ -1876,11 +1880,11 @@ function renderHistory(){
    <section>${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     <div class="weekbox compact"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
       <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
-    ${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?`<button class="todaybtn" data-act="caltoday">Today</button>`:''}
+    
     <p class="syncmini" id="syncline">${syncLine()}</p>
-    <div class="calhead"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
+    <div class="calhead${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?' away':''}"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
       <h2>${esc(calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
-      <button class="cnav" data-act="calnext" aria-label="Next month">›</button></div>
+      <button class="cnav" data-act="calnext" aria-label="Next month">›</button><button class="todaybtn" data-act="caltoday">Today</button></div>
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
     <button class="legendlink" data-act="legend">What the dots mean</button>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
@@ -2642,7 +2646,14 @@ function trainKinds(){
     p.sections.forEach((sec,i)=>{if(!sectionItems(p,i).length)return;
       out.push([`${pid}|${i}`,p.sections.length>1?`${p.chip} · ${sec.title}`:p.chip])})});
   return out}
-const trainRef=k=>`${k}|e`;
+const trainRef=k=>k.startsWith('x:')?k.slice(2):`${k}|e`;
+function trainSingles(){
+  const out={};
+  TRAIN_IDS.forEach(pid=>{const p=PROGS.find(x=>x.id===pid);if(!p)return;
+    p.sections.forEach((sec,i)=>sectionItems(p,i).forEach(e=>{
+      const grp=p.sections.length>1?`${p.chip} · ${sec.title}`:p.chip;
+      (out[grp]=out[grp]||[]).push([`x:${pid}|${i}|x:${e.id}`,e.name,e.dose])}))});
+  return out}
 let PA={tab:null,kind:null};
 const places=tab=>{const l=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y);
   const mine=l.filter(y=>!tab||!y.tab||y.tab===tab).map(y=>y.name),rest=l.map(y=>y.name).filter(n=>mine.indexOf(n)<0);
@@ -2671,7 +2682,8 @@ function paPick(tab){
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=tab==='Training'?trainKinds():(KINDS[tab]||[]);
   document.getElementById('paKindSec').hidden=!ks.length;
-  document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${colOf(tab)}">${esc(l)}</button>`).join('');
+  const tc=tab==='Training'?'var(--acc)':colOf(tab);
+  document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('')+(tab==='Training'?(()=>{const g=trainSingles();return `<details class="pickex single"><summary>Or one exercise</summary>${Object.keys(g).map(name=>`<div class="pxsec"><b>${esc(name)}</b><div class="typechips">${g[name].map(([k,l,d])=>`<button type="button" class="tchip sm${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:var(--acc)">${esc(l)}<em>${esc(d||'')}</em></button>`).join('')}</div></div>`).join('')}</details>`})():'');
   document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
   paNudge();
   document.getElementById('paNums').hidden=!needsKm(tab);
@@ -2689,7 +2701,7 @@ function planAuto(){
   const f=document.getElementById('planfrm');if(!PA.tab)return;
   const det=f.detail.value.trim(),km=parseFloat(f.km.value)||0;
   if(f.minutes.dataset.manual!=='1'){
-    const base=PA.tab==='Training'?Math.max(10,Math.round(estimate(refsToList([trainRef(PA.kind)]))/5)*5)
+    const base=PA.tab==='Training'?Math.max(5,Math.round(estimate(refsToList([trainRef(PA.kind)]))/5)*5)
       :KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
     const upm=parseInt(f.up.value,10)||0;
     f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5)
@@ -2711,7 +2723,9 @@ function planAuto(){
     const kl=kindLabel(PA.tab,PA.kind);
     const upt=parseInt(f.up.value,10)||0;
     const nums=PA.tab==='Hike'&&(km||upt)?' · '+[km?km+' km':'',upt?upt+' m up':''].filter(Boolean).join(', '):'';
-    if(PA.tab==='Training'){f.title.value=`${kindLabel('Training',PA.kind)}${det?' · '+det:''}`;}
+    if(PA.tab==='Training'){
+      const one=PA.kind.startsWith('x:')?(refsToList([trainRef(PA.kind)])[0]||{}).name:'';
+      f.title.value=`${one||kindLabel('Training',PA.kind)}${det?' · '+det:''}`;}
     else f.title.value=PA.tab==='Run'
       ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
       : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
@@ -3656,8 +3670,8 @@ function drawTrip(){
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
     if(PA.tab==='Training'){const refs=[trainRef(PA.kind)],list=refsToList(refs);
-      S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===PA.kind.split('|')[0])||{}).chip||'Climbing';
-      plan.title=cleanTitle(f.title.value)||kindLabel('Training',PA.kind);
+      S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===trainRef(PA.kind).split('|')[0])||{}).chip||'Climbing';
+      plan.title=cleanTitle(f.title.value)||(list[0]||{}).name||kindLabel('Training',PA.kind);
       plan.items=list.slice(0,6).map(e=>`${e.name} · ${e.dose}`);
       if(list.length>6)plan.items.push(`+ ${list.length-6} more`);}
     if(PENDING_TRIP&&PENDING_TRIP.day===f.date.value){S.tripOf={...(S.tripOf||{}),[id]:PENDING_TRIP.id}}

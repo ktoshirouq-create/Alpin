@@ -64,6 +64,13 @@ def run():
         kinds = pg.eval_on_selector_all('#paKinds .tchip', 'n=>n.map(x=>x.textContent)')
         c.ok('every programme section is offered', any('Ice · Tools' in k for k in kinds)
              and any('Nepal · Strength' in k for k in kinds), kinds)
+        c.ok('and single exercises are there too', pg.locator('.pickex.single').count() == 1)
+        pg.click('.pickex.single summary'); pg.wait_for_timeout(250)
+        pg.locator('[data-kind="x:nepal|1|x:stair44"]').scroll_into_view_if_needed()
+        pg.click('[data-kind="x:nepal|1|x:stair44"]'); pg.wait_for_timeout(300)
+        c.ok('one exercise names the session',
+             pg.input_value('#planfrm [name=title]') == 'Stair 4 × 4 · guided',
+             pg.input_value('#planfrm [name=title]'))
         pg.click('#paKinds [data-kind="ice|0"]'); pg.wait_for_timeout(250)
         c.ok('it names itself and works out the length',
              pg.input_value('#planfrm [name=title]') == 'Ice · Tools and grip'
@@ -114,6 +121,9 @@ def run():
         pg.click('.cd[data-d="2026-10-27"]'); pg.wait_for_timeout(300)
         c.ok('the day heading carries the trip', 'day 1 of 2' in pg.inner_text('.dayhead.trip'))
         c.ok('trip days are washed in the grid', pg.locator('.cd.trip').count() == 2)
+        c.ok('Today sits in the month row, only when you are away from it',
+             pg.evaluate("""()=>{const h=document.querySelector('.calhead');
+               return h.contains(document.querySelector('.todaybtn')) && h.classList.contains('away')}"""))
         c.ok('and count as away', pg.evaluate("tripDays().has('2026-10-27')&&tripDays().has('2026-10-28')"))
         c.ok('one line per session', pg.locator('.prow').count() == 1)
 
