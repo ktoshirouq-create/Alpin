@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Training guide</title>
 <meta name="theme-color" content="#0B151D">
 <meta name="description" content="Illustrated training, stretching and warm-up routines with timers.">
@@ -49,11 +49,11 @@ button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:tran
 #bnav button[aria-current="page"] rect,#bnav button[aria-current="page"] path[stroke]{stroke:var(--acc);fill:none}
 body{height:100dvh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
   padding-bottom:0;padding-top:env(safe-area-inset-top,0px)}
-.wrap{flex:1 1 auto;min-height:0;width:100%;max-width:760px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:16px}
+.wrap{flex:1 1 auto;min-height:0;width:100%;max-width:760px;box-sizing:border-box;touch-action:pan-y;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:16px}
 body{width:100%;max-width:100%;overflow-x:hidden}
 body>nav#bnav{flex:0 0 auto}
 body>dialog{flex:0 0 auto}
-html{height:100%;overscroll-behavior-y:none}
+html{height:100%;overscroll-behavior-y:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body:not([data-view="today"]) #flags{display:none}
 body:not([data-view="train"]) #progs{display:none}
 body[data-view="train"] h1{font-size:clamp(34px,9vw,52px)}
@@ -396,6 +396,8 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .qbtn svg{grid-row:1/3;width:14px;height:14px;fill:var(--acc)}
 .qbtn b{font-size:16px}.qbtn span{font-size:12px;color:var(--muted)}
 .tsync{margin-top:22px;font-size:13px}
+.syncerr{display:block;text-align:left;margin-bottom:4px;line-height:1.4}
+.syncerr .link{white-space:nowrap}
 .syncmini{margin:2px 0 0;font-size:11.5px;color:var(--muted);text-align:right;opacity:.85}
 .syncmini .link{font-size:11.5px}
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
@@ -1741,7 +1743,7 @@ async function pullHistory(){
 function syncLine(){const c=syncCfg(),q=lsGet(QKEY,[]).filter(o=>o.op!=='state').length;
   if(!c.url)return 'History is saved on this phone. <button class="link" data-act="syncsetup">Connect a Google Sheet</button>';
   const ago=c.last?Math.max(0,Math.round((Date.now()-c.last)/60000)):null;
-  return (c.error?`<span class="warn">Sync problem: ${esc(c.error)}</span> `:'')
+  return (c.error?`<span class="warn syncerr">Sync problem: ${esc(c.error)} <button class="link" data-act="syncretry">Try again</button></span>`:'')
     +(q?`${q} waiting to sync. `:'')+(ago==null?'Connected to your Sheet. ':`Synced ${ago<1?'just now':ago+' min ago'}. `)
     +'<button class="link" data-act="syncsetup">Sync settings</button>';}
 function updateSyncLine(){const n=document.getElementById('syncline');if(n)n.innerHTML=syncLine()}
@@ -3051,6 +3053,8 @@ function onAct(b){
   if(act==='syncsetup'){openSync();return}
   if(act==='caltoday'){calSel=dayOf(new Date());calMonth=monthStart(new Date());calPicked=false;render();pullPlans();
     setTimeout(()=>{const el=document.querySelector('.cd.today');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})},40);return}
+  if(act==='syncretry'){const n=document.getElementById('syncline');if(n)n.textContent='Trying again…';
+    (async()=>{try{await pullPlans();await flushQueue()}catch(e){}updateSyncLine();render()})();return}
   if(act==='legend'){const base=BASETABS.concat(['Hike']).filter((t,k,a)=>a.indexOf(t)===k);
     document.getElementById('askT').textContent='What the dots mean';
     document.getElementById('askB').innerHTML=`<span class="legend2">${base.map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}</span>
