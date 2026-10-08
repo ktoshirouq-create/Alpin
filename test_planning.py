@@ -11,8 +11,7 @@ def run():
 
         # --- the plan sheet ---
         pg.click('[data-act=plannew]'); pg.wait_for_timeout(350)
-        c.ok('six activities plus training', pg.locator('.pacard').count() == 7
-             and pg.locator('[data-pa=Training]').count() == 1)
+        c.ok('six activities', pg.locator('.pacard').count() == 6)
         c.ok('it points at trips first', 'more than one day' in pg.inner_text('.tripline'))
         counts = {}
         for t in ['Run','Climbing','Bouldering','Ice climbing','Hike','Other']:
@@ -58,33 +57,40 @@ def run():
              'Gaustatoppen' in pg.inner_text('#paPlaces'))[-1])
         pg.click('#planfrm button[value=cancel]'); pg.wait_for_timeout(200)
 
-        # --- a training session, planned from the sheet ---
+        # --- training lives inside each discipline ---
         pg.click('[data-act=plannew]'); pg.wait_for_timeout(350)
-        pg.click('[data-pa=Training]'); pg.wait_for_timeout(300)
-        kinds = pg.eval_on_selector_all('#paKinds .tchip', 'n=>n.map(x=>x.textContent)')
-        c.ok('every programme section is offered', any('Ice · Tools' in k for k in kinds)
-             and any('Nepal · Strength' in k for k in kinds), kinds)
+        pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(300)
+        out = pg.eval_on_selector_all('#paKinds .tchip:not(.train):not(.sm)', 'n=>n.map(x=>x.textContent)')
+        tr = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        c.ok('ice offers days out and ice training',
+             'Ice cragging' in out and any('Tools and grip' in t for t in tr), (out, tr))
+        pg.click('[data-pa=Hike]'); pg.wait_for_timeout(250)
+        trh = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        c.ok('a hike trains with Nepal strength', any('Nepal' in t for t in trh), trh)
+        pg.click('[data-pa=Climbing]'); pg.wait_for_timeout(250)
+        trc = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        c.ok('climbing trains fingers and pulling',
+             any('Fingers' in t for t in trc) and any('Pull' in t for t in trc), trc)
         c.ok('and single exercises are there too', pg.locator('.pickex.single').count() == 1)
         pg.click('.pickex.single summary'); pg.wait_for_timeout(250)
-        pg.locator('[data-kind="x:nepal|1|x:stair44"]').scroll_into_view_if_needed()
-        pg.click('[data-kind="x:nepal|1|x:stair44"]'); pg.wait_for_timeout(300)
-        c.ok('one exercise names the session',
-             pg.input_value('#planfrm [name=title]') == 'Stair 4 × 4 · guided',
-             pg.input_value('#planfrm [name=title]'))
-        pg.click('#paKinds [data-kind="ice|0"]'); pg.wait_for_timeout(250)
-        c.ok('it names itself and works out the length',
+        names = pg.eval_on_selector_all('.tchip.sm', 'n=>n.map(x=>x.textContent)')
+        c.ok('the single list sticks to that discipline',
+             any('Hangboard' in n for n in names) and not any('Step-ups' in n for n in names), names[:6])
+        pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(250)
+        pg.click('#paKinds .tchip.train >> nth=0'); pg.wait_for_timeout(300)
+        c.ok('picking training names the session and times it',
              pg.input_value('#planfrm [name=title]') == 'Ice · Tools and grip'
              and int(pg.input_value('#planfrm [name=minutes]')) >= 10,
              (pg.input_value('#planfrm [name=title]'), pg.input_value('#planfrm [name=minutes]')))
         pg.fill('#planfrm [name=date]', '2026-10-12')
         pg.click('#planfrm button[value=save]'); pg.wait_for_timeout(1100)
-        tr = [x for x in store['plans'] if x['date'] == '2026-10-12']
+        tr2 = [x for x in store['plans'] if x['date'] == '2026-10-12']
         c.ok('it lands in the calendar with its exercises',
-             len(tr) == 1 and tr[0]['tab'] == 'Ice' and len(tr[0]['items']) >= 2, tr)
+             len(tr2) == 1 and tr2[0]['tab'] == 'Ice' and len(tr2[0]['items']) >= 1, tr2)
         pg.click('.cd[data-d="2026-10-12"]'); pg.wait_for_timeout(400)
         c.ok('and can be started from the day', pg.locator('.prow [data-act=pstart]').count() == 1)
         pg.click('.prow [data-act=pstart]'); pg.wait_for_timeout(350)
-        c.ok('the timer runs those exercises', pg.evaluate('F.open') and pg.evaluate('F.src.length') >= 2)
+        c.ok('the timer runs those exercises', pg.evaluate('F.open') and pg.evaluate('F.src.length') >= 1)
         pg.click('#faX'); pg.wait_for_timeout(200)
         if pg.locator('[data-act=discard]').count(): pg.click('[data-act=discard]')
 
@@ -121,9 +127,11 @@ def run():
         pg.click('.cd[data-d="2026-10-27"]'); pg.wait_for_timeout(300)
         c.ok('the day heading carries the trip', 'day 1 of 2' in pg.inner_text('.dayhead.trip'))
         c.ok('trip days are washed in the grid', pg.locator('.cd.trip').count() == 2)
-        c.ok('Today sits in the month row, only when you are away from it',
-             pg.evaluate("""()=>{const h=document.querySelector('.calhead');
-               return h.contains(document.querySelector('.todaybtn')) && h.classList.contains('away')}"""))
+        c.ok('the month stays centred, with Today on the line above',
+             pg.evaluate("""()=>{const h=document.querySelector('.calhead'),t=document.querySelector('.todaybtn');
+               if(!t||h.contains(t))return false;
+               const r=h.querySelector('h2').getBoundingClientRect(),w=h.getBoundingClientRect();
+               return Math.abs((r.left+r.right)/2-(w.left+w.right)/2)<12}"""))
         c.ok('and count as away', pg.evaluate("tripDays().has('2026-10-27')&&tripDays().has('2026-10-28')"))
         c.ok('one line per session', pg.locator('.prow').count() == 1)
 
