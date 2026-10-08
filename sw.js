@@ -1,6 +1,6 @@
 // Offline support. The page itself is always fetched fresh when online,
 // so edits to index.html show up without touching this file.
-const CACHE = 'training-guide-50';
+const CACHE = 'training-guide-51';
 const CORE = ['./', './index.html', './manifest.json', './icon.png'];
 
 self.addEventListener('install', e => {
@@ -15,6 +15,11 @@ self.addEventListener('activate', e => {
   );
 });
 
+self.addEventListener('message', e => {
+  if (e.data === 'version') e.source.postMessage({version: CACHE});
+  if (e.data === 'update') self.skipWaiting();
+});
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -27,7 +32,10 @@ self.addEventListener('fetch', e => {
   };
   if (req.mode === 'navigate') {
     // page: network first, cached copy when offline
-    e.respondWith(fetch(req).then(save).catch(() => caches.match(req).then(r => r || caches.match('./index.html'))));
+    // always ask the network for a fresh page, bypassing the browser's own HTTP cache
+    e.respondWith(fetch(req, {cache: 'reload'}).then(save)
+      .catch(() => fetch(req).then(save))
+      .catch(() => caches.match(req).then(r => r || caches.match('./index.html'))));
   } else {
     // everything else (icon, fonts): cache first
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(save)));

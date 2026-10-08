@@ -1000,7 +1000,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='50';
+const BUILD='51';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2962,7 +2962,7 @@ function render(){
   const kps=kpsOf(p);const hid=S.hidden.filter(h=>kps.some(k=>h.startsWith(k+':'))).length;
   document.getElementById('foot').innerHTML=(hid?`<button class="link" data-act="unhide">Show ${hid} hidden exercise${hid>1?'s':''}</button><br>`:'')
     +'<span id="syncline">'+syncLine()+'</span><br>'
-    +'<span class="buildno">Version '+BUILD+'</span><br>'
+    +'<span class="buildno">Version '+BUILD+' · <button class="link" data-act="forceupdate">Check for an update</button></span><br>'
     +'<button class="link" data-act="export">Back up</button> · <button class="link" data-act="import">Restore</button>';
 }
 const scrollEl=()=>document.querySelector('.wrap')||document.scrollingElement;
@@ -3070,6 +3070,15 @@ function onAct(b){
   if(act==='syncsetup'){openSync();return}
   if(act==='caltoday'){calSel=dayOf(new Date());calMonth=monthStart(new Date());calPicked=false;render();pullPlans();
     setTimeout(()=>{const el=document.querySelector('.cd.today');if(el)el.scrollIntoView({block:'center',behavior:'smooth'})},40);return}
+  if(act==='forceupdate'){
+    ask('Reload for the newest version?','The app fetches its files again. Nothing you have logged is lost.','Reload').then(async ok=>{
+      if(!ok)return;
+      try{if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();
+        for(const r of regs){try{await r.unregister()}catch(e){}}}
+        if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}
+      }catch(e){}
+      location.replace(location.pathname+'?v='+Date.now());
+    });return}
   if(act==='syncretry'){const n=document.getElementById('syncline');if(n)n.textContent='Trying again…';
     (async()=>{try{await pullPlans();await flushQueue()}catch(e){}updateSyncLine();render()})();return}
   if(act==='legend'){const base=BASETABS.concat(['Hike']).filter((t,k,a)=>a.indexOf(t)===k);

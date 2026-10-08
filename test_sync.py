@@ -62,6 +62,15 @@ def run():
         c.ok('and recovers when it answers again', 'Sync problem' not in pg.inner_text('#syncline'),
              pg.inner_text('#syncline')[:60])
 
+        # --- the version is visible, and there is a way to force an update ---
+        pg.click('#bnav [data-view=train]'); pg.wait_for_timeout(400)
+        c.ok('the build number is on screen', 'Version' in pg.inner_text('#foot'), pg.inner_text('#foot')[:60])
+        c.ok('and a way to fetch the files again', pg.locator('[data-act=forceupdate]').count() == 1)
+        pg.click('[data-act=forceupdate]'); pg.wait_for_timeout(400)
+        c.ok('it asks before reloading', pg.is_visible('#ask'))
+        pg.click('#askNo'); pg.wait_for_timeout(300)
+        pg.click('#bnav [data-view=history]'); pg.wait_for_timeout(500)
+
         # --- state backup ---
         pg.evaluate("""()=>{S.levels.toolhang=3;save();
           const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');
