@@ -557,11 +557,12 @@ body.has-resume .wrap{padding-bottom:110px}
 .syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
 .syncextra{display:flex;gap:18px;flex-wrap:wrap}
 .warn{color:var(--acc)}
-.toprow{display:flex;align-items:center;gap:10px;justify-content:flex-end;margin:2px 0 0}
-.toprow .syncmini{margin:0;flex:1;text-align:right}
-.todaybtn{flex:0 0 auto;border:1.5px solid var(--acc);background:none;color:var(--acc);border-radius:999px;padding:5px 12px;font:600 13px Barlow,sans-serif}
-.calhead{display:flex;align-items:center;justify-content:space-between;margin:22px 0 8px}
-.calhead h2{font-size:26px;text-transform:capitalize}
+.calhead{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
+.calhead h2{font-size:clamp(21px,6vw,26px);text-transform:capitalize;white-space:nowrap;margin:0}
+.calnav{display:flex;gap:6px;margin-left:auto}
+.todaybtn{display:none;border:0;background:none;color:var(--acc);font:600 13px Barlow,sans-serif;
+  text-decoration:underline;text-underline-offset:3px;padding:4px 2px;white-space:nowrap}
+.calhead.away .todaybtn{display:inline-block}
 .cnav{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .calgrid>b{text-align:center;font-size:12px;color:var(--muted);font-weight:600;padding:4px 0}
@@ -678,6 +679,15 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .row2 input,.row2 select{width:100%;max-width:100%;box-sizing:border-box}
 .pickex{margin:2px 0 4px}
 .pickex summary{list-style:none;cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;padding:6px 0}
+.pickex.single{width:100%}
+.exlist{width:100%}
+.exlist b{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
+.exline{display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:0;
+  border-top:1px solid var(--rule);padding:9px 2px;color:var(--ink);font:600 14.5px Barlow,sans-serif}
+.exline span{flex:1;min-width:0}
+.exline em{font-style:normal;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.exline.on{color:var(--tc)}
+.exline.on span::before{content:'✓ ';font-weight:700}
 .kindsep{flex-basis:100%;font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
 .tchip.train{border-style:dashed}
 .tchip.train.on{border-style:solid}
@@ -1005,7 +1015,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='52';
+const BUILD='53';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1888,11 +1898,11 @@ function renderHistory(){
     <div class="weekbox compact"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
       <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     
-    <div class="toprow"><p class="syncmini" id="syncline">${syncLine()}</p>
-      ${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?`<button class="todaybtn" data-act="caltoday">Today</button>`:''}</div>
-    <div class="calhead"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button>
+    <p class="syncmini" id="syncline">${syncLine()}</p>
+    <div class="calhead${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?' away':''}">
       <h2>${esc(calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'}))}</h2>
-      <button class="cnav" data-act="calnext" aria-label="Next month">›</button></div>
+      <button class="todaybtn" data-act="caltoday">Today</button>
+      <span class="calnav"><button class="cnav" data-act="calprev" aria-label="Previous month">‹</button><button class="cnav" data-act="calnext" aria-label="Next month">›</button></span></div>
     <div class="calgrid">${wd.map(x=>`<b>${x}</b>`).join('')}${cells}</div>
     <button class="legendlink" data-act="legend">What the dots mean</button>
     ${(()=>{const n=dupCount();return n?`<div class="adjcard hard"><p><b>${n} duplicate session${n>1?'s':''}.</b> Same day, time and title more than once, usually from connecting twice. Removing them clears the extra events from your Training calendar and keeps one of each.</p><div><button class="go sm" data-act="dupfix">Remove duplicates</button></div></div>`:''})()}
@@ -2702,16 +2712,29 @@ function openPlan(){
   document.getElementById('planMsg').textContent='';
   document.getElementById('plandlg').showModal();
 }
+function drawKinds(){
+  const tab=PA.tab;if(!tab)return;
+  const ks=KINDS[tab]||[],tc=colOf(tab),tr=trainFor(tab);
+  document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('')+(tr.length?`<span class="kindsep">or train for it</span>`
+      +tr.map(([k,l])=>`<button type="button" class="tchip train${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}">${esc(l)}</button>`).join(''):'')
+    +(()=>{
+      const sec=PA.kind&&PA.kind.startsWith('x:')?PA.kind.slice(2).split('|').slice(0,2).join('|')
+        :isTrainKind(PA.kind)?PA.kind:'';
+      if(!sec)return '';
+      const p=PROGS.find(x=>x.id===sec.split('|')[0]),si=+sec.split('|')[1];
+      const items=p?sectionItems(p,si):[];
+      if(items.length<2)return '';
+      return `<details class="pickex single"${PA.kind.startsWith('x:')?' open':''}><summary>Or just one of them</summary>`
+        +`<div class="exlist">${items.map(e=>{const k='x:'+sec+'|x:'+e.id;
+          return `<button type="button" class="exline${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}"><span>${esc(e.name)}</span><em>${esc(e.dose||'')}</em></button>`}).join('')}</div></details>`})();
+}
 function paPick(tab){
   const f=document.getElementById('planfrm');
   PA.tab=tab;const kl=KINDS[tab]||[];PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
   document.getElementById('paKindSec').hidden=!ks.length;
-  const tc=colOf(tab),tr=trainFor(tab),gs=singlesFor(tab);
-  document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('')+(tr.length?`<span class="kindsep">or train for it</span>`
-      +tr.map(([k,l])=>`<button type="button" class="tchip train${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}">${esc(l)}</button>`).join(''):'')
-    +(Object.keys(gs).length?(()=>{const g=gs;return `<details class="pickex single"><summary>Or one exercise</summary>${Object.keys(g).map(name=>`<div class="pxsec"><b>${esc(name)}</b><div class="typechips">${g[name].map(([k,l,d])=>`<button type="button" class="tchip sm${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}">${esc(l)}<em>${esc(d||'')}</em></button>`).join('')}</div></div>`).join('')}</details>`})():'');
+  drawKinds();
   document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
   paNudge();
   document.getElementById('paNums').hidden=!needsKm(tab);
@@ -3678,8 +3701,7 @@ function drawTrip(){
   document.getElementById('paGrid').addEventListener('click',ev=>{const b=ev.target.closest('[data-pa]');if(b)paPick(b.dataset.pa)});
   document.getElementById('paKinds').addEventListener('click',ev=>{const b=ev.target.closest('[data-kind]');if(!b)return;
     PA.kind=b.dataset.kind;S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
-    document.querySelectorAll('#paKinds .tchip').forEach(x=>x.classList.toggle('on',x===b));
-    paNudge();
+    drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0')f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:f.km.value;
     planAuto()});
   document.getElementById('paWhen').addEventListener('click',ev=>{const b=ev.target.closest('[data-day]');if(!b)return;

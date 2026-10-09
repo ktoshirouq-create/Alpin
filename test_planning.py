@@ -71,12 +71,15 @@ def run():
         trc = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
         c.ok('climbing trains fingers and pulling',
              any('Fingers' in t for t in trc) and any('Pull' in t for t in trc), trc)
-        c.ok('and single exercises are there too', pg.locator('.pickex.single').count() == 1)
-        pg.click('.pickex.single summary'); pg.wait_for_timeout(250)
-        names = pg.eval_on_selector_all('.tchip.sm', 'n=>n.map(x=>x.textContent)')
-        c.ok('the single list sticks to that discipline',
-             any('Hangboard' in n for n in names) and not any('Step-ups' in n for n in names), names[:6])
+        c.ok('no exercise list until a section is chosen', pg.locator('.pickex.single').count() == 0)
         pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(250)
+        pg.click('#paKinds .tchip.train >> nth=0'); pg.wait_for_timeout(350)
+        c.ok('choosing a section offers its own exercises, nothing else',
+             pg.locator('.pickex.single').count() == 1
+             and (pg.click('.pickex.single summary'), pg.wait_for_timeout(250),
+                  pg.eval_on_selector_all('.exline span', 'n=>n.map(x=>x.textContent)'))[-1]
+                 == ['Ice tool hangs', 'Ice tool traverse', 'Tool lock-offs'],
+             pg.eval_on_selector_all('.exline span', 'n=>n.map(x=>x.textContent)'))
         pg.click('#paKinds .tchip.train >> nth=0'); pg.wait_for_timeout(300)
         c.ok('picking training names the session and times it',
              pg.input_value('#planfrm [name=title]') == 'Ice · Tools and grip'
@@ -127,11 +130,11 @@ def run():
         pg.click('.cd[data-d="2026-10-27"]'); pg.wait_for_timeout(300)
         c.ok('the day heading carries the trip', 'day 1 of 2' in pg.inner_text('.dayhead.trip'))
         c.ok('trip days are washed in the grid', pg.locator('.cd.trip').count() == 2)
-        c.ok('the month stays centred, with Today on the line above',
-             pg.evaluate("""()=>{const h=document.querySelector('.calhead'),t=document.querySelector('.todaybtn');
-               if(!t||h.contains(t))return false;
-               const r=h.querySelector('h2').getBoundingClientRect(),w=h.getBoundingClientRect();
-               return Math.abs((r.left+r.right)/2-(w.left+w.right)/2)<12}"""))
+        c.ok('the month title leads the row, arrows on the right, Today beside it',
+             pg.evaluate("""()=>{const h=document.querySelector('.calhead');
+               const t=h.querySelector('h2').getBoundingClientRect(), n=h.querySelector('.calnav').getBoundingClientRect();
+               const today=h.querySelector('.todaybtn');
+               return t.left<n.left && h.contains(today) && t.height<44}"""))
         c.ok('and count as away', pg.evaluate("tripDays().has('2026-10-27')&&tripDays().has('2026-10-28')"))
         c.ok('one line per session', pg.locator('.prow').count() == 1)
 
