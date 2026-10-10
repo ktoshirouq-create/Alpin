@@ -102,6 +102,10 @@ def run_pairing():
                return rows.filter(r=>!r.classList.contains('pool')).length}""") == 1)
         pg.click('.hrow.pool summary'); pg.wait_for_timeout(250)
         c.ok('and opens into its exercises', pg.locator('.poolin .hrow').count() == 3)
+        c.ok('the pooled row stacks, never side by side',
+             pg.evaluate("""()=>{const d=document.querySelector('.hrow.pool');
+               const s=d.querySelector('summary').getBoundingClientRect(), i=d.querySelector('.poolin').getBoundingClientRect();
+               return i.top>=s.bottom-1 && s.height<60}"""))
         pg.click('.cd[data-d="2026-10-07"]'); pg.wait_for_timeout(400)
         c.ok('an unfinished plan is untouched',
              pg.locator('.prow').count() == 1 and 'done' not in pg.inner_text('.prow'))
