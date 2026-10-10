@@ -80,7 +80,10 @@ def run():
         c.ok('counts down, then work', pg.inner_text('#faLbl').startswith('Rep 1')
              and pg.evaluate("fa.classList.contains('ph-work')"), pg.inner_text('#faLbl'))
         pg.clock.run_for(11000)
-        c.ok('then rest', pg.inner_text('#faLbl') == 'Rest' and pg.evaluate("fa.classList.contains('ph-rest')"))
+        c.ok('then rest, saying what comes next',
+             pg.inner_text('#faLbl').startswith('Rest · next rep 2 of ')
+             and ' · set 1 of ' in pg.inner_text('#faLbl')
+             and pg.evaluate("fa.classList.contains('ph-rest')"), pg.inner_text('#faLbl'))
         c.ok('live controls appear in the rest', pg.is_visible('#faLive') and pg.locator('[data-live=rest30]').count() == 1)
         left = pg.evaluate('F.left'); pg.click('[data-live=rest30]')
         c.ok('+30 s rest', pg.evaluate('F.left') - left == 30)
