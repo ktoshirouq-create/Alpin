@@ -557,13 +557,14 @@ body.has-resume .wrap{padding-bottom:110px}
 .syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
 .syncextra{display:flex;gap:18px;flex-wrap:wrap}
 .warn{color:var(--acc)}
-.calnav{display:flex;gap:6px;margin-left:auto}
-.calhead h2{margin:0;white-space:nowrap;font-size:clamp(21px,6vw,26px);text-transform:capitalize}
-.calhead{display:flex;align-items:center;gap:8px;margin:10px 0 6px}
-.calhead h2{font-size:clamp(21px,6vw,26px);text-transform:capitalize;white-space:nowrap;margin:0 2px}
+.calnav{display:flex;align-items:center;gap:6px;margin-left:auto}
+.calhead{display:flex;align-items:center;gap:10px;margin:6px 0 10px}
+.calhead h2{font:700 clamp(30px,8.4vw,40px)/1 "Barlow Condensed",sans-serif;text-transform:capitalize;
+  white-space:nowrap;margin:0;letter-spacing:-.01em;display:flex;align-items:baseline;gap:8px}
+.calhead h2 small{font:600 15px Barlow,sans-serif;color:var(--muted);letter-spacing:.02em}
 
-.todaybtn{display:none;border:0;background:none;color:var(--acc);font:600 13px Barlow,sans-serif;
-  text-decoration:underline;text-underline-offset:3px;padding:4px 2px;white-space:nowrap}
+.todaybtn{display:none;border:1.5px solid var(--rule);background:none;color:var(--ink);border-radius:999px;
+  padding:7px 13px;font:600 13px Barlow,sans-serif;white-space:nowrap;margin-right:2px}
 .calhead.away .todaybtn{display:inline-block;margin-left:auto}
 .cnav{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -742,7 +743,7 @@ label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 label.popt{flex-direction:row;align-items:center;gap:10px;font-weight:400;font-size:15px;padding:7px 0}
 label.popt input{width:20px;height:20px;accent-color:var(--acc)}
 label.popt span{flex:1}label.popt em{font-style:normal;color:var(--muted);font-size:13px}
-.weekbox.compact{margin:4px 0 2px}
+.weekbox.compact{margin:20px 0 2px}
 .weekbox.compact div{padding:8px 6px}
 .weekbox.compact b{font-size:21px}
 .weekbox.compact span{font-size:10.5px;line-height:1.2}
@@ -750,6 +751,13 @@ label.popt span{flex:1}label.popt em{font-style:normal;color:var(--muted);font-s
 .weekbox div{background:var(--panel);border-radius:12px;padding:12px;text-align:center}
 .weekbox b{display:block;font:700 30px/1 "Barlow Condensed",sans-serif}.weekbox span{font-size:12px;color:var(--muted)}
 .hday{margin-top:22px}.hday h3{font-size:20px;margin:0 0 6px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
+.hrow.pool>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:10px 0}
+.hrow.pool>summary::-webkit-details-marker{display:none}
+.hrow.pool>summary b{flex:1;font:600 16px Barlow,sans-serif;display:flex;align-items:center;gap:8px}
+.hrow.pool>summary span{font-size:13px;color:var(--muted)}
+.hrow.pool>summary::after{content:'▾';color:var(--muted);font-size:12px}
+.hrow.pool[open]>summary::after{content:'▴'}
+.poolin{padding-left:16px;border-left:2px solid color-mix(in srgb,var(--tc) 40%,transparent);margin:0 0 6px}
 .hrow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule)}
 .hmain{flex:1;min-width:0}.hmain b{display:block;font-weight:600}.hmain span{font-size:13px;color:var(--muted)}
 .hmain em{font-style:normal;color:var(--acc)}
@@ -1032,7 +1040,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='55';
+const BUILD='57';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1896,15 +1904,20 @@ function renderHistory(){
   const week=all.filter(r=>r.date>=wkStart&&r.result!=='skipped'),secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
   const upcoming=plans.filter(p=>p.date>=todayS).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
   const dayPlans=(planBy[calSel]||[]).sort((a,b)=>a.start.localeCompare(b.start)),dayLog=(logBy[calSel]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+  const pairs=pairDay(dayPlans,dayLog);
   const doneDay=dayLog.some(r=>r.result==='done');
   const planRow=p=>`<div class="prow" style="--tc:${colOf(p.tab)}"><button class="pmain" data-act="pedit" data-id="${esc(p.id)}"><b>${esc(cleanTitle(p.title))}</b>
-      <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(()=>{const lg=(logBy[p.date]||[]).find(r=>r.plan_id===p.id);
+      <span>${esc(p.start)} · ${esc(String(p.minutes))} min${p.pending?' · <em>waiting to reach the calendar</em>':''}${(()=>{const lg=pairs.byPlan[p.id];
         return lg?` · <em class="ok">✓ done ${esc(lg.time)}${lg.completed?' · '+esc(lg.completed):''}</em>`:(p.status==='done'?' · <em class="ok">✓ done</em>':'')})()}</span>
       ${(()=>{const norm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
         const rest=(p.items||[]).filter(x=>norm(x)!==norm(cleanTitle(p.title)));
         return rest.length?`<small>${rest.map(esc).join('<br>')}</small>`:''})()}<u>Tap to change time or day</u></button>
       <div class="pside">${(S.planRefs[p.id]||[]).length&&p.date>=todayS?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
         :(!(S.planRefs[p.id]||[]).length&&p.date<=todayS&&p.status!=='done'&&!(logBy[p.date]||[]).some(r=>r.plan_id===p.id)?`<button class="go sm alt" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`:'')}<button class="link hx" data-act="pdel" data-id="${esc(p.id)}" aria-label="Remove plan">✕</button></div></div>`;
+  const poolRow=rows=>{const t=tabName(rows[0].tab),col=colOf(t),last=rows[rows.length-1];
+    return `<details class="hrow pool" style="--tc:${col}"><summary><b><i class="tdot" style="background:${col}"></i>${esc(t)} training</b>
+      <span>${rows.length} exercises · ${esc(rows[0].time)}–${esc(last.time)}</span></summary>
+      <div class="poolin">${rows.map(logRow).join('')}</div></details>`};
   const logRow=r=>`<div class="hrow" data-id="${esc(r.id)}"><div class="hmain"><b><i class="tdot" style="background:${colOf(r.tab)}"></i>${esc(r.exercise)}</b>
       <span>${esc(r.dose||'')}${r.slot?` · slot ${esc(r.slot)}`:''}${r.result==='partial'?` · <em>stopped at ${esc(r.completed)}</em>`:''}${r.result==='skipped'?' · <em>skipped</em>':''}</span></div>
       <div class="hside"><span class="htime">${esc(r.time)}</span>${r.feel?`<span class="feel f-${esc(r.feel)}">${esc(r.feel)}</span>`:''}
@@ -1912,8 +1925,6 @@ function renderHistory(){
   document.getElementById('plede').textContent='';
   document.getElementById('main').innerHTML=`
    <section>${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
-    <div class="weekbox compact"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
-      <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     
     <p class="syncmini" id="syncline">${syncLine()}</p>
     <div class="calhead${(calSel!==todayS||calMonth.getMonth()!==now.getMonth()||calMonth.getFullYear()!==now.getFullYear())?' away':''}">
@@ -1934,13 +1945,15 @@ function renderHistory(){
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
       ${dayPlans.map(planRow).join('')}
-      ${dayLog.filter(r=>!(r.plan_id&&dayPlans.some(p=>p.id===r.plan_id))).map(logRow).join('')}
+      ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add${dayPlans.length||dayLog.length?' slim':''}" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
         <div class="planmore"><button class="link" data-act="tripnew">${ICON('Hike','inl')} Trip</button>
           <button class="link" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Week of exercises</button>
           <button class="link" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Running week</button></div></div>
     </div>
+    <div class="weekbox compact"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days this week</span></div>
+      <div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
     ${upcoming.length?`<div class="hday"><h3>Coming up</h3>${upcoming.slice(0,6).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(niceDay(p.date))} · ${esc(p.start)}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}</div>`:''}
    </section>`;
   document.getElementById('foot').innerHTML='';
@@ -2870,6 +2883,33 @@ function phasesOf(e){
   return ph.length?ph:null;
 }
 const totalOf=e=>{const ph=phasesOf(e);return ph?ph.reduce((a,x)=>a+x.t,0):0};
+/* One session, one line. A plan and a log on the same day are the same session when
+   they share an id, or when the plan is a day out (no exercises) and there is exactly
+   one unclaimed log of that activity. */
+function pairDay(plans,logs){
+  const byPlan={},claimed={};
+  plans.forEach(p=>{const l=logs.find(r=>r.plan_id===p.id);if(l){byPlan[p.id]=l;claimed[l.id]=1}});
+  plans.forEach(p=>{
+    if(byPlan[p.id])return;
+    if((S.planRefs[p.id]||[]).length)return;              // a training session owns its own rows
+    const cand=logs.filter(r=>!claimed[r.id]&&!r.plan_id&&r.result!=='skipped'
+      &&tabName(r.tab)===tabName(p.tab));
+    if(cand.length===1){byPlan[p.id]=cand[0];claimed[cand[0].id]=1}
+  });
+  return {byPlan,claimed};
+}
+/* Exercises logged close together are one gym session. */
+function poolLogs(rows){
+  const out=[],GAP=90*60*1000,mins=t=>{const[a,b]=String(t||'0:0').split(':');return (+a)*60+(+b)};
+  rows.forEach(r=>{
+    const last=out[out.length-1];
+    const poolable=!!r.exercise_id&&tabName(r.tab)!=='Run';
+    if(last&&last.pool&&poolable&&tabName(last.rows[0].tab)===tabName(r.tab)
+       &&(mins(r.time)-mins(last.rows[last.rows.length-1].time))*60000<=GAP){last.rows.push(r);return}
+    out.push(poolable?{pool:true,rows:[r]}:{pool:false,rows:[r]});
+  });
+  return out;
+}
 
 const DEF={reps:{sets:3,reps:10,unit:''},hold:{sets:1,time:30,rest:30,sides:false},iv:{reps:6,work:10,rest:20,sets:1,setRest:120},text:{dose:''}};
 function baseOf(id){

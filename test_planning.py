@@ -61,39 +61,52 @@ def run():
         pg.click('[data-act=plannew]'); pg.wait_for_timeout(350)
         pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(300)
         out = pg.eval_on_selector_all('#paKinds .tchip:not(.train):not(.sm)', 'n=>n.map(x=>x.textContent)')
-        tr = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        tr = pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
         c.ok('ice offers days out and ice training',
              'Ice cragging' in out and any('Tools and grip' in t for t in tr), (out, tr))
         pg.click('[data-pa=Hike]'); pg.wait_for_timeout(250)
-        trh = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        trh = pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
         c.ok('a hike trains with Nepal strength', any('Nepal' in t for t in trh), trh)
         pg.click('[data-pa=Climbing]'); pg.wait_for_timeout(250)
-        trc = pg.eval_on_selector_all('#paKinds .tchip.train', 'n=>n.map(x=>x.textContent)')
+        trc = pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
         c.ok('climbing trains fingers and pulling',
              any('Fingers' in t for t in trc) and any('Pull' in t for t in trc), trc)
-        c.ok('no exercise list until a section is chosen', pg.locator('.pickex.single').count() == 0)
-        pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(250)
-        pg.click('#paKinds .tchip.train >> nth=0'); pg.wait_for_timeout(350)
-        c.ok('choosing a section offers its own exercises, nothing else',
-             pg.locator('.pickex.single').count() == 1
-             and (pg.click('.pickex.single summary'), pg.wait_for_timeout(250),
-                  pg.eval_on_selector_all('.exline span', 'n=>n.map(x=>x.textContent)'))[-1]
-                 == ['Ice tool hangs', 'Ice tool traverse', 'Tool lock-offs'],
-             pg.eval_on_selector_all('.exline span', 'n=>n.map(x=>x.textContent)'))
-        pg.click('#paKinds .tchip.train >> nth=0'); pg.wait_for_timeout(300)
-        c.ok('picking training names the session and times it',
-             pg.input_value('#planfrm [name=title]') == 'Ice · Tools and grip'
-             and int(pg.input_value('#planfrm [name=minutes]')) >= 10,
+        c.ok('training sections are collapsed rows', pg.locator('.trhead').count() >= 2
+             and pg.locator('.trrow.open').count() == 0)
+        pg.click('.trhead >> nth=0'); pg.wait_for_timeout(300)
+        c.ok('tapping one opens its exercises', pg.locator('.trrow.open [data-trex]').count() >= 2)
+        pg.click('.trrow.open [data-trex] >> nth=0'); pg.wait_for_timeout(200)
+        pg.click('.trrow.open [data-trex] >> nth=1'); pg.wait_for_timeout(250)
+        c.ok('two from one section', pg.evaluate('PA.train.length') == 2)
+        pg.click('.trhead >> nth=1'); pg.wait_for_timeout(250)
+        pg.click('.trrow.open [data-trex] >> nth=0'); pg.wait_for_timeout(300)
+        c.ok('and one more from another', pg.evaluate('PA.train.length') == 3)
+        c.ok('the session names and times itself',
+             'exercises' in pg.input_value('#planfrm [name=title]')
+             and int(pg.input_value('#planfrm [name=minutes]')) > 0,
              (pg.input_value('#planfrm [name=title]'), pg.input_value('#planfrm [name=minutes]')))
+        pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(250)
+        pg.click('.trhead >> nth=1'); pg.wait_for_timeout(300)
+        c.ok('a section only offers its own exercises',
+             pg.eval_on_selector_all('.trrow.open [data-trex] span', 'n=>n.map(x=>x.textContent)')[:2]
+             == ['Front-point calf holds', 'Scapular pull-ups'],
+             pg.eval_on_selector_all('.trrow.open [data-trex] span', 'n=>n.map(x=>x.textContent)')[:3])
+        c.ok('picking training times the session', int(pg.input_value('#planfrm [name=minutes]')) > 0)
+        pg.click('[data-pa="Ice climbing"]'); pg.wait_for_timeout(250)
+        pg.click('.trhead >> nth=0'); pg.wait_for_timeout(250)
+        pg.click('.trrow.open [data-trex] >> nth=0'); pg.wait_for_timeout(150)
+        pg.click('.trrow.open [data-trex] >> nth=1'); pg.wait_for_timeout(150)
+        pg.click('.trrow.open [data-trex] >> nth=2'); pg.wait_for_timeout(250)
         pg.fill('#planfrm [name=date]', '2026-10-12')
         pg.click('#planfrm button[value=save]'); pg.wait_for_timeout(1100)
         tr2 = [x for x in store['plans'] if x['date'] == '2026-10-12']
         c.ok('it lands in the calendar with its exercises',
-             len(tr2) == 1 and tr2[0]['tab'] == 'Ice' and len(tr2[0]['items']) >= 1, tr2)
+             len(tr2) == 1 and tr2[0]['tab'] == 'Ice' and len(tr2[0]['items']) >= 3, tr2)
         pg.click('.cd[data-d="2026-10-12"]'); pg.wait_for_timeout(400)
         c.ok('and can be started from the day', pg.locator('.prow [data-act=pstart]').count() == 1)
         pg.click('.prow [data-act=pstart]'); pg.wait_for_timeout(350)
-        c.ok('the timer runs those exercises', pg.evaluate('F.open') and pg.evaluate('F.src.length') >= 1)
+        c.ok('the timer runs everything you picked',
+             pg.evaluate('F.open') and pg.evaluate('F.src.length') >= 3, pg.evaluate('F.src.length'))
         pg.click('#faX'); pg.wait_for_timeout(200)
         if pg.locator('[data-act=discard]').count(): pg.click('[data-act=discard]')
 
