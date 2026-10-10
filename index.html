@@ -399,7 +399,7 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .buildno{color:var(--muted);opacity:.75;font-size:12px}
 .syncerr{display:block;text-align:left;margin-bottom:4px;line-height:1.4}
 .syncerr .link{white-space:nowrap}
-.syncmini{margin:2px 0 0;font-size:11.5px;color:var(--muted);text-align:right;opacity:.85}
+.syncmini{margin:0;font-size:11.5px;color:var(--muted);text-align:right;opacity:.85}
 .syncmini .link{font-size:11.5px}
 nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
   display:flex;gap:8px;padding:10px 0;border-bottom:1px solid var(--rule);overflow-x:auto;scrollbar-width:none}
@@ -557,13 +557,15 @@ body.has-resume .wrap{padding-bottom:110px}
 .syncmsg{margin:0;font-size:14px;min-height:1.2em}.syncmsg.good{color:var(--rest)}.syncmsg.bad{color:var(--acc)}
 .syncextra{display:flex;gap:18px;flex-wrap:wrap}
 .warn{color:var(--acc)}
-.calhead{display:flex;align-items:center;gap:10px;margin:16px 0 8px}
-.calhead h2{font-size:clamp(21px,6vw,26px);text-transform:capitalize;white-space:nowrap;margin:0}
 .calnav{display:flex;gap:6px;margin-left:auto}
+.calhead h2{margin:0;white-space:nowrap;font-size:clamp(21px,6vw,26px);text-transform:capitalize}
+.calhead{display:flex;align-items:center;gap:8px;margin:10px 0 6px}
+.calhead h2{font-size:clamp(21px,6vw,26px);text-transform:capitalize;white-space:nowrap;margin:0 2px}
+
 .todaybtn{display:none;border:0;background:none;color:var(--acc);font:600 13px Barlow,sans-serif;
   text-decoration:underline;text-underline-offset:3px;padding:4px 2px;white-space:nowrap}
-.calhead.away .todaybtn{display:inline-block}
-.cnav{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
+.calhead.away .todaybtn{display:inline-block;margin-left:auto}
+.cnav{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--rule);background:none;font-size:22px;line-height:1}
 .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .calgrid>b{text-align:center;font-size:12px;color:var(--muted);font-weight:600;padding:4px 0}
 .cd{aspect-ratio:1/1.05;min-height:44px;border:0;border-radius:10px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:6px 2px 7px;font-weight:600;font-size:15px}
@@ -634,7 +636,8 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .legnote{display:block;font-size:13px;line-height:1.5;color:var(--muted)}
 h1 .hdate{display:block;font:400 14px/1.3 Barlow,sans-serif;color:var(--muted);margin-top:2px;letter-spacing:0}
 body[data-view="today"] header{padding-bottom:4px}
-body[data-view="history"] header{padding-bottom:2px}
+body[data-view="history"] header{display:none}
+body[data-view="history"] #main{padding-top:14px}
 body[data-view="history"] h1{font-size:clamp(28px,7.4vw,38px)}
 body[data-view="history"] #plede{display:none}
 body[data-view="history"] main>section>.weekbox{margin-top:2px}
@@ -679,6 +682,20 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .row2 input,.row2 select{width:100%;max-width:100%;box-sizing:border-box}
 .pickex{margin:2px 0 4px}
 .pickex summary{list-style:none;cursor:pointer;color:var(--acc);font-weight:600;font-size:14px;padding:6px 0}
+.trlist{width:100%;display:flex;flex-direction:column}
+.trrow{border-top:1px solid var(--rule)}
+.trrow:last-child{border-bottom:1px solid var(--rule)}
+.trhead{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;padding:11px 2px;color:var(--ink)}
+.trhead b{flex:1;font:600 15px Barlow,sans-serif}
+.trhead em{font-style:normal;font-size:12px;color:var(--muted);white-space:nowrap}
+.trhead .trtick{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+.trhead.on .trtick{background:var(--tc);border-color:var(--tc)}
+.trhead.on b{color:var(--tc)}
+.trcar{font-style:normal;color:var(--muted);font-size:12px}
+.trrow .exlist{padding:0 0 8px 30px}
+.trrow .exline{border-top:1px dashed var(--rule);padding:8px 2px;font-size:14px}
+.trrow .exline.all{color:var(--muted);font-weight:600}
+.trsum{width:100%;margin:10px 0 0;font-size:13px;color:var(--muted)}
 .pickex.single{width:100%}
 .exlist{width:100%}
 .exlist b{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:12px 0 2px}
@@ -1015,7 +1032,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='53';
+const BUILD='54';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2690,7 +2707,7 @@ function trainSingles(){
       const grp=p.sections.length>1?`${p.chip} · ${sec.title}`:p.chip;
       (out[grp]=out[grp]||[]).push([`x:${pid}|${i}|x:${e.id}`,e.name,e.dose])}))});
   return out}
-let PA={tab:null,kind:null};
+let PA={tab:null,kind:null,train:[],open:null};
 const places=tab=>{const l=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y);
   const mine=l.filter(y=>!tab||!y.tab||y.tab===tab).map(y=>y.name),rest=l.map(y=>y.name).filter(n=>mine.indexOf(n)<0);
   return [...new Set(mine.concat(rest))].slice(0,8)};
@@ -2712,25 +2729,43 @@ function openPlan(){
   document.getElementById('planMsg').textContent='';
   document.getElementById('plandlg').showModal();
 }
+function trainPicked(ref){return PA.train.indexOf(ref)>=0}
+function trainLabel(){
+  const list=refsToList(PA.train);
+  if(!list.length)return '';
+  if(PA.train.length===1&&PA.train[0].endsWith('|e')){
+    const [pid,si]=PA.train[0].split('|'),p=PROGS.find(x=>x.id===pid);
+    return p?(p.sections.length>1?`${p.chip} · ${p.sections[+si].title}`:p.chip):'Training';
+  }
+  if(list.length<=2)return list.map(e=>e.name).join(' + ');
+  const chips=[...new Set(PA.train.map(r=>{const p=PROGS.find(x=>x.id===r.split('|')[0]);return p?p.chip:''}))];
+  return `${chips.join(' + ')} · ${list.length} exercises`;
+}
 function drawKinds(){
   const tab=PA.tab;if(!tab)return;
   const ks=KINDS[tab]||[],tc=colOf(tab),tr=trainFor(tab);
-  document.getElementById('paKinds').innerHTML=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('')+(tr.length?`<span class="kindsep">or train for it</span>`
-      +tr.map(([k,l])=>`<button type="button" class="tchip train${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}">${esc(l)}</button>`).join(''):'')
-    +(()=>{
-      const sec=PA.kind&&PA.kind.startsWith('x:')?PA.kind.slice(2).split('|').slice(0,2).join('|')
-        :isTrainKind(PA.kind)?PA.kind:'';
-      if(!sec)return '';
-      const p=PROGS.find(x=>x.id===sec.split('|')[0]),si=+sec.split('|')[1];
-      const items=p?sectionItems(p,si):[];
-      if(items.length<2)return '';
-      return `<details class="pickex single"${PA.kind.startsWith('x:')?' open':''}><summary>Or just one of them</summary>`
-        +`<div class="exlist">${items.map(e=>{const k='x:'+sec+'|x:'+e.id;
-          return `<button type="button" class="exline${k===PA.kind?' on':''}" data-kind="${esc(k)}" style="--tc:${tc}"><span>${esc(e.name)}</span><em>${esc(e.dose||'')}</em></button>`}).join('')}</div></details>`})();
+  const dayOut=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind&&!PA.train.length?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('');
+  const train=tr.map(([sec,label])=>{
+    const p=PROGS.find(x=>x.id===sec.split('|')[0]),si=+sec.split('|')[1];
+    const items=p?sectionItems(p,si):[],ess=items.filter(e=>e.tier==='e');
+    const whole=`${sec}|e`,open=PA.open===sec;
+    const picked=trainPicked(whole),n=items.filter(e=>trainPicked(`${sec}|x:${e.id}`)).length;
+    return `<div class="trrow${open?' open':''}">
+      <button type="button" class="trhead${picked||n?' on':''}" data-trsec="${esc(sec)}" style="--tc:${tc}">
+        <span class="trtick">${picked?'✓':n?'–':''}</span><b>${esc(label)}</b>
+        <em>${picked?`all ${ess.length||items.length}`:n?`${n} picked`:`${items.length}`}</em>
+        <i class="trcar">${open?'▴':'▾'}</i></button>
+      ${open?`<div class="exlist">${items.map(e=>{const k=`${sec}|x:${e.id}`;
+        return `<button type="button" class="exline${trainPicked(k)?' on':''}" data-trex="${esc(k)}" style="--tc:${tc}"><span>${esc(e.name)}</span><em>${esc(e.dose||'')}</em></button>`}).join('')}
+        <button type="button" class="exline all${picked?' on':''}" data-trall="${esc(sec)}" style="--tc:${tc}"><span>Everything essential here</span><em>${ess.length||items.length}</em></button></div>`:''}
+    </div>`}).join('');
+  document.getElementById('paKinds').innerHTML=dayOut
+    +(tr.length?`<span class="kindsep">or train for it</span><div class="trlist">${train}</div>`:'')
+    +(PA.train.length?`<p class="trsum">${esc(trainLabel())} · about ${Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)} min <button type="button" class="link" data-tr-clear="1">Clear</button></p>`:'');
 }
 function paPick(tab){
   const f=document.getElementById('planfrm');
-  PA.tab=tab;const kl=KINDS[tab]||[];PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
+  PA.tab=tab;PA.train=[];PA.open=null;const kl=KINDS[tab]||[];PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
   document.getElementById('paKindSec').hidden=!ks.length;
@@ -2752,7 +2787,7 @@ function planAuto(){
   const f=document.getElementById('planfrm');if(!PA.tab)return;
   const det=f.detail.value.trim(),km=parseFloat(f.km.value)||0;
   if(f.minutes.dataset.manual!=='1'){
-    const base=isTrainKind(PA.kind)?Math.max(5,Math.round(estimate(refsToList([trainRef(PA.kind)]))/5)*5)
+    const base=PA.train.length?Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)
       :KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
     const upm=parseInt(f.up.value,10)||0;
     f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5)
@@ -2774,10 +2809,7 @@ function planAuto(){
     const kl=kindLabel(PA.tab,PA.kind);
     const upt=parseInt(f.up.value,10)||0;
     const nums=PA.tab==='Hike'&&(km||upt)?' · '+[km?km+' km':'',upt?upt+' m up':''].filter(Boolean).join(', '):'';
-    if(isTrainKind(PA.kind)){
-      const one=PA.kind.startsWith('x:')?(refsToList([trainRef(PA.kind)])[0]||{}).name:'';
-      const lbl=one||(trainFor(PA.tab).find(x=>x[0]===PA.kind)||[])[1]||'Training';
-      f.title.value=`${lbl}${det?' · '+det:''}`;}
+    if(PA.train.length){f.title.value=`${trainLabel()}${det?' · '+det:''}`;}
     else f.title.value=PA.tab==='Run'
       ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
       : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
@@ -3699,8 +3731,20 @@ function drawTrip(){
 (function(){
   const f=document.getElementById('planfrm');
   document.getElementById('paGrid').addEventListener('click',ev=>{const b=ev.target.closest('[data-pa]');if(b)paPick(b.dataset.pa)});
-  document.getElementById('paKinds').addEventListener('click',ev=>{const b=ev.target.closest('[data-kind]');if(!b)return;
-    PA.kind=b.dataset.kind;S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
+  document.getElementById('paKinds').addEventListener('click',ev=>{
+    const sec=ev.target.closest('[data-trsec]');
+    if(sec){const k=sec.dataset.trsec;PA.open=PA.open===k?null:k;drawKinds();planAuto();return}
+    const all=ev.target.closest('[data-trall]');
+    if(all){const k=all.dataset.trall,whole=`${k}|e`;
+      PA.train=trainPicked(whole)?PA.train.filter(r=>r!==whole):PA.train.filter(r=>!r.startsWith(k+'|')).concat([whole]);
+      drawKinds();planAuto();return}
+    const ex=ev.target.closest('[data-trex]');
+    if(ex){const k=ex.dataset.trex,sc=k.split('|').slice(0,2).join('|');
+      PA.train=trainPicked(k)?PA.train.filter(r=>r!==k):PA.train.filter(r=>r!==`${sc}|e`).concat([k]);
+      drawKinds();planAuto();return}
+    if(ev.target.closest('[data-tr-clear]')){PA.train=[];drawKinds();planAuto();return}
+    const b=ev.target.closest('[data-kind]');if(!b)return;
+    PA.kind=b.dataset.kind;PA.train=[];S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
     drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0')f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:f.km.value;
     planAuto()});
@@ -3730,9 +3774,9 @@ function drawTrip(){
         :`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}${PA.tab==='Hike'&&(km||(parseInt(f.up.value,10)||0))?' · '+[km?km+' km':'',(parseInt(f.up.value,10)||0)?(parseInt(f.up.value,10))+' m up':''].filter(Boolean).join(', '):''}`],
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
-    if(isTrainKind(PA.kind)){const refs=[trainRef(PA.kind)],list=refsToList(refs);
-      S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===trainRef(PA.kind).split('|')[0])||{}).chip||'Climbing';
-      plan.title=cleanTitle(f.title.value)||(list[0]||{}).name||'Training';
+    if(PA.train.length){const refs=PA.train.slice(),list=refsToList(refs);
+      S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===refs[0].split('|')[0])||{}).chip||'Climbing';
+      plan.title=cleanTitle(f.title.value)||trainLabel()||'Training';
       plan.items=list.slice(0,6).map(e=>`${e.name} · ${e.dose}`);
       if(list.length>6)plan.items.push(`+ ${list.length-6} more`);}
     if(PENDING_TRIP&&PENDING_TRIP.day===f.date.value){S.tripOf={...(S.tripOf||{}),[id]:PENDING_TRIP.id}}
