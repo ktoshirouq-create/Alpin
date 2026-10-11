@@ -58,7 +58,7 @@ def run():
         pg.click('[data-act=plannew]'); pg.wait_for_timeout(350); check('plan sheet')
         pg.click('[data-pa=Hike]'); pg.wait_for_timeout(250); check('plan sheet · hike')
         if pg.is_visible('#paUpLab') is False: issues.append('plan sheet: a hike has no ascent field')
-        for t in ['Climbing','Bouldering','Other']:
+        for t in ['Climbing','Other']:
             pg.click(f'[data-pa={t}]'); pg.wait_for_timeout(180)
             if pg.is_visible('#paKmLab'): issues.append(f'plan sheet: distance field shows for {t}')
         pg.click('#planfrm button[value=cancel]'); pg.wait_for_timeout(250)

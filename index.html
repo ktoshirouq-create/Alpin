@@ -1006,7 +1006,7 @@ button.chip::after{display:none}
   <h2>Plan a session</h2>
   <button type="button" class="tripline" data-act="toTrip">Out for more than one day? Plan a trip →</button>
   <section class="epsec"><h4>What</h4><div class="pagrid" id="paGrid"></div></section>
-  <section class="epsec" id="paKindSec" hidden><h4>Kind</h4><div class="typechips" id="paKinds"></div>
+  <section class="epsec" id="paKindSec" hidden><h4 id="paKindH">Kind</h4><div class="typechips" id="paKinds"></div>
     <p class="nudge" id="paNudge" hidden></p>
     <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"></label>
       <label id="paUpLab" hidden>Ascent, m<input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"></label></div></section>
@@ -1041,7 +1041,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='58';
+const BUILD='61';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1824,7 +1824,7 @@ const ICON=(name,cls)=>{const d=ICONP[name]||ICONP.Other;
   return `<svg class="ic ${cls||''}" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`};
 const TABICON={'Nepal':'🏔','Ice':'🧊','Climbing':'🧗','Stretch':'🧘','Warm up':'🔥','Run':'🏃','Hike':'🥾','Bouldering':'🪨','Ice climbing':'⛏️','Other':'✳️'};
 const BASETABS=['Climbing','Bouldering','Ice climbing','Run','Hike'];
-const EXTRAS=[['Run',45],['Climbing',240],['Bouldering',180],['Ice climbing',360],['Hike',180],['Other',60]];
+const EXTRAS=[['Run',45],['Climbing',240],['Ice climbing',360],['Hike',180],['Nepal',45],['Other',60]];
 let calPicked=false,calDay=null;
 const PKEY='tpg:plans';
 const plansCache=()=>lsGet(PKEY,[]);
@@ -2677,10 +2677,11 @@ function openRunLog(pre){
   d.showModal();setTimeout(()=>{try{f.km.focus()}catch(e){}},50);
 }
 const KINDS={Run:[['easy','Easy'],['long','Long'],['recovery','Recovery'],['tempo','Tempo'],['intervals','Intervals'],['hills','Hills'],['mp','Marathon pace'],['trail','Trail'],['race','Race']],
-  Climbing:[['indoor','Indoor'],['toprope','Top rope'],['sport','Sport'],['trad','Trad'],['multi','Multipitch'],['alpine','Alpine']],
+  Climbing:[['indoor','Indoor'],['toprope','Top rope'],['sport','Sport'],['trad','Trad'],['multi','Multipitch'],['alpine','Alpine'],['bindoor','Boulder indoor'],['boutdoor','Boulder outdoor'],['board','Board'],['circuits','Circuits']],
   Bouldering:[['indoor','Indoor'],['outdoor','Outdoor'],['board','Board'],['circuits','Circuits']],
   'Ice climbing':[['crag','Ice cragging'],['multi','Multipitch'],['mixed','Mixed'],['alpine','Alpine']],
   Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak'],['overnight','Overnight'],['hut','Hut to hut'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe'],['approach','Approach']],
+  Nepal:[],
   Other:[['gym','Gym'],['mobility','Mobility'],['skitour','Ski touring'],['ski','Skiing'],['bike','Cycling'],['swim','Swim'],['rest','Rest'],['travel','Travel']]};
 const KINDMIN={day:180,pack:300,peak:480,overnight:420,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
   indoor:180,toprope:150,sport:300,trad:420,multi:480,alpine:600,board:90,circuits:120,crag:360,mixed:360,
@@ -2697,12 +2698,13 @@ function trainKinds(){
   return out}
 const trainRef=k=>k.startsWith('x:')?k.slice(2):`${k}|e`;
 // what counts as training for each kind of day out
-const TRAINFOR={Run:[['warmup',0]],
-  Climbing:[['climb',0],['climb',1],['warmup',2]],
-  Bouldering:[['climb',0],['climb',1],['warmup',2]],
-  'Ice climbing':[['ice',0],['ice',1],['warmup',1]],
-  Hike:[['nepal',0],['nepal',1],['warmup',1]],
-  Other:[['nepal',0],['warmup',1],['warmup',3]]};
+const TRAINFOR={Run:[],
+  Climbing:[['climb',0],['climb',1]],
+  Bouldering:[['climb',0],['climb',1]],
+  'Ice climbing':[['ice',0],['ice',1]],
+  Hike:[],
+  Nepal:[['nepal',0],['nepal',1]],
+  Other:[]};
 function trainFor(tab){
   return (TRAINFOR[tab]||[]).map(([pid,i])=>{const p=PROGS.find(x=>x.id===pid);
     if(!p||!p.sections[i]||!sectionItems(p,i).length)return null;
@@ -2773,6 +2775,7 @@ function drawKinds(){
         return `<button type="button" class="exline${trainPicked(k)?' on':''}" data-trex="${esc(k)}" style="--tc:${tc}"><span>${esc(e.name)}</span><em>${esc(e.dose||'')}</em></button>`}).join('')}
         <button type="button" class="exline all${picked?' on':''}" data-trall="${esc(sec)}" style="--tc:${tc}"><span>Everything essential here</span><em>${ess.length||items.length}</em></button></div>`:''}
     </div>`}).join('');
+  document.getElementById('paKindH').textContent=ks.length?'Kind':'What to train';
   document.getElementById('paKinds').innerHTML=dayOut
     +(tr.length?`<span class="kindsep">or train for it</span><div class="trlist">${train}</div>`:'')
     +(PA.train.length?`<p class="trsum">${esc(trainLabel())} · about ${Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)} min <button type="button" class="link" data-tr-clear="1">Clear</button></p>`:'');
@@ -2782,7 +2785,7 @@ function paPick(tab){
   PA.tab=tab;PA.train=[];PA.open=null;const kl=KINDS[tab]||[];PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
-  document.getElementById('paKindSec').hidden=!ks.length;
+  document.getElementById('paKindSec').hidden=!ks.length&&!trainFor(tab).length;
   drawKinds();
   document.getElementById('paPlaces').innerHTML=places(tab).map(x=>`<button type="button" data-place="${esc(x)}">${esc(x)}</button>`).join('');
   paNudge();

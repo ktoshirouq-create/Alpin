@@ -11,10 +11,13 @@ def run():
 
         # --- the plan sheet ---
         pg.click('[data-act=plannew]'); pg.wait_for_timeout(350)
-        c.ok('six activities', pg.locator('.pacard').count() == 6)
+        c.ok('bouldering folded into climbing, Nepal is its own category',
+             pg.locator('.pacard').count() == 6 and pg.locator('[data-pa=Bouldering]').count() == 0
+             and pg.locator('[data-pa=Nepal]').count() == 1,
+             pg.eval_on_selector_all('.pacard', 'n=>n.map(x=>x.dataset.pa)'))
         c.ok('it points at trips first', 'more than one day' in pg.inner_text('.tripline'))
         counts = {}
-        for t in ['Run','Climbing','Bouldering','Ice climbing','Hike','Other']:
+        for t in ['Run','Climbing','Ice climbing','Hike','Other']:
             pg.click(f'[data-pa="{t}"]'); pg.wait_for_timeout(200)
             counts[t] = pg.locator('#paKinds .tchip').count()
         c.ok('every activity has real options', min(counts.values()) >= 4, counts)
@@ -65,8 +68,8 @@ def run():
         c.ok('ice offers days out and ice training',
              'Ice cragging' in out and any('Tools and grip' in t for t in tr), (out, tr))
         pg.click('[data-pa=Hike]'); pg.wait_for_timeout(250)
-        trh = pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
-        c.ok('a hike trains with Nepal strength', any('Nepal' in t for t in trh), trh)
+        c.ok('a hike offers only days out, training lives under Nepal',
+             pg.locator('.trhead').count() == 0 and pg.locator('#paKinds .tchip').count() >= 8)
         pg.click('[data-pa=Climbing]'); pg.wait_for_timeout(250)
         trc = pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
         c.ok('climbing trains fingers and pulling',
@@ -110,13 +113,50 @@ def run():
         pg.click('#faX'); pg.wait_for_timeout(200)
         if pg.locator('[data-act=discard]').count(): pg.click('[data-act=discard]')
 
+        # --- Nepal: a training category you bundle ---
+        pg.click('[data-act=plannew]'); pg.wait_for_timeout(350)
+        pg.click('[data-pa=Nepal]'); pg.wait_for_timeout(300)
+        c.ok('Nepal has no day out, only what to train',
+             pg.locator('#paKinds .tchip').count() == 0
+             and pg.inner_text('#paKindH').lower().startswith('what to train'),
+             pg.inner_text('#paKindH'))
+        c.ok('both Nepal sections are offered',
+             pg.eval_on_selector_all('.trhead b', 'n=>n.map(x=>x.textContent)')
+             == ['Nepal · Strength', 'Nepal · Endurance'])
+        pg.click('.trhead >> nth=0'); pg.wait_for_timeout(250)
+        pg.click('.trrow.open [data-trex] >> nth=0'); pg.wait_for_timeout(200)
+        pg.click('.trrow.open [data-trex] >> nth=2'); pg.wait_for_timeout(250)
+        pg.click('.trhead >> nth=1'); pg.wait_for_timeout(250)
+        pg.click('.trrow.open [data-trex] >> nth=1'); pg.wait_for_timeout(300)
+        c.ok('a bundle across both sections names itself',
+             'Nepal' in pg.input_value('#planfrm [name=title]')
+             and '3 exercises' in pg.input_value('#planfrm [name=title]'),
+             pg.input_value('#planfrm [name=title]'))
+        pg.fill('#planfrm [name=date]', '2026-10-14')
+        pg.click('#planfrm button[value=save]'); pg.wait_for_timeout(1100)
+        nep = [x for x in store['plans'] if x['date'] == '2026-10-14']
+        c.ok('and lands as one session with its exercises',
+             len(nep) == 1 and nep[0]['tab'] == 'Nepal' and len(nep[0]['items']) == 3, nep)
+        c.ok('the stair 4 × 4 lives under Nepal · Endurance',
+             (pg.click('[data-act=plannew]'), pg.wait_for_timeout(350),
+              pg.click('[data-pa=Nepal]'), pg.wait_for_timeout(250),
+              pg.click('.trhead >> nth=1'), pg.wait_for_timeout(250),
+              any('Stair 4' in t for t in pg.eval_on_selector_all('.trrow.open [data-trex]','n=>n.map(x=>x.textContent)')))[-1],
+             pg.eval_on_selector_all('.trrow.open [data-trex]','n=>n.map(x=>x.textContent.slice(0,20))'))
+        c.ok('no programme appears under two cards',
+             pg.evaluate("""()=>{const seen={},dup=[];
+               Object.keys(TRAINFOR).forEach(t=>TRAINFOR[t].forEach(([p,i])=>{
+                 const k=p+'|'+i; if(seen[k]&&t!=='Bouldering')dup.push(k+' in '+t+' and '+seen[k]); seen[k]=t}));
+               return dup.length===0}"""))
+        pg.click('#planfrm button[value=cancel]'); pg.wait_for_timeout(250)
+
         # --- the editor ---
         pg.click('.cd[data-d="2026-10-20"]'); pg.wait_for_timeout(400)
         pg.click('.prow .pmain'); pg.wait_for_timeout(350)
         c.ok('type chips, no dropdown', pg.locator('#epTypes .tchip').count() >= 5
              and pg.get_attribute('#epTypes .tchip.on', 'data-type') == 'Hike')
         pg.fill('#editplanfrm [name=title]','My own words'); pg.dispatch_event('#editplanfrm [name=title]','input')
-        pg.click('#epTypes [data-type=Bouldering]'); pg.wait_for_timeout(250)
+        pg.click('#epTypes [data-type=Hike]'); pg.wait_for_timeout(250)
         c.ok('a title you wrote is kept', pg.input_value('#editplanfrm [name=title]') == 'My own words')
         c.ok('the length follows the new type', pg.input_value('#editplanfrm [name=minutes]') == '180')
         pg.click('#epTypes [data-type=Run]'); pg.wait_for_timeout(250)
