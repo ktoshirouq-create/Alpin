@@ -517,6 +517,9 @@ dialog .chk input{width:20px;height:20px}
 #fa{position:fixed;inset:0;z-index:20;background:var(--bg);display:none;flex-direction:column;
   padding:calc(env(safe-area-inset-top,0px) + 10px) 18px calc(env(safe-area-inset-bottom,0px) + 14px)}
 #fa.open{display:flex}
+.voicebtn{background:none;border:1.5px solid var(--rule);border-radius:999px;color:var(--ink);
+  font:600 12px Barlow,sans-serif;padding:5px 10px;margin-left:auto;margin-right:8px;white-space:nowrap}
+.voicebtn.off{color:var(--muted);opacity:.75}
 .fatop{display:flex;align-items:center;justify-content:space-between;max-width:760px;width:100%;margin:0 auto}
 .fatop .x{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--ink);background:none;font-size:20px}
 .fastep{color:var(--muted);font-weight:600}
@@ -822,9 +825,9 @@ button.chip::after{display:none}
 .tot{font-size:13px;color:var(--muted);margin-left:2px}
 .muted{color:var(--muted);font-weight:400}
 /* phase colours */
-:root{--rest:#1E8E5A;--readyc:var(--ink);--wash-work:rgba(184,53,42,.16);--wash-rest:rgba(30,142,90,.16)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rest:#4CC38A;--readyc:#FFFFFF;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18)}}
-:root[data-theme="dark"]{--rest:#4CC38A;--readyc:#FFFFFF;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18)}
+:root{--rest:#1E8E5A;--readyc:var(--ink);--fin:#9A6B00;--wash-work:rgba(184,53,42,.16);--wash-rest:rgba(30,142,90,.16);--wash-fin:rgba(154,107,0,.16)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--rest:#4CC38A;--readyc:#FFFFFF;--fin:#E8C46A;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18);--wash-fin:rgba(232,196,106,.22)}}
+:root[data-theme="dark"]{--rest:#4CC38A;--readyc:#FFFFFF;--fin:#E8C46A;--wash-work:rgba(238,114,99,.20);--wash-rest:rgba(76,195,138,.18);--wash-fin:rgba(232,196,106,.22)}
 #fa{transition:background-color .3s}
 #fa.ph-work{background:linear-gradient(to top,var(--wash-work),var(--bg) 75%) var(--bg)}
 #fa.ph-rest{background:linear-gradient(to top,var(--wash-rest),var(--bg) 75%) var(--bg)}
@@ -834,6 +837,10 @@ button.chip::after{display:none}
 #fa.ph-ready .falbl{color:var(--readyc)}
 #fa.ph-work .falbl{color:var(--acc)}
 #fa.ph-rest .falbl{color:var(--rest)}
+#fa.ph-fin{background:linear-gradient(to top,var(--wash-fin),var(--bg) 70%) var(--bg)}
+#fa.ph-fin .fanum{color:var(--fin)}
+#fa.ph-fin .falbl{color:var(--fin);font-size:19px}
+#fa.ph-fin #faNext{box-shadow:0 0 0 3px color-mix(in srgb,var(--fin) 45%,transparent)}
 /* running view: the number takes over */
 #fa.running .fabody .frames,#fa.running .fabody .cue,#fa.running .fabody .sub{display:none}
 #fa.running .faadj{margin:6px 0 2px}
@@ -945,6 +952,9 @@ button.chip::after{display:none}
   <section class="epsec" id="epTypeRow"><h4>What it is</h4>
     <div class="typechips" id="epTypes"></div></section>
 
+  <section class="epsec" id="epKindRow" hidden><h4>Kind</h4>
+    <div class="typechips" id="epKinds"></div></section>
+
   <section class="epsec" id="epRun" hidden><h4>The run</h4>
     <div class="row2"><label>Type<select name="rtype"></select></label>
       <label>Distance, km<input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5"></label></div></section>
@@ -1031,7 +1041,8 @@ button.chip::after{display:none}
 </div></dialog>
 
 <div id="fa" role="dialog" aria-modal="true" aria-label="Follow along">
-  <div class="fatop"><span class="fastep" id="faStep"></span><button class="link skipex" id="faSkipEx" type="button">Skip exercise ›</button><button class="x" id="faX" aria-label="Close">✕</button></div>
+  <div class="fatop"><span class="fastep" id="faStep"></span>
+    <button class="voicebtn" id="faVoice" type="button" aria-label="Spoken cues"></button><button class="link skipex" id="faSkipEx" type="button">Skip exercise ›</button><button class="x" id="faX" aria-label="Close">✕</button></div>
   <div class="faprog" id="faProg"></div>
   <div class="fabody" id="faBody"></div>
   <div class="fatimer"><div class="fanum" id="faNum"></div><div class="falbl" id="faLbl"></div>
@@ -1041,7 +1052,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='61';
+const BUILD='66';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1777,13 +1788,28 @@ function removeEntry(id){
   setLocalLog(localLog().filter(x=>x.id!==id));
   if(!connected())return;
   const q=lsGet(QKEY,[]);const i=q.findIndex(o=>o.op==='log'&&o.row.id===id);
+  tomb(id);
   if(i>=0&&!flushing){q.splice(i,1);lsSet(QKEY,q)}else enqueue({op:'unlog',id});
 }
+/* Deleting is a promise to the Sheet that may take a while to keep. Until the Sheet
+   agrees, remember the id so the next pull cannot resurrect it. */
+const TOMB=()=>(S.gone=S.gone||{});
+function tomb(id){if(!id)return;TOMB()[id]=Date.now();save()}
+function tombPrune(){const t=TOMB(),cut=Date.now()-60*864e5;let n=0;
+  Object.keys(t).forEach(k=>{if(t[k]<cut){delete t[k];n++}});if(n)save()}
+const buried=id=>!!TOMB()[id];
+function unbury(ids){const t=TOMB();let n=0;ids.forEach(id=>{if(t[id]){delete t[id];n++}});if(n)save()}
 async function pullHistory(){
   if(!connected())return;
   const from=dayOf(new Date(Date.now()-120*864e5));
-  try{await flushQueue();const j=await api({action:'history',from});const l=localLog(),ids=new Set(l.map(x=>x.id));
-    j.rows.forEach(r=>{if(!ids.has(r.id))l.push(r)});setLocalLog(l);setSync({last:Date.now(),error:''})}
+  try{await flushQueue();const j=await api({action:'history',from});
+    tombPrune();
+    const rows=(j.rows||[]).filter(r=>!buried(r.id));
+    const l=localLog(),ids=new Set(l.map(x=>x.id));
+    rows.forEach(r=>{if(!ids.has(r.id))l.push(r)});setLocalLog(l);
+    const back=new Set((j.rows||[]).map(r=>r.id));
+    unbury(Object.keys(TOMB()).filter(id=>!back.has(id)&&!lsGet(QKEY,[]).some(o=>o.id===id)));
+    setSync({last:Date.now(),error:''})}
   catch(e){setSync({error:e.message})}
   if(cur==='history'||cur==='today')render();
 }
@@ -1842,7 +1868,7 @@ function cleanDuplicates(){
   const ids=new Set(drop.map(x=>x.id));
   setPlans(plansCache().filter(p=>!ids.has(p.id)));
   const q=lsGet(QKEY,[]).filter(o=>!(o.op==='plan'&&drop.some(d=>d.id===o.plan.id&&d.pending)));lsSet(QKEY,q);
-  [...new Set(drop.filter(x=>!x.pending).map(x=>x.id))].forEach(id=>enqueue({op:'unplan',id}));
+  [...new Set(drop.filter(x=>!x.pending).map(x=>x.id))].forEach(id=>{tomb(id);enqueue({op:'unplan',id})});
   drop.forEach(x=>{delete S.planRefs[x.id];delete S.runMeta[x.id]});save();
   scheduleFlush(300);render();return drop.length;
 }
@@ -1851,9 +1877,14 @@ async function pullPlans(){
   const m=calMonth||monthStart(new Date());
   const from=dayOf(new Date(m.getFullYear(),m.getMonth(),-6)),to=dayOf(new Date(m.getFullYear(),m.getMonth()+1,7));
   try{await flushQueue();const j=await api({action:'plans',from,to});
+    tombPrune();
+    const fresh=(j.plans||[]).filter(p=>!buried(p.id));
     const keep=plansCache().filter(p=>p.pending||p.date<from||p.date>to);
-    const merged=keep.concat(j.plans||[]),seen=new Set();
-    setPlans(merged.filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true}));setSync({last:Date.now(),error:''})}
+    const merged=keep.concat(fresh),seen=new Set();
+    setPlans(merged.filter(p=>{if(seen.has(p.id))return false;seen.add(p.id);return true}));
+    const back=new Set((j.plans||[]).map(p=>p.id));
+    unbury(Object.keys(TOMB()).filter(id=>!back.has(id)&&!lsGet(QKEY,[]).some(o=>o.id===id)));
+    setSync({last:Date.now(),error:''})}
   catch(e){setSync({error:e.message})}
   if(linkPlan){const p=plansCache().find(x=>x.id===linkPlan);if(p){calSel=p.date;calMonth=monthStart(new Date(p.date+'T12:00'))}linkPlan=null}
   if(cur==='history'||cur==='today')render();
@@ -2103,7 +2134,7 @@ const tripPlans=(t,ds)=>plansCache().filter(p=>(S.tripOf||{})[p.id]===t.id&&(!ds
 function saveTrip(t){S.trips={...(S.trips||{}),[t.id]:t};save()}
 function deleteTrip(id,alsoPlans){
   const plans=plansCache().filter(p=>(S.tripOf||{})[p.id]===id);
-  if(alsoPlans)plans.forEach(p=>{setPlans(plansCache().filter(x=>x.id!==p.id));enqueue({op:'unplan',id:p.id});delete S.planRefs[p.id];delete S.runMeta[p.id]});
+  if(alsoPlans)plans.forEach(p=>{setPlans(plansCache().filter(x=>x.id!==p.id));tomb(p.id);enqueue({op:'unplan',id:p.id});delete S.planRefs[p.id];delete S.runMeta[p.id]});
   plans.forEach(p=>{delete S.tripOf[p.id]});
   const t={...(S.trips||{})};delete t[id];S.trips=t;save();scheduleFlush(300);render();
 }
@@ -3232,7 +3263,7 @@ function onAct(b){
   if(act==='secjump'){const el=document.getElementById('sec-'+b.dataset.sec);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});return}
   if(act==='gowarm'){const sc=b.dataset.sec||'2';go('warmup');setTimeout(()=>{const el=document.getElementById('sec-'+sc);if(el)el.scrollIntoView({block:'start'})},80);return}
   if(act==='unlog'){const id=b.dataset.id,row=localLog().find(r=>r.id===id);
-    setLocalLog(localLog().filter(r=>r.id!==id));if(connected()){enqueue({op:'unlog',id});scheduleFlush(300)}
+    setLocalLog(localLog().filter(r=>r.id!==id));tomb(id);if(connected()){enqueue({op:'unlog',id});scheduleFlush(300)}
     refresh();if(row)undoBar('Removed '+row.exercise,()=>{const l=localLog();l.push(row);setLocalLog(l);if(connected()){enqueue({op:'log',row});scheduleFlush(300)}refresh()});return}
   if(act==='exday'){const e=sectionItems(p,sec).find(x=>x.id===id);if(!e)return;SEL={on:false,keys:[selKey(p,sec,id)]};openSelDay();return}
   if(act==='selmode'){SEL={on:!SEL.on,keys:SEL.on?[]:SEL.keys};selBar();refresh();return}
@@ -3301,6 +3332,7 @@ function onAct(b){
     ask('Remove this plan?',pl.title+' on '+niceDay(pl.date)+' is removed from your Training calendar.','Remove',true).then(ok=>{if(!ok)return;
       setPlans(plansCache().filter(x=>x.id!==pl.id));delete S.planRefs[pl.id];save();
       const q=lsGet(QKEY,[]),qi=q.findIndex(o=>o.op==='plan'&&o.plan.id===pl.id);
+      tomb(pl.id);
       if(qi>=0&&!flushing){q.splice(qi,1);lsSet(QKEY,q)}else enqueue({op:'unplan',id:pl.id});
       scheduleFlush(300);render()});return}
   if(act==='hdel'){const id=b.dataset.id,row=localLog().find(x=>x.id===id);if(!row)return;
@@ -3586,7 +3618,30 @@ let PENDING_TRIP=null;
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null,EP_TYPE=null;
+let EP=null,EP_TYPE=null,EP_KIND=null;
+function guessKind(tab,title){
+  const ks=KINDS[tab]||[],t=String(title||'').toLowerCase();
+  const hit=ks.slice().sort((a,b)=>b[1].length-a[1].length).find(([k,l])=>t.includes(l.toLowerCase()));
+  return hit?hit[0]:null;
+}
+function epTitleNow(){
+  const f=document.getElementById('editplanfrm');
+  if(f.title.dataset.auto==='0')return;
+  const kl=((KINDS[EP_TYPE]||[]).find(x=>x[0]===EP_KIND)||[])[1];
+  const parts=(f.title.value||'').split(' · ').slice(1)
+    .filter(x=>!(KINDS[EP_TYPE]||[]).some(([k,l])=>l.toLowerCase()===x.toLowerCase()));
+  const det=parts.join(' · ').trim();
+  if(EP_TYPE==='Run')return;
+  f.title.value=`${EP_TYPE}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}`.trim();
+}
+function drawEpKinds(){
+  const ks=KINDS[EP_TYPE]||[],row=document.getElementById('epKindRow');
+  row.hidden=!ks.length;
+  if(!ks.length){EP_KIND=null;return}
+  if(!ks.some(([k])=>k===EP_KIND))EP_KIND=ks[0][0];
+  document.getElementById('epKinds').innerHTML=ks.map(([k,l])=>
+    `<button type="button" class="tchip${k===EP_KIND?' on':''}" data-epkind="${esc(k)}" style="--tc:${colOf(EP_TYPE)}">${esc(l)}</button>`).join('');
+}
 function openPlanEdit(id){
   const p=plansCache().find(x=>x.id===id);if(!p)return;
   const d=document.getElementById('editplandlg'),f=document.getElementById('editplanfrm');
@@ -3595,7 +3650,10 @@ function openPlanEdit(id){
   const cur0=tabName(p.tab),types=EXTRAS.map(([t])=>t).concat(EXTRAS.some(([t])=>t===cur0)?[]:[cur0]);
   document.getElementById('epTypes').innerHTML=types.map(t=>`<button type="button" class="tchip${t===cur0?' on':''}" data-type="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
   EP_TYPE=cur0;
+  EP_KIND=(S.kinds||{})[p.id]||guessKind(cur0,p.title);
+  drawEpKinds();
   document.getElementById('epTypeRow').hidden=!!app;
+  document.getElementById('epKindRow').hidden=!!app||!(KINDS[cur0]||[]).length;
   const isRun=cur0==='Run',m=S.runMeta[p.id]||{};
   document.getElementById('epRun').hidden=!isRun;
   f.rtype.innerHTML=Object.keys(RUNLBL).map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('');
@@ -3617,6 +3675,12 @@ function replacePlan(plan){
     f.minutes.value=b.dataset.min;document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',x===b))});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.touched='1';document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on'))});
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
+  document.getElementById('epKinds').addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-epkind]');if(!b)return;
+    EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();
+    const km=KINDMIN[EP_KIND];if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
+      document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+km))}
+  });
   document.getElementById('epTypes').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-type]');if(!b)return;
     document.querySelectorAll('#epTypes .tchip').forEach(x=>x.classList.toggle('on',x===b));
@@ -3628,6 +3692,7 @@ function replacePlan(plan){
       document.getElementById('epRun').hidden=t!=='Run';
       if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;if(!keepTitle)f.title.value=`${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
       else if(!keepTitle)f.title.value=`${t}${det?' · '+det:''}`.trim();
+      EP_KIND=guessKind(t,f.title.value);drawEpKinds();
       const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
     }});
@@ -3649,6 +3714,8 @@ function replacePlan(plan){
     if(!ev.submitter||ev.submitter.value!=='save'||!EP)return;
     const newTab=document.getElementById('epTypeRow').hidden?tabName(EP.tab):(EP_TYPE||tabName(EP.tab));
     const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:cleanTitle(f.title.value)||cleanTitle(EP.title)};
+    if(EP_KIND&&(KINDS[newTab]||[]).some(([k])=>k===EP_KIND))S.kinds={...(S.kinds||{}),[p.id]:EP_KIND};
+    else{const kk={...(S.kinds||{})};delete kk[p.id];S.kinds=kk}
     if(newTab!=='Run'){delete S.runMeta[p.id];const det=(p.title.split(' · ').slice(1).join(' · ')||'').trim();p.items=[newTab+(det?': '+det:'')]}
     if(newTab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
       S.runMeta[p.id]={type:ty,km};p.items=[`${RUNLBL[ty]}${km?': '+km+' km':''}`,zoneText(RUNZONE[ty]||[2,2])]}
@@ -3884,13 +3951,49 @@ function tone(freq,dur,delay=0,vol=.22){try{actx=actx||new (window.AudioContext|
   g.gain.setValueAtTime(.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+.015);g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
   o.connect(g).connect(actx.destination);o.start(t0);o.stop(t0+dur+.02)}catch(e){}}
 const buzz=p=>{try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}};
+/* Each phase has its own shape, so a pocket tells you what changed:
+   work = one long, rest = three short, finished = long-short-long-short-longer. */
 const SOUND={
   tick:n=>{const f=n===1?1046:n===2?880:784;tone(f,.16,0,n===1?.75:.6);buzz(n===1?110:70)},
-  work:()=>{tone(1318,.16,0,.85);tone(1760,.5,.14,.85);buzz([400])},
-  rest:()=>{tone(660,.2,0,.6);tone(440,.45,.18,.55);buzz([120,90,120])},
+  work:()=>{tone(1318,.16,0,.85);tone(1760,.5,.14,.85);buzz([600])},
+  rest:()=>{tone(660,.2,0,.6);tone(440,.45,.18,.55);buzz([90,110,90,110,90])},
   ready:()=>{tone(880,.3,0,.6);buzz(180)},
-  done:()=>{tone(784,.18,0,.7);tone(988,.18,.18,.7);tone(1318,.6,.36,.8);buzz([200,100,200,100,500])}};
+  done:()=>{tone(784,.18,0,.7);tone(988,.18,.18,.7);tone(1318,.6,.36,.8);
+    buzz([500,150,150,150,500,150,900])}};
 function beep(){SOUND.work()}
+
+/* The phone's own voice. No files, works offline, ducks music rather than stopping it. */
+const voiceOn=()=>S.settings.voice!==0;
+let lastSaid='';
+function say(text,force){
+  if(!text||!voiceOn())return;
+  if(!force&&text===lastSaid)return;
+  lastSaid=text;
+  try{const u=new SpeechSynthesisUtterance(text);u.rate=1.02;u.pitch=1;u.volume=1;u.lang=document.documentElement.lang||'en';
+    speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}
+}
+function hush(){try{speechSynthesis.cancel()}catch(e){};lastSaid=''}
+/* Turn a phase label into something worth hearing. */
+function phaseSpeech(ph,secs){
+  if(!ph)return '';
+  const mins=m=>m>=60?(m%60===0?`${m/60} minute${m===60?'':'s'}`:`${Math.floor(m/60)} minute${m<120?'':'s'} ${m%60}`):`${m} seconds`;
+  const len=mins(secs);
+  if(ph.kind==='ready')return 'Get ready';
+  const l=ph.l||'';
+  if(/^Warm up/i.test(l))return `Warm up. ${len} easy.`;
+  if(/^Cool down/i.test(l))return `Cool down. ${len} easy.`;
+  if(/^Switch sides/i.test(l))return 'Switch sides';
+  const rep=/Rep (\d+) of (\d+)/.exec(l),set=/set (\d+) of (\d+)/.exec(l);
+  if(ph.work){
+    if(!rep)return `Go. ${len}.`;
+    const last=rep[1]===rep[2];
+    return `${last?'Last one':'Rep '+rep[1]+' of '+rep[2]}${set?`, set ${set[1]} of ${set[2]}`:''}. ${len}. Go.`;
+  }
+  const next=/next rep (\d+) of (\d+)/.exec(l),nset=/next set (\d+) of (\d+)/.exec(l);
+  if(nset)return `Rest. ${len}. Then set ${nset[1]} of ${nset[2]}.`;
+  if(next)return `${/keep moving/i.test(l)?'Easy':'Rest'}. ${len}. Next, rep ${next[1]} of ${next[2]}.`;
+  return `${/keep moving/i.test(l)?'Easy. Keep moving.':'Rest.'} ${len}.`;
+}
 const srcOf=e=>({it:e.warm?{id:e.id,warm:e.warmP}:e.id,pid:e.pid,sec:e.sec,tier:e.tier});
 function faElapsed(){if(!F.ph)return 0;if(F.done)return F.ph.reduce((a,x)=>a+(x.kind==='ready'?0:x.t),0);let t=0;for(let i=0;i<F.ph.length;i++){if(F.ph[i].kind==='ready')continue;if(i<F.p)t+=F.ph[i].t;else if(i===F.p)t+=F.ph[i].t-F.left}return t}
 function logFA(result){F.logged=F.logged||{};if(F.logged[F.i])return;const e=curEx();if(!e)return;
@@ -3931,13 +4034,16 @@ function closeFA(reason){
 addEventListener('popstate',()=>{if(F.open){histPushed=false;closeFA('pop')}});
 addEventListener('pagehide',()=>{if(F.open)saveSession()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&F.open)saveSession()});
-function stop(){F.run=false;clearInterval(F.timer);F.timer=null}
+function stop(){hush();F.run=false;clearInterval(F.timer);F.timer=null}
 function setEx(keepChip){stop();if(!keepChip)openChip=null;const e=curEx();F.ph=e?phasesOf(e):null;
   if(F.ph&&S.settings.ready>0){const first=F.ph[0].l;F.ph.unshift({t:S.settings.ready,l:'Get ready · '+first,work:false,kind:'ready'})}
   F.p=0;F.left=F.ph?F.ph[0].t:0;F.done=false;F.shown='';drawFA()}
 function reloadFA(){if(!F.run&&!started())setEx(true);else drawFA()}
 const started=()=>F.ph&&(F.p>0||F.left<F.ph[0].t);
-function drawFA(){
+function drawVoiceBtn(){const v=document.getElementById('faVoice');if(!v)return;
+  const on=voiceOn();v.textContent=on?'🔊 Voice on':'🔈 Voice off';v.classList.toggle('off',!on);
+  v.setAttribute('aria-pressed',on?'true':'false')}
+function drawFA(){drawVoiceBtn();
   const e=curEx();if(!e)return;const n=F.src.length;
   document.getElementById('faStep').textContent=`${F.title}: ${F.i+1} of ${n}`;
   document.getElementById('faProg').innerHTML=F.src.map((x,i)=>`<button type="button" class="seg${i<F.i?' on':''}${i===F.i?' cur':''}" data-jump="${i}" aria-label="Go to exercise ${i+1}"><i></i></button>`).join('');
@@ -3962,7 +4068,7 @@ function drawFA(){
     const kind=F.done?'done':F.ph[F.p].kind||'work',live=F.run||started();
     ['ready','work','rest','done'].forEach(k=>fa.classList.toggle('ph-'+k,live&&k===kind||F.done&&k==='done'));
     fa.classList.toggle('running',F.run);
-    lbl.textContent=F.done?'Done':F.ph[F.p].l;
+    lbl.textContent=F.done?(F.i===F.src.length-1?'Session done — tap Finish':'Exercise done — tap Next'):F.ph[F.p].l;
     go.textContent=F.done?'Again':F.run?'Pause':(started()?'Resume':'Start');
     go.style.display='';
     skip.style.display=!F.done&&(F.run||started())?'':'none';
@@ -3977,7 +4083,7 @@ function drawFA(){
     lc.innerHTML=`${isRest?'<button type="button" class="chip" data-live="rest30">+30 s rest</button>':''}
       <button type="button" class="chip" data-live="again">Repeat rep</button>
       <button type="button" class="chip" data-live="addset">Add a set</button>
-      ${e.L?`<span class="lslots">${[0,1,2,3,4].map(i=>`<button type="button" class="lslot${i===e.lvl?' on':''}" data-live="slot" data-i="${i}">${i+1}</button>`).join('')}</span>`:''}`;
+`;
     lc.style.display='flex';
   }else lc.style.display='none';
   const fb=document.getElementById('faFeel'),lid=F.logged&&F.logged[F.i];
@@ -3986,6 +4092,7 @@ function drawFA(){
   else fb.style.display='none';
   const pb=document.getElementById('faPrev');pb.disabled=false;
   pb.textContent=(F.ph&&started()&&F.p>0)?'Back a step':(F.i===0?'Exit':'Back');
+  fa.classList.toggle('ph-fin',!!F.done);
   const nb=document.getElementById('faNext'),fin=F.done||!F.ph;
   nb.textContent=fin?(F.i===n-1?'Finish':'Done'):(F.i===n-1?'Finish':'Next');
   nb.classList.toggle('pri',!!fin&&!F.ph);
@@ -3993,17 +4100,25 @@ function drawFA(){
 function tick(){const k=Math.max(1,Math.round((Date.now()-F.last)/1000));F.last+=k*1000;for(let j=0;j<k&&F.run;j++)step();drawFA();saveSession()}
 function step(){
   F.left--;
+  const cur=F.ph&&F.ph[F.p];
+  if(cur&&cur.t>=120&&F.left===30)say('Thirty seconds',true);
   if(F.left>0&&F.left<=3){SOUND.tick(F.left);return}
   if(F.left<=0){
-    if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)()}
-    else{stop();F.done=true;F.left=0;SOUND.done();logFA('done')}}
+    if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)();
+      say(phaseSpeech(F.ph[F.p],F.left),true)}
+    else{stop();F.done=true;F.left=0;SOUND.done();say('Done. Well done.',true);logFA('done')}}
 }
+document.getElementById('faVoice').addEventListener('click',()=>{
+  S.settings.voice=voiceOn()?0:1;save();hush();drawVoiceBtn();
+  if(voiceOn()&&F.ph&&F.ph[F.p])say(phaseSpeech(F.ph[F.p],F.left),true);
+});
 document.getElementById('faGo').addEventListener('click',()=>{
   if(!F.ph)return;
   if(F.done){setEx()}
   if(F.run){stop();drawFA();saveSession();return}
   try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume()}catch(_){}
   F.run=true;F.last=Date.now();F.timer=setInterval(tick,1000);drawFA();
+  if(F.ph&&F.ph[F.p])say(phaseSpeech(F.ph[F.p],F.left),true);
 });
 document.getElementById('faSkip').addEventListener('click',()=>{
   if(!F.ph||F.done)return;
