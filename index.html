@@ -676,6 +676,14 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
   border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px}
 .tchip .ic{width:16px;height:16px;color:var(--tc)}
 .tchip.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 18%,transparent)}
+.stepper{display:flex;align-items:stretch;gap:0;margin-top:6px}
+.stepper input{flex:1;min-width:0;text-align:center;border-radius:0;border-left:0;border-right:0;margin:0}
+.row2 .stepbtn{flex:0 0 34px;font-size:17px}
+.row2 .stepper input{font-size:15px;padding-left:2px;padding-right:2px}
+.stepbtn{flex:0 0 46px;background:var(--panel);border:1.5px solid var(--rule);color:var(--ink);
+  font:600 20px/1 Barlow,sans-serif;border-radius:12px 0 0 12px;padding:0;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.stepbtn:last-child{border-radius:0 12px 12px 0}
+.stepbtn:active{background:color-mix(in srgb,var(--acc) 20%,var(--panel));border-color:var(--acc);color:var(--acc)}
 .minlab{max-width:9em}
 #editplandlg .link.del{align-self:center;color:var(--acc);margin-top:4px;padding:10px}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -961,7 +969,7 @@ button.chip::after{display:none}
 <dialog id="runlogdlg"><form method="dialog" id="runlogfrm">
   <h2>Log a run</h2>
   <div class="row2"><label>Day<input name="date" type="date" required></label><label>Type<select name="type"></select></label></div>
-  <div class="row2"><label>Distance, km<input name="km" type="number" inputmode="decimal" min="0.5" max="100" step="0.01" required></label><label>Time, min <span class="hint">optional</span><input name="min" type="number" inputmode="numeric" min="1" max="600"></label></div>
+  <div class="row2"><label>Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.1" aria-label="less">–</button><input name="km" type="number" inputmode="decimal" min="0.5" max="100" step="0.01" required><button type="button" class="stepbtn" data-step="0.1" aria-label="more">+</button></span></label><label>Time, min <span class="hint">optional</span><span class="stepper"><button type="button" class="stepbtn" data-step="-1" aria-label="less">–</button><input name="min" type="number" inputmode="numeric" min="1" max="600"><button type="button" class="stepbtn" data-step="1" aria-label="more">+</button></span></label></div>
   <div class="feelrow"><span>How was it?</span><label><input type="radio" name="feel" value="easy">Easy</label><label><input type="radio" name="feel" value="good">Good</label><label><input type="radio" name="feel" value="hard">Hard</label></div>
   <label>Note <span class="hint">optional</span><input name="note" autocomplete="off"></label>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Save run</button></div>
@@ -971,7 +979,8 @@ button.chip::after{display:none}
   <h2>Add to a day</h2>
   <p class="hint" id="sdSum"></p>
   <div id="sdList" class="sdlist"></div>
-  <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div>
+  <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
+    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
 </form></dialog>
 
@@ -996,14 +1005,15 @@ button.chip::after{display:none}
 
   <section class="epsec" id="epRun" hidden><h4>The run</h4>
     <div class="row2"><label>Type<select name="rtype"></select></label>
-      <label>Distance, km<input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5"></label></div></section>
+      <label class="">Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.5" aria-label="less">–</button><input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5"><button type="button" class="stepbtn" data-step="0.5" aria-label="more">+</button></span></label></div></section>
 
   <section class="epsec"><h4>When</h4>
-    <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div></section>
+    <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
+    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div></section>
 
   <section class="epsec"><h4>How long</h4>
     <div id="epChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div>
-    <label class="minlab">Minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label></section>
+    <label class="minlab">Minutes<span class="stepper"><button type="button" class="stepbtn" data-step="-5" aria-label="less">–</button><input name="minutes" type="number" min="5" max="720" inputmode="numeric" required><button type="button" class="stepbtn" data-step="5" aria-label="more">+</button></span></label></section>
 
   <section class="epsec"><h4>Title in your calendar</h4>
     <input name="title" autocomplete="off" required></section>
@@ -1057,15 +1067,16 @@ button.chip::after{display:none}
   <section class="epsec"><h4>What</h4><div class="pagrid" id="paGrid"></div></section>
   <section class="epsec" id="paKindSec" hidden><h4 id="paKindH">Kind</h4><div class="typechips" id="paKinds"></div>
     <p class="nudge" id="paNudge" hidden></p>
-    <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"></label>
-      <label id="paUpLab" hidden>Ascent, m<input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"></label></div></section>
+    <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.5" aria-label="less">–</button><input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"><button type="button" class="stepbtn" data-step="0.5" aria-label="more">+</button></span></label>
+      <label id="paUpLab" hidden>Ascent, m<span class="stepper"><button type="button" class="stepbtn" data-step="-50" aria-label="less">–</button><input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"><button type="button" class="stepbtn" data-step="50" aria-label="more">+</button></span></label></div></section>
   <section class="epsec"><h4>When</h4>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
-    <div class="row2"><label>Day<input name="date" type="date" required></label><label>Start<input name="start" type="time" required></label></div></section>
+    <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
+    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div></section>
   <section class="epsec"><h4>How long</h4>
     <p class="nudge" id="durHint" hidden></p>
     <div class="durchips" id="durChips"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div>
-    <label class="minlab">Minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label></section>
+    <label class="minlab">Minutes<span class="stepper"><button type="button" class="stepbtn" data-step="-5" aria-label="less">–</button><input name="minutes" type="number" min="5" max="720" inputmode="numeric" required><button type="button" class="stepbtn" data-step="5" aria-label="more">+</button></span></label></section>
   <section class="epsec"><h4>Where <span class="hint">optional</span></h4>
     <input name="detail" autocomplete="off" placeholder="Grønmo, Kolsås, Nordmarka…">
     <div class="durchips" id="paPlaces"></div></section>
@@ -1094,7 +1105,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='70';
+const BUILD='73';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1967,6 +1978,11 @@ function renderHistory(){
     const dl=(logBy[ds]||[]).filter(r=>r.result!=='skipped'&&!DOTLESS.includes(tabName(r.tab)));
     const doneAct=[...new Set(dl.filter(isSession).map(r=>tabName(r.tab)))];
     const doneTrain=[...new Set(dl.filter(r=>!isSession(r)).map(r=>tabName(r.tab)))].filter(t=>!doneAct.includes(t));
+    // a plan you ticked done is done, whether or not a log row carries its id
+    const planDone=[...new Set((planBy[ds]||[]).filter(p=>p.status==='done'
+      ||(logBy[ds]||[]).some(r=>r.plan_id===p.id&&r.result!=='skipped')).map(p=>tabName(p.tab)))]
+      .filter(t=>!DOTLESS.includes(t)&&!doneAct.includes(t)&&!doneTrain.includes(t));
+    doneTrain.push(...planDone.filter(t=>!doneTrain.includes(t)));
     const planTabs=[...new Set((planBy[ds]||[]).map(p=>tabName(p.tab)))].filter(t=>!DOTLESS.includes(t)&&!doneAct.includes(t)&&!doneTrain.includes(t));
     const dots=[...doneAct.slice(0,3).map(t=>`<i style="background:${colOf(t)}"></i>`),
       ...doneTrain.slice(0,2).map(t=>`<i class="small" style="background:${colOf(t)}"></i>`),
@@ -3894,7 +3910,51 @@ function drawTrip(){
 (function(){
   const f=document.getElementById('planfrm');
   document.getElementById('paGrid').addEventListener('click',ev=>{const b=ev.target.closest('[data-pa]');if(b)paPick(b.dataset.pa)});
-  document.getElementById('paKinds').addEventListener('click',ev=>{
+  document.addEventListener('click',ev=>{
+  const b=ev.target.closest('.stepbtn');if(!b)return;
+  const inp=b.parentElement.querySelector('input');if(!inp)return;
+  stepField(b,inp);
+});
+function stepField(b,inp){
+  if(b.dataset.dstep!==undefined)return nudgeDay(inp,+b.dataset.dstep);
+  if(b.dataset.tstep!==undefined)return nudgeClock(inp,+b.dataset.tstep);
+  nudge(inp,parseFloat(b.dataset.step));
+}
+function nudgeDay(inp,by){
+  const d=inp.value?parseDay(inp.value):new Date();
+  inp.value=dayOf(addDays(d,by));
+  inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}));
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
+}
+function nudgeClock(inp,by){
+  const [h,m]=(inp.value||'12:00').split(':').map(Number);
+  let t=(h*60+m+by+1440)%1440;
+  inp.value=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+  inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}));
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
+}
+function nudge(inp,by){
+  const dec=(String(by).split('.')[1]||'').length;
+  const min=inp.min===''?-Infinity:parseFloat(inp.min),max=inp.max===''?Infinity:parseFloat(inp.max);
+  const now=parseFloat(inp.value);
+  let v=(isNaN(now)?(by>0?min===-Infinity?0:min:0):now)+by;
+  v=Math.min(max,Math.max(min,Math.round(v*10**dec)/10**dec));
+  inp.value=dec?String(v):String(Math.round(v));
+  inp.dispatchEvent(new Event('input',{bubbles:true}));
+  inp.dispatchEvent(new Event('change',{bubbles:true}));
+  try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}
+}
+// holding a button keeps nudging
+(()=>{let t=null,iv=null;
+  const stop=()=>{clearTimeout(t);clearInterval(iv);t=iv=null};
+  document.addEventListener('pointerdown',ev=>{
+    const b=ev.target.closest('.stepbtn');if(!b)return;
+    const inp=b.parentElement.querySelector('input');if(!inp)return;
+    t=setTimeout(()=>{iv=setInterval(()=>stepField(b,inp),110)},420);
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(e=>document.addEventListener(e,stop));
+})();
+document.getElementById('paKinds').addEventListener('click',ev=>{
     const sec=ev.target.closest('[data-trsec]');
     if(sec){const k=sec.dataset.trsec;PA.open=PA.open===k?null:k;drawKinds();planAuto();return}
     const all=ev.target.closest('[data-trall]');
@@ -4027,23 +4087,21 @@ function hush(){try{speechSynthesis.cancel()}catch(e){};lastSaid=''}
 /* Two parts: the sentence is spoken during the run-in, the single word lands exactly
    when the phase flips, so you move on the word rather than after it. */
 function phaseWords(ph,secs){
+  // as few words as the moment needs: a heads-up, then one word on the change
   if(!ph)return {lead:'',mark:''};
-  const mins=m=>m>=60?(m%60===0?`${m/60} minute${m===60?'':'s'}`:`${Math.floor(m/60)} minute${m<120?'':'s'} ${m%60}`):`${m} seconds`;
-  const len=mins(secs),l=ph.l||'';
-  if(ph.kind==='ready')return {lead:'',mark:'Get ready'};
-  if(/^Warm up/i.test(l))return {lead:'',mark:`Warm up. ${len} easy.`};
-  if(/^Cool down/i.test(l))return {lead:'Cool down coming up',mark:`Cool down. ${len} easy.`};
-  if(/^Switch sides/i.test(l))return {lead:'Switch sides coming up',mark:'Switch sides'};
+  const l=ph.l||'';
+  if(ph.kind==='ready')return {lead:'',mark:''};
+  if(/^Warm up/i.test(l))return {lead:'',mark:'Warm up'};
+  if(/^Cool down/i.test(l))return {lead:'',mark:'Cool down'};
+  if(/^Switch sides/i.test(l))return {lead:'',mark:'Switch sides'};
   const r=/Rep (\d+) of (\d+)/.exec(l),st=/set (\d+) of (\d+)/.exec(l);
   if(ph.work){
     const last=r&&r[1]===r[2];
-    const name=!r?'Work':last?'Last one':`Rep ${r[1]} of ${r[2]}`;
-    return {lead:`${name}${st?`, set ${st[1]} of ${st[2]}`:''}, ${len}, coming up`,mark:'Go'};
+    const newSet=st&&r&&r[1]==='1'&&st[1]!=='1';
+    const lead=!r?'':last?'Last one':newSet?`Set ${st[1]}`:`Rep ${r[1]}`;
+    return {lead,mark:'Go'};
   }
-  const nx=/next rep (\d+) of (\d+)/.exec(l),ns=/next set (\d+) of (\d+)/.exec(l);
-  const easy=/keep moving/i.test(l);
-  const after=ns?`then set ${ns[1]} of ${ns[2]}`:nx?`then rep ${nx[1]} of ${nx[2]}`:'';
-  return {lead:`${easy?'Easy':'Rest'} coming up, ${len}${after?', '+after:''}`,mark:easy?'Easy, keep moving':'Rest'};
+  return {lead:'',mark:/keep moving/i.test(l)?'Easy':'Rest'};
 }
 const phaseSpeech=(ph,secs)=>phaseWords(ph,secs).mark;
 const srcOf=e=>({it:e.warm?{id:e.id,warm:e.warmP}:e.id,pid:e.pid,sec:e.sec,tier:e.tier});
@@ -4192,16 +4250,14 @@ function step(){
   const cur=F.ph&&F.ph[F.p],nxt=F.ph&&F.ph[F.p+1];
   if(cur&&cur.t>=120&&F.left===30)say('Thirty seconds',true);
   // the sentence goes out while the current phase still has seven seconds to run
-  if(cur&&cur.t>=20&&F.left===7){
-    if(nxt){const w=phaseWords(nxt,nxt.t);if(w.lead)say(w.lead,true)}
-    else say('Nearly there',true);
-  }
+  if(cur&&cur.t>=20&&nxt&&nxt.t>=20&&F.left===7){const w=phaseWords(nxt,nxt.t);if(w.lead)say(w.lead,true)}
   if(F.left>0&&F.left<=3){SOUND.tick(F.left);return}
   if(F.left<=0){
     if(F.p<F.ph.length-1){F.p++;F.left=F.ph[F.p].t;(SOUND[F.ph[F.p].kind]||SOUND.work)();
-      const w=phaseWords(F.ph[F.p],F.left);
-      say(cur&&cur.t>=20?w.mark:(w.lead||w.mark),true)}
-    else{stop();F.done=true;F.left=0;SOUND.done();say('Done. Well done.',true);logFA('done')}}
+      const np=F.ph[F.p],w=phaseWords(np,F.left);
+      const heralded=cur&&cur.t>=20&&np.t>=20&&w.lead;
+      say(heralded?w.mark:(w.lead?`${w.lead}${w.mark==='Go'?'':', '+w.mark}`:w.mark),true)}
+    else{stop();F.done=true;F.left=0;SOUND.done();say('Done',true);logFA('done')}}
 }
 document.getElementById('faVoice').addEventListener('click',()=>{
   S.settings.voice=voiceOn()?0:1;save();hush();drawVoiceBtn();
