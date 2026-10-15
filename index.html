@@ -676,14 +676,19 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
   border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px}
 .tchip .ic{width:16px;height:16px;color:var(--tc)}
 .tchip.on{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 18%,transparent)}
-.stepper{display:flex;align-items:stretch;gap:0;margin-top:6px}
-.stepper input{flex:1;min-width:0;text-align:center;border-radius:0;border-left:0;border-right:0;margin:0}
-.row2 .stepbtn{flex:0 0 34px;font-size:17px}
-.row2 .stepper input{font-size:15px;padding-left:2px;padding-right:2px}
-.stepbtn{flex:0 0 46px;background:var(--panel);border:1.5px solid var(--rule);color:var(--ink);
-  font:600 20px/1 Barlow,sans-serif;border-radius:12px 0 0 12px;padding:0;touch-action:manipulation;-webkit-user-select:none;user-select:none}
-.stepbtn:last-child{border-radius:0 12px 12px 0}
-.stepbtn:active{background:color-mix(in srgb,var(--acc) 20%,var(--panel));border-color:var(--acc);color:var(--acc)}
+.stepper{position:relative;display:block;margin-top:6px}
+.stepper input{width:100%;text-align:center;padding-left:40px;padding-right:40px;margin:0}
+.stepbtn{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;
+  background:none;border:0;color:var(--muted);font:600 21px/1 Barlow,sans-serif;padding:0;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.stepbtn:first-of-type{left:5px}
+.stepbtn:last-of-type{right:5px}
+.stepbtn:active{background:color-mix(in srgb,var(--acc) 18%,transparent);color:var(--acc)}
+.row2 .stepper input{padding-left:34px;padding-right:34px;font-size:15px}
+.row2 .stepbtn{width:30px;height:30px;font-size:19px}
+/* a time field inside a stepper has no room for the native clock button */
+.stepper input[type="time"]{font-variant-numeric:tabular-nums}
+.stepper input[type="time"]::-webkit-calendar-picker-indicator{display:none}
 .minlab{max-width:9em}
 #editplandlg .link.del{align-self:center;color:var(--acc);margin-top:4px;padding:10px}
 #plandlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -979,8 +984,8 @@ button.chip::after{display:none}
   <h2>Add to a day</h2>
   <p class="hint" id="sdSum"></p>
   <div id="sdList" class="sdlist"></div>
-  <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
-    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div>
+  <div class="row2"><label>Day<input name="date" type="date" required></label>
+    <label>Start<input name="start" type="time" required></label></div>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save">Add to calendar</button></div>
 </form></dialog>
 
@@ -1008,12 +1013,12 @@ button.chip::after{display:none}
       <label class="">Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.5" aria-label="less">–</button><input name="rkm" type="number" inputmode="decimal" min="1" max="60" step="0.5"><button type="button" class="stepbtn" data-step="0.5" aria-label="more">+</button></span></label></div></section>
 
   <section class="epsec"><h4>When</h4>
-    <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
-    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div></section>
+    <div class="row2"><label>Day<input name="date" type="date" required></label>
+    <label>Start<input name="start" type="time" required></label></div></section>
 
   <section class="epsec"><h4>How long</h4>
     <div id="epChips" class="durchips" role="group" aria-label="Quick durations"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div>
-    <label class="minlab">Minutes<span class="stepper"><button type="button" class="stepbtn" data-step="-5" aria-label="less">–</button><input name="minutes" type="number" min="5" max="720" inputmode="numeric" required><button type="button" class="stepbtn" data-step="5" aria-label="more">+</button></span></label></section>
+    <label class="minlab">Minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label></section>
 
   <section class="epsec"><h4>Title in your calendar</h4>
     <input name="title" autocomplete="off" required></section>
@@ -1071,12 +1076,12 @@ button.chip::after{display:none}
       <label id="paUpLab" hidden>Ascent, m<span class="stepper"><button type="button" class="stepbtn" data-step="-50" aria-label="less">–</button><input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"><button type="button" class="stepbtn" data-step="50" aria-label="more">+</button></span></label></div></section>
   <section class="epsec"><h4>When</h4>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
-    <div class="row2"><label>Day<span class="stepper"><button type="button" class="stepbtn" data-dstep="-1" aria-label="day earlier">–</button><input name="date" type="date" required><button type="button" class="stepbtn" data-dstep="1" aria-label="day later">+</button></span></label>
-    <label>Start<span class="stepper"><button type="button" class="stepbtn" data-tstep="-15" aria-label="earlier">–</button><input name="start" type="time" required><button type="button" class="stepbtn" data-tstep="15" aria-label="later">+</button></span></label></div></section>
+    <div class="row2"><label>Day<input name="date" type="date" required></label>
+    <label>Start<input name="start" type="time" required></label></div></section>
   <section class="epsec"><h4>How long</h4>
     <p class="nudge" id="durHint" hidden></p>
     <div class="durchips" id="durChips"><button type="button" data-min="30">30 min</button><button type="button" data-min="60">1 h</button><button type="button" data-min="120">2 h</button><button type="button" data-min="240">Half day</button><button type="button" data-min="480">Full day</button></div>
-    <label class="minlab">Minutes<span class="stepper"><button type="button" class="stepbtn" data-step="-5" aria-label="less">–</button><input name="minutes" type="number" min="5" max="720" inputmode="numeric" required><button type="button" class="stepbtn" data-step="5" aria-label="more">+</button></span></label></section>
+    <label class="minlab">Minutes<input name="minutes" type="number" min="5" max="720" inputmode="numeric" required></label></section>
   <section class="epsec"><h4>Where <span class="hint">optional</span></h4>
     <input name="detail" autocomplete="off" placeholder="Grønmo, Kolsås, Nordmarka…">
     <div class="durchips" id="paPlaces"></div></section>
@@ -1105,7 +1110,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='73';
+const BUILD='74';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
