@@ -723,6 +723,19 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .exline.on{color:var(--tc)}
 .exline.on span::before{content:'✓ ';font-weight:700}
 .kindsep{flex-basis:100%;font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.epsec.fold{padding:12px 0 2px;border-top:1px solid var(--rule)}
+.epsec.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:2px 0}
+.epsec.fold>summary::-webkit-details-marker{display:none}
+.epsec.fold>summary .fl{font:600 12px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.epsec.fold>summary b{flex:1;font:600 16.5px Barlow,sans-serif;color:var(--ink)}
+.epsec.fold>summary b i{font-style:normal;font-weight:400;color:var(--muted)}
+.epsec.fold>summary .ic{display:inline-flex;align-items:center}
+.epsec.fold>summary .ic svg{width:19px;height:19px}
+.subhead{font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.subhead:first-of-type{margin-top:12px}
+.epsec.fold>summary::after{content:'Change';color:var(--acc);font:600 13px Barlow,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.epsec.fold[open]>summary::after{content:'Done'}
+.epsec.fold>.typechips{margin-top:10px}
 .tchip.train{border-style:dashed}
 .tchip.train.on{border-style:solid}
 .pickex.single{width:100%;margin-top:2px}
@@ -1002,11 +1015,9 @@ button.chip::after{display:none}
 <dialog id="editplandlg"><form method="dialog" id="editplanfrm">
   <h2>Change this session</h2>
 
-  <section class="epsec" id="epTypeRow"><h4>What it is</h4>
-    <div class="typechips" id="epTypes"></div></section>
-
-  <section class="epsec" id="epKindRow" hidden><h4>Kind</h4>
-    <div class="typechips" id="epKinds"></div></section>
+  <details class="epsec fold" id="epWhatRow"><summary><span class="ic" id="epIcon"></span><b id="epWhatNow"></b></summary>
+    <div class="subhead">Activity</div><div class="typechips" id="epTypes"></div>
+    <div class="subhead" id="epKindHead">Kind</div><div class="typechips" id="epKinds"></div></details>
 
   <section class="epsec" id="epRun" hidden><h4>The run</h4>
     <div class="row2"><label>Type<select name="rtype"></select></label>
@@ -1110,7 +1121,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='74';
+const BUILD='76';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -3705,13 +3716,22 @@ function epTitleNow(){
   if(EP_TYPE==='Run')return;
   f.title.value=`${EP_TYPE}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}`.trim();
 }
+function epWhatNow(){
+  const kl=((KINDS[EP_TYPE]||[]).find(x=>x[0]===EP_KIND)||[])[1];
+  const n=document.getElementById('epWhatNow');
+  if(n)n.innerHTML=`${esc(EP_TYPE||'')}${kl?` <i>· ${esc(kl.toLowerCase())}</i>`:''}`;
+  const ic=document.getElementById('epIcon');
+  if(ic)ic.innerHTML=EP_TYPE?ICON(EP_TYPE):'';
+  if(ic)ic.style.color=colOf(EP_TYPE||'');
+}
 function drawEpKinds(){
-  const ks=KINDS[EP_TYPE]||[],row=document.getElementById('epKindRow');
-  row.hidden=!ks.length;
-  if(!ks.length){EP_KIND=null;return}
+  const ks=KINDS[EP_TYPE]||[],head=document.getElementById('epKindHead'),box=document.getElementById('epKinds');
+  if(head)head.hidden=!ks.length;
+  if(!ks.length){EP_KIND=null;if(box)box.innerHTML='';epWhatNow();return}
   if(!ks.some(([k])=>k===EP_KIND))EP_KIND=ks[0][0];
   document.getElementById('epKinds').innerHTML=ks.map(([k,l])=>
     `<button type="button" class="tchip${k===EP_KIND?' on':''}" data-epkind="${esc(k)}" style="--tc:${colOf(EP_TYPE)}">${esc(l)}</button>`).join('');
+  epWhatNow();
 }
 function openPlanEdit(id){
   const p=plansCache().find(x=>x.id===id);if(!p)return;
@@ -3721,10 +3741,10 @@ function openPlanEdit(id){
   const cur0=tabName(p.tab),types=EXTRAS.map(([t])=>t).concat(EXTRAS.some(([t])=>t===cur0)?[]:[cur0]);
   document.getElementById('epTypes').innerHTML=types.map(t=>`<button type="button" class="tchip${t===cur0?' on':''}" data-type="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
   EP_TYPE=cur0;
+  document.getElementById('epWhatRow').open=false;
   EP_KIND=(S.kinds||{})[p.id]||guessKind(cur0,p.title);
   drawEpKinds();
-  document.getElementById('epTypeRow').hidden=!!app;
-  document.getElementById('epKindRow').hidden=!!app||!(KINDS[cur0]||[]).length;
+  document.getElementById('epWhatRow').hidden=!!app;
   const isRun=cur0==='Run',m=S.runMeta[p.id]||{};
   document.getElementById('epRun').hidden=!isRun;
   f.rtype.innerHTML=Object.keys(RUNLBL).map(k=>`<option value="${k}">${RUNLBL[k]}</option>`).join('');
@@ -3748,7 +3768,7 @@ function replacePlan(plan){
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
   document.getElementById('epKinds').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-epkind]');if(!b)return;
-    EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();
+    EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();epWhatNow();
     const km=KINDMIN[EP_KIND];if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+km))}
   });
@@ -3763,7 +3783,7 @@ function replacePlan(plan){
       document.getElementById('epRun').hidden=t!=='Run';
       if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;if(!keepTitle)f.title.value=`${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
       else if(!keepTitle)f.title.value=`${t}${det?' · '+det:''}`.trim();
-      EP_KIND=guessKind(t,f.title.value);drawEpKinds();
+      EP_KIND=guessKind(t,f.title.value);drawEpKinds();epWhatNow();
       const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
     }});
@@ -3783,7 +3803,7 @@ function replacePlan(plan){
       scheduleFlush(300);document.getElementById('editplandlg').close('done');refresh()})});
   f.addEventListener('submit',ev=>{
     if(!ev.submitter||ev.submitter.value!=='save'||!EP)return;
-    const newTab=document.getElementById('epTypeRow').hidden?tabName(EP.tab):(EP_TYPE||tabName(EP.tab));
+    const newTab=document.getElementById('epWhatRow').hidden?tabName(EP.tab):(EP_TYPE||tabName(EP.tab));
     const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:cleanTitle(f.title.value)||cleanTitle(EP.title)};
     if(EP_KIND&&(KINDS[newTab]||[]).some(([k])=>k===EP_KIND))S.kinds={...(S.kinds||{}),[p.id]:EP_KIND};
     else{const kk={...(S.kinds||{})};delete kk[p.id];S.kinds=kk}
