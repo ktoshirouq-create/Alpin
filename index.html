@@ -206,6 +206,7 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .dstep.hi::before{background:#FF8A70;border-color:#FF8A70}
 .dstep em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}.dstep b{display:block;font-size:16px;margin:1px 0 3px}
 .dstep p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.dnum{display:block;font:600 12.5px Barlow,sans-serif;color:#8EC9F0;margin:0 0 5px}
 .prepl{display:flex;flex-direction:column;gap:8px}
 .prow2{display:flex;gap:12px;padding:12px;border-radius:14px;background:var(--panel)}
 .prow2.ms{border:1.5px solid #8EC9F0}.prow2.done{opacity:.6}
@@ -1121,7 +1122,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='76';
+const BUILD='80';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2179,12 +2180,21 @@ setInterval(tickCountdown,1000);
 const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco',start:'2027-01-12',trekEnd:'2027-01-14',end:'2027-01-18',prepStart:'2026-09-21',col:'#8EC9F0',icon:'❄',
   route:[['Imlil',1740,0],['Aroumd',1900,0],['Sidi Chamharouch',2350,0],['Refuge',3207,0,1],['South col',3940,1],['Summit',4167,1,1],['Refuge',3207,1],['Refuge',3207,2],['Sidi Chamharouch',2350,2],['Imlil',1740,2]],
   days:[
-   {d:'2027-01-12',t:'Imlil → Toubkal refuge',x:'Transfer from Marrakech (about 1½ h). Walk up through Aroumd and Sidi Chamharouch to the refuge at 3,207 m, 5–6 hours. Snow likely from about 2,500 m. Night at the refuge, well below freezing.'},
-   {d:'2027-01-13',t:'Summit day',x:'Alpine start around 5 am by headtorch. About 960 m up through the south col to 4,167 m with crampons and ice axe, then back down. The guide decides on the day if wind or snow make it unsafe.',hi:1},
-   {d:'2027-01-14',t:'Down to Imlil',x:'Descend to Imlil, transfer back to Marrakech. The long descent is hard on the knees: poles help.'},
-   {d:'2027-01-15',to:'2027-01-18',t:'Four open days',x:'Not decided yet: a Sahara desert tour, Marrakech\u2019s medina and gardens, or a rental car to the coast.'}],
-  note:'Guided trips differ: some summit on day 2 and sleep at the refuge again, others go straight down. Your guide sets the final plan.',
-  facts:[['4,167 m','highest point in North Africa'],['≈2,430 m','up from Imlil in total'],['≈960 m','on summit day, 8–10 h round trip'],['−10 °C','or colder at the refuge at night'],['Guide','legally required since 2018'],['Crampons','and ice axe above the snow line']],
+   {d:'2027-01-12',t:'Imlil → Toubkal refuge',n:'Drive 1½ h · walk 5–6 h · ≈11 km · 1,740 → 3,207 m',
+     x:'Pick-up in Marrakech around 8 am, about 1½ h to Imlil. Meet the guide, check kit, then up the Ait Mizane valley through Aroumd and Sidi Chamharouch, where lunch usually is. The last stretch to the refuge at 3,207 m feels slow with the altitude. Snow likely from about 2,500 m. Dinner and night at the refuge, well below freezing.'},
+   {d:'2027-01-13',t:'Summit day',n:'Walk 7–9 h · ≈7 km · 3,207 → 4,167 → 3,207 m',
+     x:'Early breakfast, then the summit climb by headtorch. Steep and rocky; in winter crampons and axe from the snowline. Most reach 4,167 m in 3–4 hours from the refuge. Back at the refuge for lunch, the afternoon is rest and tea, then a second night up there. The guide decides on the day if wind or snow make it unsafe.',hi:1},
+   {d:'2027-01-14',t:'Down to Imlil, back to Marrakech',n:'Walk 3–4 h · ≈11 km · 3,207 → 1,740 m · drive 1½ h',
+     x:'Breakfast, then the same valley back down past Sidi Chamharouch to Imlil at a relaxed pace. The driver meets you in Imlil for the transfer to Marrakech. A long descent and hard on the knees: poles help.'},
+   {d:'2027-01-15',t:'Marrakech → Aït Benhaddou → Tinghir',n:'Drive ≈7–8 h · ≈370 km · over Tizi n\u2019Tichka 2,260 m',
+     x:'Start of the three-day desert loop. Early pick-up, over the High Atlas by the Tizi n\u2019Tichka pass with photo stops, then the UNESCO ksar at Aït Benhaddou with a guided visit and lunch. On through Ouarzazate and the Rose Valley at Kelaat M\u2019Gouna, reaching the oasis town of Tinghir late afternoon. Hotel, dinner, overnight.'},
+   {d:'2027-01-16',t:'Todra Gorge → Merzouga → Erg Chebbi',n:'Drive ≈5–6 h · ≈260 km · gorge walk 1 h · camel 1½ h',
+     x:'Breakfast in Tinghir, then the Todra Gorge with its 300 m limestone walls and a walk along the riverbed with a local guide. Through Tinjdad, Touroug and Erfoud to Merzouga at the edge of the Sahara. Camel trek into the Erg Chebbi dunes at sunset, overnight bag carried by 4×4. Dinner, Berber music and a night in the desert camp.'},
+   {d:'2027-01-17',t:'Sahara sunrise → Marrakech',n:'Camel 1 h · drive ≈9–10 h · ≈560 km',
+     x:'Early up for the quiet of the dunes at dawn, breakfast at camp, then camel back to Merzouga. The long return through the Draa valley and the palm oases, lunch at Kelaat M\u2019Gouna, over Tizi n\u2019Tichka again, back in Marrakech late afternoon or evening.'},
+   {d:'2027-01-18',t:'Marrakech',x:'Last day in the city: the medina, the gardens, a hammam for the legs. Flight home.'}],
+  note:'Neither agency is booked yet. Trek numbers are for the standard three-day itinerary: about 29 km and 2,350 m of climbing across the three days. Winter conditions change the timings, and your guide sets the final plan.',
+  facts:[['4,167 m','highest point in North Africa'],['≈29 km','over the three trek days'],['≈2,350 m','of climbing in total'],['≈960 m','on summit day, 7–9 h round trip'],['−10 °C','or colder at the refuge at night'],['Guide','legally required since 2018'],['Crampons','and ice axe above the snow line']],
   prep:[
    {id:'p1',when:'Sep – Oct',t:'Build the base',x:'Nepal strength twice a week: step-ups, step-downs, calf raises. A long hike every other week.',go:'nepal'},
    {id:'p2',when:'November',t:'Pack and descents',x:'4–6 hour hikes with 8–10 kg and plenty of downhill. Front-point holds for crampon calves.',go:'ice'},
@@ -2273,27 +2283,16 @@ function renderObjective(){
    <div class="tkhero" data-cdt="${go.toISOString().slice(0,10)}T06:00:00">
      <div class="snow" aria-hidden="true">${flakes}</div>
      ${zellige()}
-     <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Guided, 3 days · then 4 days in Morocco</span></div>
+     <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>3-day guided trek · then a 3-day Sahara loop</span></div>
      ${left>0?cdBlock(go.toISOString().slice(0,10)+'T06:00:00'):`<div class="cdbig"><b>${now<=parseDay(TK.end)?'You\u2019re there':'Done'}</b></div>`}
      ${tkRouteSVG(prog)}
      <div class="tkfoot"><span>Prep: <b>${wk} weeks</b> to go</span><span>${Math.round(prog*100)}% of the way</span></div>
    </div>
    <div class="facts">${TK.facts.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div>
    <h2 class="objh">Day by day</h2>
-   <div class="daystrip">${TK.days.map(x=>`<div class="dstep${x.hi?' hi':''}"><em>${esc(x.to?fmt(x.d)+' – '+fmt(x.to):fmt(x.d))}</em><b>${esc(x.t)}</b><p>${esc(x.x)}</p></div>`).join('')}</div>
+   <div class="daystrip">${TK.days.map(x=>`<div class="dstep${x.hi?' hi':''}"><em>${esc(x.to?fmt(x.d)+' – '+fmt(x.to):fmt(x.d))}</em><b>${esc(x.t)}</b>${x.n?`<span class="dnum">${esc(x.n)}</span>`:''}<p>${esc(x.x)}</p></div>`).join('')}</div>
    <p class="hint">${esc(TK.note)}</p>
-   <h2 class="objh">Getting ready</h2>
-   <div class="prepl">${TK.prep.map(x=>{const done=(o.prep||{})[x.id];return `<div class="prow2${done?' done':''}${x.milestone?' ms':''}">
-      <label class="tick"><input type="checkbox" data-obj="prep" data-k="${x.id}"${done?' checked':''}><span></span></label>
-      <div><em>${esc(x.when)}${x.milestone?' · milestone':''}</em><b>${esc(x.t)}</b><p>${esc(x.x)}</p>
-      ${x.go?`<button class="link" data-act="objgo" data-go="${x.go}">Open ${x.go==='nepal'?'Nepal strength':'Ice: front-point holds'}</button>`:''}${x.plan?`<button class="link" data-act="objplan">Plan the test hike</button>`:''}</div></div>`}).join('')}</div>
-   <h2 class="objh">Gear <span class="gcount">${gearDone} / ${gearAll} packed</span></h2>
-   <div class="gear">${TK.gear.map(([cat,items],gi)=>`<div class="gcat"><h4>${esc(cat)}</h4>${items.map((it,ii)=>{const k=gi+'.'+ii,on=(o.gear||{})[k];
-      return `<label class="gitem${on?' on':''}"><input type="checkbox" data-obj="gear" data-k="${k}"${on?' checked':''}><span>${esc(it)}</span></label>`}).join('')}</div>`).join('')}</div>
-   <h2 class="objh">After the mountain</h2>
-   <div class="after"><div><b>Sahara tour</b><span>Usually 2–3 days from Marrakech, long drives over the Atlas.</span></div>
-     <div><b>Marrakech</b><span>Medina, souks and gardens; an easy way to recover.</span></div>
-     <div><b>The coast</b><span>A rental car to a coastal town like Essaouira, a few hours west.</span></div></div>
+
   </section>`;
   document.getElementById('foot').innerHTML='';
 }
