@@ -422,7 +422,12 @@ h2{font:700 34px/1 "Barlow Condensed",sans-serif;margin:0}
 .grp{display:flex;align-items:baseline;gap:10px;margin-top:22px;padding-bottom:6px;border-bottom:2px solid var(--ink)}
 .grp h4{font:700 22px/1 "Barlow Condensed",sans-serif;margin:0}
 .grp span{color:var(--muted);font-size:14px}
-.grp+.secbar{display:flex;gap:6px;overflow-x:auto;padding:10px 0 12px;margin:0 0 4px;position:sticky;top:0;z-index:6;background:var(--bg);-webkit-overflow-scrolling:touch}
+.grp+.focusbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.focusbar::-webkit-scrollbar{display:none}
+.fchip{flex:0 0 auto;background:none;border:1.5px solid var(--rule);border-radius:999px;padding:6px 13px;
+  color:var(--muted);font:600 13.5px Barlow,sans-serif;white-space:nowrap}
+.fchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.secbar{display:flex;gap:6px;overflow-x:auto;padding:10px 0 12px;margin:0 0 4px;position:sticky;top:0;z-index:6;background:var(--bg);-webkit-overflow-scrolling:touch}
 .secbar::-webkit-scrollbar{display:none}
 .spill{white-space:nowrap;border:1.5px solid var(--rule);background:none;color:var(--muted);border-radius:999px;padding:8px 13px;font:600 13px Barlow,sans-serif}
 .spill.sel{border-style:dashed;color:var(--acc)}.spill.sel.on{background:var(--acc);border-color:var(--acc);border-style:solid;color:#fff}
@@ -443,6 +448,11 @@ h2{font:700 34px/1 "Barlow Condensed",sans-serif;margin:0}
 .ex.open{background:var(--panel);border-radius:14px;padding:14px;margin:8px 0}
 .ex.donecard{border-left:3px solid var(--rest)}
 .ex{border-top:0}
+.focusbar{display:flex;gap:6px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.focusbar::-webkit-scrollbar{display:none}
+.fchip{flex:0 0 auto;background:none;border:1.5px solid var(--rule);border-radius:999px;padding:6px 13px;
+  color:var(--muted);font:600 13.5px Barlow,sans-serif;white-space:nowrap}
+.fchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .secbar{display:flex;gap:6px;overflow-x:auto;padding:10px 0 12px;margin:0 0 4px;position:sticky;top:0;z-index:6;background:var(--bg);-webkit-overflow-scrolling:touch}
 .secbar::-webkit-scrollbar{display:none}
 .spill{white-space:nowrap;border:1.5px solid var(--rule);background:none;color:var(--muted);border-radius:999px;padding:8px 13px;font:600 13px Barlow,sans-serif}
@@ -749,6 +759,13 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 .tripline{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid var(--acc);
   padding:6px 0 6px 10px;margin:2px 0 4px;color:var(--muted);font-weight:600;font-size:13.5px}
+.didbtn{display:block;width:100%;margin-top:8px;background:none;border:1.5px solid var(--rule);
+  border-radius:14px;padding:12px;color:var(--muted);font:600 15px Barlow,sans-serif}
+.didbtn:active{border-color:var(--acc);color:var(--acc)}
+.didbox{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;border-radius:12px;
+  border:1.5px solid var(--rule);font-weight:600;font-size:14.5px;cursor:pointer}
+.didbox input{width:20px;height:20px;accent-color:var(--acc);margin:0}
+.didbox:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
 .nudge{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--muted);background:color-mix(in srgb,var(--acc) 10%,transparent);
   border-radius:10px;padding:8px 10px}
 .nudge .link{font-size:13px}
@@ -1079,7 +1096,7 @@ button.chip::after{display:none}
 </form></dialog>
 
 <dialog id="plandlg"><form method="dialog" id="planfrm">
-  <h2>Plan a session</h2>
+  <h2 id="paTitle">Plan a session</h2>
   <button type="button" class="tripline" data-act="toTrip">Out for more than one day? Plan a trip →</button>
   <section class="epsec"><h4>What</h4><div class="pagrid" id="paGrid"></div></section>
   <section class="epsec" id="paKindSec" hidden><h4 id="paKindH">Kind</h4><div class="typechips" id="paKinds"></div>
@@ -1087,6 +1104,7 @@ button.chip::after{display:none}
     <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.5" aria-label="less">–</button><input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"><button type="button" class="stepbtn" data-step="0.5" aria-label="more">+</button></span></label>
       <label id="paUpLab" hidden>Ascent, m<span class="stepper"><button type="button" class="stepbtn" data-step="-50" aria-label="less">–</button><input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"><button type="button" class="stepbtn" data-step="50" aria-label="more">+</button></span></label></div></section>
   <section class="epsec"><h4>When</h4>
+    <label class="didbox"><input type="checkbox" name="already"><span>I already did this</span></label>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
     <div class="row2"><label>Day<input name="date" type="date" required></label>
     <label>Start<input name="start" type="time" required></label></div></section>
@@ -1122,7 +1140,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='80';
+const BUILD='83';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1240,15 +1258,15 @@ const OLD={
   levels:['Plank 30 s, side 20 s','Plank 45 s, side 30 s','Plank 60 s, side 45 s','Shoulder-tap plank, side plank with top leg raised'],frames:[
   {cap:'Forearm plank, elbows under shoulders',pose:{hip:[62,125],torso:85,near:[5,136],far:[5,136],nearFoot:100,farFoot:100,hand:[120,142],elbow:'down'}},
   {cap:'Side plank: one straight line, top arm up',pose:{hip:[59.7,118.6],torso:67.5,near:[5,141],far:[5,141],nearFoot:20,farFoot:20,hand:[95,60],elbow:'back',hand2:[95,142],elbow2:'back'},arrows:[[40,146,40,128]]}]},
- hipflex:{name:'Half-kneeling hip flexor stretch',dose:'2 × 45 s per side',time:45,sides:true,cue:'Tuck the pelvis under and squeeze the back glute. You should feel it at the front of the back hip.',
+ hipflex:{name:'Half-kneeling hip flexor stretch',focus:'hips',dose:'2 × 45 s per side',time:45,sides:true,cue:'Tuck the pelvis under and squeeze the back glute. You should feel it at the front of the back hip.',
   levels:['Hold 45 s','Add the overhead reach','Back foot up on a bench (couch stretch)'],frames:[
   {cap:'Half kneel, torso tall',pose:{hip:[72,114],torso:0,near:[100,142],far:[44,140],farKnee:'down',farFoot:180}},
   {cap:'Tuck pelvis, shift forward, reach up',pose:{hip:[80,116],torso:-6,near:[100,142],far:[44,140],farKnee:'down',farFoot:180,hand:[82,40],elbow:'fwd'},arrows:[[30,104,50,104]]}]},
- calfstretch:{name:'Wall calf stretch',dose:'30 s each way, per side',time:30,sides:true,cue:'Back heel stays down. Straight knee stretches the upper calf, bent knee the lower one.',
+ calfstretch:{name:'Wall calf stretch',focus:'calves',dose:'30 s each way, per side',time:30,sides:true,cue:'Back heel stays down. Straight knee stretches the upper calf, bent knee the lower one.',
   levels:['Against the wall','Off a step edge, heel dropped'],frames:[
   {cap:'Back knee straight',props:[wall(128)],pose:{hip:[82,98],torso:25,near:[48,142],far:[110,142],hand:[127,62],elbow:'down'}},
   {cap:'Then bend the back knee',props:[wall(128)],pose:{hip:[84,106],torso:22,near:[56,142],far:[110,142],hand:[127,72],elbow:'down'},arrows:[[40,110,40,130]]}]},
- kneewall:{name:'Knee-to-wall ankle mobility',dose:'2 × 10 per side',cue:'Heel glued to the floor. Once the knee touches easily, slide the foot back a little.',
+ kneewall:{name:'Knee-to-wall ankle mobility',focus:'calves',dose:'2 × 10 per side',cue:'Heel glued to the floor. Once the knee touches easily, slide the foot back a little.',
   levels:['Knee to wall','Foot 2 cm further back','Light weight resting on the knee'],frames:[
   {cap:'Half kneel, front toes near the wall',props:[wall(128)],pose:{hip:[86,114],torso:0,near:[112,142],far:[58,140],farKnee:'down',farFoot:180,hand:[118,84],elbow:'down'}},
   {cap:'Drive the knee to touch the wall',props:[wall(128)],pose:{hip:[100,116],torso:4,near:[112,142],far:[58,140],farKnee:'down',farFoot:180},arrows:[[98,100,120,100]]}]},
@@ -1258,23 +1276,35 @@ const OLD={
   levels:['6 × 3 min','8 × 4 min','10 × 5 min','10 × 5 min with pack'],frames:[]},
  z2:{name:'Easy zone 2 runs',dose:'2–3 per week',cue:'Overlaps with marathon training. A big aerobic base gives you more margin at altitude.',frames:[]},
 
- catcow:{name:'Cat-cow',dose:'60 s, slow',time:60,cue:'Move with the breath: round up on the exhale, sink and look forward on the inhale.',frames:[
+ catcow:{name:'Cat-cow',focus:'back',dose:'60 s, slow',time:60,cue:'Move with the breath: round up on the exhale, sink and look forward on the inhale.',frames:[
   {cap:'Hands under shoulders, knees under hips',pose:{...QUAD}},
   {cap:'Exhale, round the back up',pose:{...QUAD,bend:9,headAng:50},arrows:[[70,86,70,70]]},
   {cap:'Inhale, let the belly sink, look ahead',pose:{...QUAD,bend:-7,headAng:-30},arrows:[[70,92,70,106]]}]},
- child:{name:'Child\u2019s pose',dose:'45 s',time:45,cue:'Sit the hips back to the heels, arms long, let the back relax.',
+ child:{name:'Child\u2019s pose',focus:'back',dose:'45 s',time:45,cue:'Sit the hips back to the heels, arms long, let the back relax.',
   levels:['Arms straight ahead','Walk hands to one side for the lats'],frames:[
   {cap:'Knees wide, hips to heels, reach forward',pose:{hip:[40,128],torso:97,headAng:8,near:[38,142],nearKnee:'fwd',nearFoot:180,far:[36,142],farKnee:'fwd',farFoot:180,hand:[124,142],elbow:'up'},arrows:[[96,110,124,110]]}]},
- hamstring:{name:'Seated hamstring stretch',dose:'45 s',time:45,cue:'Hinge from the hips with a long back. Reaching the toes doesn\u2019t matter.',
+ hamstring:{name:'Seated hamstring stretch',focus:'legs',dose:'45 s',time:45,cue:'Hinge from the hips with a long back. Reaching the toes doesn\u2019t matter.',
   levels:['Soft knees','Straight legs','Loop a band round the feet and pull gently'],frames:[
   {cap:'Legs straight, toes up, reach forward',pose:{hip:[40,138],torso:55,headAng:15,near:[96,141],far:[95,141],nearFoot:-80,farFoot:-80,hand:[98,132],elbow:'down'},arrows:[[96,96,116,110]]}]},
- squathold:{name:'Deep squat hold',dose:'60 s',time:60,cue:'Heels down, chest up, elbows gently push the knees out.',
+ squathold:{name:'Deep squat hold',focus:'hips',dose:'60 s',time:60,cue:'Heels down, chest up, elbows gently push the knees out.',
   levels:['Hold a door frame for support','Hands together, free-standing','Holding a light weight at the chest'],frames:[
   {cap:'Sink low, heels down, elbows inside knees',pose:{hip:[58,128],torso:22,near:[74,142],far:[72,142],hand:[84,112],elbow:'down'}}]},
 
  legswing:{name:'Leg swings, front to back',dose:'10 per leg',cue:'Loose and relaxed, let the leg swing like a pendulum. Build the range gradually.',frames:[
   {cap:'Hand on the wall, swing back',props:[wall(114)],pose:{hip:[74,86],torso:0,far:[74,142],near:[44,132],nearKnee:'back',hand:[112,60],elbow:'down'},arrows:[[30,150,52,150]]},
   {cap:'Swing through to the front',props:[wall(114)],pose:{hip:[74,86],torso:-4,far:[74,142],near:[104,126],hand:[112,60],elbow:'down'},arrows:[[60,150,90,150]]}]},
+ anklecircle:{name:'Ankle circles and pumps',dose:'10 each way per foot',focus:'calves',
+  cue:'Stand on one leg or sit on a step. Draw slow circles with the foot, then point and flex. First thing before anything springy.',frames:[]},
+ toysoldier:{name:'Toy soldiers',dose:'10 per leg',focus:'legs',
+  cue:'Walk forward kicking a straight leg up to meet the opposite hand. Keep the back long; height does not matter, control does.',frames:[]},
+ worldsgreatest:{name:'Deep lunge with a twist',dose:'5 per side',focus:'hips',
+  cue:'Long lunge, hand inside the front foot, then rotate the other arm to the sky and look at it. The best single move for running hips.',frames:[]},
+ buttkick:{name:'Butt kicks',dose:'20 steps',focus:'legs',
+  cue:'Jog on the spot or forward, heels flicking to the backside. Quick and light, not powerful.',frames:[]},
+ askip:{name:'A-skips',dose:'2 × 20 m',focus:'legs',
+  cue:'Skip with a high knee and a quick foot down under the hip. Tall posture, light sound. Wakes up the stride before a faster run.',frames:[]},
+ adductorrock:{name:'Adductor rocks',dose:'8 per side',focus:'hips',
+  cue:'On all fours, one leg straight out to the side, rock the hips back and forward. Opens the groin before hills and stairs.',frames:[]},
  legswingside:{name:'Leg swings, side to side',dose:'10 per leg',cue:'Hips face forward, the leg crosses in front of the standing foot.',frames:[
   {cap:'Swing out to the side',front:true,pose:{hip:[76,86],L:[70,142],R:[120,126]},arrows:[[96,152,122,146]]},
   {cap:'Swing across in front',front:true,pose:{hip:[80,86],L:[74,142],R:[62,136]},arrows:[[112,150,86,152]]}]},
@@ -1425,6 +1455,23 @@ const LV={
   {v:'Steady uphill, walk down easy',p:{reps:8}},
   {v:'5 kg pack',p:{reps:8,work:240,rest:240}},
   {v:'10 kg pack',p:{reps:10,work:240,rest:240}}]},
+ sm44:{name:'StairMaster 4 × 4 · guided',kind:'iv',P:{reps:4,work:240,rest:180,sets:1,setRest:0,warm:600,cool:480},
+  cue:'The same Norwegian session on the machine: ten minutes easy, then four hard and three easy, four times, then eight easy. Hard is a step rate you can hold for the full four minutes, not a sprint on the first. Hands off the rails, or light fingertips only: leaning on them takes a third of the work away. Stand tall, full foot on the step, drive from the hip.',
+  phaseCue:{warm:'Easy pace, upright, hands off. You should be able to talk the whole way.',
+    first:'Raise the level, not the lean. Start steadier than feels right.',
+    work:'Hold the step rate. Tall through the hips, full foot on each step, hands off the rails.',
+    last:'Last one. Same rate as the first; spend anything left in the final minute.',
+    rest:'Drop the level, keep stepping. Let the heart rate fall to about 120–130.',
+    cool:'Easy stepping until the breathing settles, then walk a minute on the flat.'},
+  L:[{v:'Two intervals, finding the level',p:{reps:2,warm:600,cool:360}},
+     {v:'Three intervals',p:{reps:3}},
+     {v:'The full four',p:{}},
+     {v:'Four, with a 5 kg pack',p:{}},
+     {v:'Five intervals',p:{reps:5}}],frames:[]},
+ smsteady:{name:'StairMaster steady',kind:'hold',P:{sets:1,time:1800,rest:0},
+  cue:'A long steady climb at a pace you could hold for an hour: breathing deeper but still able to speak in sentences. Hands off the rails. This is the machine version of a long hill walk, useful on a dark night when the stairs are ice.',
+  L:[{v:'20 minutes',p:{time:1200}},{v:'30 minutes',p:{time:1800}},{v:'40 minutes',p:{time:2400}},
+     {v:'40 minutes with a 5 kg pack',p:{time:2400}},{v:'50 minutes with a 10 kg pack',p:{time:3000}}],frames:[]},
  stair44:{name:'Stair 4 × 4 · guided',kind:'iv',P:{reps:4,work:240,rest:180,sets:1,setRest:0,warm:600,cool:480,lap:150},
   cue:'The whole Norwegian session, start to finish: ten minutes easy, then four minutes hard and three minutes easy, four times, then eight minutes easy down. Press Start at the bottom of the stairs and follow it. Hard means you cannot say more than a word or two by the end of the four minutes; with your max around 185 that is roughly 157–176 bpm. Keep walking through the easy parts, never sit down.',
   phaseCue:{warm:'Easy up and down, or a walk around the block. Loose and unhurried: you should be able to talk the whole way.',
@@ -1485,6 +1532,12 @@ const LV={
 
  legswing:{kind:'reps',P:{sets:1,reps:10,unit:' per leg'}},
  legswingside:{kind:'reps',P:{sets:1,reps:10,unit:' per leg'}},
+ anklecircle:{kind:'reps',P:{sets:1,reps:10,unit:' each way'}},
+ toysoldier:{kind:'reps',P:{sets:1,reps:10,unit:' per leg'}},
+ worldsgreatest:{kind:'reps',P:{sets:1,reps:5,unit:' per side'}},
+ buttkick:{kind:'reps',P:{sets:1,reps:20,unit:' steps'}},
+ askip:{kind:'reps',P:{sets:2,reps:20,unit:' m'}},
+ adductorrock:{kind:'reps',P:{sets:1,reps:8,unit:' per side'}},
  lunge:{kind:'reps',P:{sets:3,reps:8,unit:' per leg'},L:[
   {v:'Static split squat',p:{sets:2}},
   {v:'Walking lunge, short steps',p:{sets:2}},
@@ -1552,7 +1605,7 @@ const RENAME={calf:'Calf raise',plank:'Plank'};
 const EX={};
 Object.keys(LV).forEach(id=>{
   const o=OLD[id]||{};
-  EX[id]={name:RENAME[id]||o.name,cue:o.cue||'',frames:o.frames||[],...LV[id]};
+  EX[id]={name:RENAME[id]||o.name,cue:o.cue||'',frames:o.frames||[],focus:o.focus,...LV[id]};
 });
 EX.plank.frames=[OLD.plank.frames[0]];
 EX.plank.cue='Straight line from heels to head. Squeeze the glutes so the hips don\u2019t sag.';
@@ -1641,31 +1694,31 @@ Object.assign(EX,{
   frames:[
    {cap:'Big holds, quiet feet',props:[VWALL,HOLD(127,28),HOLD(127,56),HOLD(127,98,8),HOLD(127,124,8),HOLD(127,138,8)],pose:{hip:[104,92],torso:8,near:[126,122],far:[126,136],hand:[124,28],hand2:[124,56],elbow:'down',elbow2:'down'}},
    {cap:'Then smaller holds and steeper',props:[OVERHANG,HOLD(121,20,7),HOLD(126,46,7),HOLD(138,112,7),HOLD(141,128,7)],pose:{hip:[90,100],torso:22,near:[136,112],far:[139,128],hand:[119,22],hand2:[124,47],elbow:'down',elbow2:'down'}}]},
- butterfly:{name:'Butterfly and frog stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
+ butterfly:{name:'Butterfly and frog stretch',focus:'hips',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
   cue:'Opens the hips for bridging, drop-knees and turned-out feet. Keep the back long and let the knees sink, don\u2019t force them down.',
   L:[{v:'Sit tall, soles together',p:{sets:1}},{v:'Hinge forward from the hips',p:{}},{v:'Feet closer, longer holds',p:{time:45}},{v:'Frog stretch on the forearms',p:{time:45}},{v:'Frog, knees wider',p:{time:60}}],
   frames:[
    {cap:'Soles together, sit tall',front:true,pose:{hip:[80,136],L:[76,142],R:[84,142],kL:[46,126],kR:[114,126],hands:[[54,124],[106,124]],handRules:['down','down']}},
    {cap:'Hinge forward, knees sink',front:true,pose:{hip:[80,136],tl:26,L:[76,142],R:[84,142],kL:[44,130],kR:[116,130],hands:[[60,132],[100,132]],handRules:['down','down']},arrows:[[34,112,34,124],[126,112,126,124]]}]},
- latstretch:{name:'Wall lat stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
+ latstretch:{name:'Wall lat stretch',focus:'shoulders',kind:'hold',P:{sets:2,time:30,rest:10,sides:false},
   cue:'Hands on a wall or post, thumbs up. Walk back and hinge at the hips, then let the chest sink between the arms. Feel it along the sides of the back.',
   L:[{v:'Hands on a table, hinge',p:{}},{v:'Hands on a wall at hip height',p:{}},{v:'Longer holds',p:{time:45}},{v:'One arm on a post, lean away',p:{sides:true}},{v:'One arm, longer holds',p:{sides:true,time:45}}],
   frames:[
    {cap:'Hands on the wall, walk back and hinge',props:[wall(142)],pose:{hip:[60,92],torso:84,headAng:25,near:[64,142],far:[60,142],hand:[140,80],hand2:[140,84],elbow:'down',elbow2:'down'}},
    {cap:'Let the chest sink between the arms',props:[wall(142)],pose:{hip:[58,90],torso:86,bend:-6,headAng:30,near:[64,142],far:[60,142],hand:[140,82],hand2:[140,86],elbow:'down',elbow2:'down'},arrows:[[96,64,96,82]]}]},
- pecdoor:{name:'Doorway chest stretch',kind:'hold',P:{sets:2,time:30,rest:10,sides:true},
+ pecdoor:{name:'Doorway chest stretch',focus:'shoulders',kind:'hold',P:{sets:2,time:30,rest:10,sides:true},
   cue:'Forearm flat on the door frame, then step through until the front of the shoulder and chest open up. No pinching in the shoulder joint.',
   L:[{v:'Arm at 90\u00b0, gentle',p:{sets:1}},{v:'Step through further',p:{}},{v:'Arm higher for the upper chest',p:{}},{v:'Both heights',p:{time:45}},{v:'Both heights, longer holds',p:{time:60}}],
   frames:[
    {cap:'Forearm on the frame, elbow at shoulder height',front:true,props:[POST(38)],pose:{hip:[80,86],L:[74,142],R:[86,142],hands:[[46,26],[89,83]],elbows:[[46,48],[92,66]]}},
    {cap:'Slide the arm higher for the upper chest',front:true,props:[POST(38)],pose:{hip:[80,86],L:[74,142],R:[86,142],hands:[[44,6],[89,83]],elbows:[[48,32],[92,66]]}}]},
- threadneedle:{name:'Thread the needle',kind:'reps',P:{sets:1,reps:8,unit:' per side'},
+ threadneedle:{name:'Thread the needle',focus:'back',kind:'reps',P:{sets:1,reps:8,unit:' per side'},
   cue:'Upper-back rotation. Move slowly, follow the hand with your eyes and breathe out as you reach.',
   L:[{v:'Small range',p:{reps:6}},{v:'Full reach under',p:{}},{v:'2 s pause at each end',p:{}},{v:'Hips back towards the heels',p:{reps:10}},{v:'Slow, 3 s each way',p:{reps:10}}],
   frames:[
    {cap:'Reach under, rotating the upper back',pose:{hip:[52,117],torso:80,headAng:40,near:[24,140],nearKnee:'down',nearFoot:180,far:[26,140],farKnee:'down',farFoot:180,hand:[58,140],elbow:'down',hand2:[90,144],elbow2:'back'}},
    {cap:'Open up, reach to the ceiling',pose:{hip:[52,117],torso:75,headAng:-40,near:[24,140],nearKnee:'down',nearFoot:180,far:[26,140],farKnee:'down',farFoot:180,hand:[92,48],elbow:'fwd',hand2:[89,144],elbow2:'back'},arrows:[[112,96,112,64]]}]},
- forearmstretch:{name:'Forearm stretch',kind:'hold',P:{sets:1,time:20,rest:0,sides:true},
+ forearmstretch:{name:'Forearm stretch',focus:'arms',kind:'hold',P:{sets:1,time:20,rest:0,sides:true},
   cue:'Gentle. Arm straight, palm away, ease the fingers back. Then palm down, fingers to the floor. Your fingers work hard enough already.',
   L:[{v:'Palm away, gentle',p:{}},{v:'Palm away, then palm down',p:{sets:2}},{v:'Longer holds',p:{sets:2,time:30}},{v:'Add wrist circles between',p:{sets:2,time:30}},{v:'Three rounds',p:{sets:3,time:30}}],
   frames:[
@@ -1722,7 +1775,7 @@ const TRAIN_IDS=['nepal','ice','climb','run','warmup'];
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
-  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','stair44','hills','stairs','vo2','z2'],extra:['z2','vo2']}]},
+  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','stair44','sm44','stairs','smsteady','hills','vo2','z2'],extra:['z2','vo2']}]},
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
   {title:'Tools and grip',sub:'Twice a week, never on back-to-back days.',items:['toolhang','tooltraverse','lockoff'],extra:['lockoff']},
   {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
@@ -1730,7 +1783,9 @@ const PROGS=[
   {title:'Fingers',sub:'Twice a week, not the day before a hard climbing day. Rest at least 48 hours between finger sessions.',items:['hangboard','pinch'],extra:[]},
   {title:'Pull',sub:'After the finger work or on its own day.',items:['pullup','scap'],extra:[]}]},
  {id:'warmup',chip:'Warm up',title:'Warm up',lede:'Pick the one for today\u2019s session. The essentials take a few minutes.',sections:[
-  {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,items:['legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'highknee',{id:'pogo',...W({sets:2,reps:20,unit:''})}],extra:['pogo']},
+  {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,
+   items:['anklecircle','legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'worldsgreatest','toysoldier','highknee','buttkick',{id:'pogo',...W({sets:2,reps:20,unit:''})},'askip','adductorrock'],
+   extra:['buttkick','pogo','askip','adductorrock','toysoldier']},
   {pid:'prework',title:'Pre-workout',sub:'Wake up the hips, core and shoulders before strength work.',routine:true,items:[{id:'squat',...W({sets:1,reps:10,unit:''})},{id:'bridge',...W({sets:1,reps:10,unit:''})},'armcircle',{id:'plank',...W({sets:1,time:30,rest:0,sides:false})},{id:'bandwalk',...W({sets:1,reps:10,unit:' steps each way'})}],extra:['armcircle','plank','bandwalk']},
   PRECLIMB,
   {pid:'daily',title:'Stretch',sub:'About 10 minutes, daily if you can, in the evening or after training.',routine:true,items:['hipflex','calfstretch','squathold','butterfly','latstretch','pecdoor','threadneedle','hamstring','kneewall','catcow','child','forearmstretch'],extra:['threadneedle','hamstring','kneewall','catcow','child','forearmstretch']}]},
@@ -1745,11 +1800,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},focus:{},gone:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf','focus','gone'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=5;
   if(!S0.settings.readyV2){if(S0.settings.ready===10)S0.settings.ready=5;S0.settings.readyV2=1}
   if(!Array.isArray(S0.hidden))S0.hidden=[];
@@ -2055,6 +2110,7 @@ function renderHistory(){
       ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add${dayPlans.length||dayLog.length?' slim':''}" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
+        ${calSel<=todayS?`<button class="didbtn" data-act="didnew">✓ I did something</button>`:''}
         <div class="planmore"><button class="link" data-act="tripnew">${ICON('Hike','inl')} Trip</button>
           <button class="link" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Week of exercises</button>
           <button class="link" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Running week</button></div></div>
@@ -2109,6 +2165,7 @@ function renderToday(){
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
+    <button class="didbtn" data-act="didnew">✓ I did something</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
     <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
@@ -2177,22 +2234,24 @@ function tickCountdown(){
 }
 setInterval(tickCountdown,1000);
 /* ---------- objectives ---------- */
-const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco',start:'2027-01-12',trekEnd:'2027-01-14',end:'2027-01-18',prepStart:'2026-09-21',col:'#8EC9F0',icon:'❄',
+const TK={id:'toubkal',name:'Toubkal',sub:'Winter ascent · High Atlas, Morocco',start:'2027-01-12',trekEnd:'2027-01-15',end:'2027-01-19',prepStart:'2026-09-21',col:'#8EC9F0',icon:'❄',
   route:[['Imlil',1740,0],['Aroumd',1900,0],['Sidi Chamharouch',2350,0],['Refuge',3207,0,1],['South col',3940,1],['Summit',4167,1,1],['Refuge',3207,1],['Refuge',3207,2],['Sidi Chamharouch',2350,2],['Imlil',1740,2]],
   days:[
-   {d:'2027-01-12',t:'Imlil → Toubkal refuge',n:'Drive 1½ h · walk 5–6 h · ≈11 km · 1,740 → 3,207 m',
+   {d:'2027-01-12',t:'Fly in, Marrakech',n:'Arrival day · no walking',
+     x:'Into Marrakech, settle in and sort kit. An early night: the trek starts with a pick-up the next morning.'},
+   {d:'2027-01-13',t:'Imlil → Toubkal refuge',n:'Drive 1½ h · walk 5–6 h · ≈11 km · 1,740 → 3,207 m',
      x:'Pick-up in Marrakech around 8 am, about 1½ h to Imlil. Meet the guide, check kit, then up the Ait Mizane valley through Aroumd and Sidi Chamharouch, where lunch usually is. The last stretch to the refuge at 3,207 m feels slow with the altitude. Snow likely from about 2,500 m. Dinner and night at the refuge, well below freezing.'},
-   {d:'2027-01-13',t:'Summit day',n:'Walk 7–9 h · ≈7 km · 3,207 → 4,167 → 3,207 m',
+   {d:'2027-01-14',t:'Summit day',n:'Walk 7–9 h · ≈7 km · 3,207 → 4,167 → 3,207 m',
      x:'Early breakfast, then the summit climb by headtorch. Steep and rocky; in winter crampons and axe from the snowline. Most reach 4,167 m in 3–4 hours from the refuge. Back at the refuge for lunch, the afternoon is rest and tea, then a second night up there. The guide decides on the day if wind or snow make it unsafe.',hi:1},
-   {d:'2027-01-14',t:'Down to Imlil, back to Marrakech',n:'Walk 3–4 h · ≈11 km · 3,207 → 1,740 m · drive 1½ h',
+   {d:'2027-01-15',t:'Down to Imlil, back to Marrakech',n:'Walk 3–4 h · ≈11 km · 3,207 → 1,740 m · drive 1½ h',
      x:'Breakfast, then the same valley back down past Sidi Chamharouch to Imlil at a relaxed pace. The driver meets you in Imlil for the transfer to Marrakech. A long descent and hard on the knees: poles help.'},
-   {d:'2027-01-15',t:'Marrakech → Aït Benhaddou → Tinghir',n:'Drive ≈7–8 h · ≈370 km · over Tizi n\u2019Tichka 2,260 m',
+   {d:'2027-01-16',t:'Marrakech → Aït Benhaddou → Tinghir',n:'Drive ≈7–8 h · ≈370 km · over Tizi n\u2019Tichka 2,260 m',
      x:'Start of the three-day desert loop. Early pick-up, over the High Atlas by the Tizi n\u2019Tichka pass with photo stops, then the UNESCO ksar at Aït Benhaddou with a guided visit and lunch. On through Ouarzazate and the Rose Valley at Kelaat M\u2019Gouna, reaching the oasis town of Tinghir late afternoon. Hotel, dinner, overnight.'},
-   {d:'2027-01-16',t:'Todra Gorge → Merzouga → Erg Chebbi',n:'Drive ≈5–6 h · ≈260 km · gorge walk 1 h · camel 1½ h',
+   {d:'2027-01-17',t:'Todra Gorge → Merzouga → Erg Chebbi',n:'Drive ≈5–6 h · ≈260 km · gorge walk 1 h · camel 1½ h',
      x:'Breakfast in Tinghir, then the Todra Gorge with its 300 m limestone walls and a walk along the riverbed with a local guide. Through Tinjdad, Touroug and Erfoud to Merzouga at the edge of the Sahara. Camel trek into the Erg Chebbi dunes at sunset, overnight bag carried by 4×4. Dinner, Berber music and a night in the desert camp.'},
-   {d:'2027-01-17',t:'Sahara sunrise → Marrakech',n:'Camel 1 h · drive ≈9–10 h · ≈560 km',
+   {d:'2027-01-18',t:'Sahara sunrise → Marrakech',n:'Camel 1 h · drive ≈9–10 h · ≈560 km',
      x:'Early up for the quiet of the dunes at dawn, breakfast at camp, then camel back to Merzouga. The long return through the Draa valley and the palm oases, lunch at Kelaat M\u2019Gouna, over Tizi n\u2019Tichka again, back in Marrakech late afternoon or evening.'},
-   {d:'2027-01-18',t:'Marrakech',x:'Last day in the city: the medina, the gardens, a hammam for the legs. Flight home.'}],
+   {d:'2027-01-19',t:'Marrakech',x:'Last day in the city: the medina, the gardens, a hammam for the legs. Flight home.'}],
   note:'Neither agency is booked yet. Trek numbers are for the standard three-day itinerary: about 29 km and 2,350 m of climbing across the three days. Winter conditions change the timings, and your guide sets the final plan.',
   facts:[['4,167 m','highest point in North Africa'],['≈29 km','over the three trek days'],['≈2,350 m','of climbing in total'],['≈960 m','on summit day, 7–9 h round trip'],['−10 °C','or colder at the refuge at night'],['Guide','legally required since 2018'],['Crampons','and ice axe above the snow line']],
   prep:[
@@ -2283,7 +2342,7 @@ function renderObjective(){
    <div class="tkhero" data-cdt="${go.toISOString().slice(0,10)}T06:00:00">
      <div class="snow" aria-hidden="true">${flakes}</div>
      ${zellige()}
-     <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>3-day guided trek · then a 3-day Sahara loop</span></div>
+     <div class="tkhead"><span class="tkkick">${ICON('snow','inl')} Winter ascent</span><b>${fmt(TK.start,{day:'numeric',month:'long'})} – ${fmt(TK.trekEnd,{day:'numeric',month:'long',year:'numeric'})}</b><span>Arrive 12 Jan · trek 13–15 · Sahara loop 16–18</span></div>
      ${left>0?cdBlock(go.toISOString().slice(0,10)+'T06:00:00'):`<div class="cdbig"><b>${now<=parseDay(TK.end)?'You\u2019re there':'Done'}</b></div>`}
      ${tkRouteSVG(prog)}
      <div class="tkfoot"><span>Prep: <b>${wk} weeks</b> to go</span><span>${Math.round(prog*100)}% of the way</span></div>
@@ -2839,6 +2898,7 @@ function openPlan(){
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
   PA={tab:null,kind:null};
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
+  f.already.checked=false;
   f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';f.up.value='';
   document.getElementById('paNums').hidden=true;
   document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('')
@@ -3045,7 +3105,7 @@ function resolve(item,pid){
     p={...preset,...(o.p||{})};tuned=!!(o.p&&Object.keys(o.p).length);
     slotName=o.name||L[lvl].v;slotNote=o.note||'';slotEdited=tuned||!!o.name||!!o.note}
   else{const tune=S.tune[key]||{};p={...preset,...tune};tuned=Object.keys(tune).length>0}
-  return {id:it.id,pid,name:b.name,cue:b.cue,phaseCue:b.phaseCue,frames:b.frames||[],kind:b.kind,P:preset,p,L,lvl,key,warm,
+  return {id:it.id,pid,name:b.name,cue:b.cue,focus:b.focus,phaseCue:b.phaseCue,frames:b.frames||[],kind:b.kind,P:preset,p,L,lvl,key,warm,
     tuned,slotEdited,note:slotNote,warmP:it.warm||null,version:slotName,defName:L?L[lvl].v:'',dose:doseOf(b.kind,p),
     timed:b.kind==='hold'||b.kind==='iv',custom:!!b.custom,edited:!!S.edits[it.id]};
 }
@@ -3162,6 +3222,9 @@ function render(){
   if(p.id==='passes'){renderPasses();return}
   document.getElementById('main').innerHTML=p.sections.map((s,si)=>{
     let items;try{items=sectionItems(p,si)}catch(err){showErr('Could not build '+s.title+': '+err.message);items=[]}
+    const foci=[...new Set(items.map(e=>e.focus).filter(Boolean))];
+    const pick=(S.focus||{})[kpOf(p,si)]||'';
+    if(pick&&foci.includes(pick))items=items.filter(e=>e.focus===pick);
     const ess=items.filter(e=>e.tier==='e'),ext=items.filter(e=>e.tier!=='e');
     const est=`Essentials about ${estimate(ess)} min, full routine about ${estimate(items)} min`;
     const head=p.routine?`<p class="sub">${est}</p>`:`<h2>${s.title}</h2><p class="sub">${s.sub}${s.routine?`<br><span class="muted">${est}</span>`:''}</p>`;
@@ -3169,7 +3232,10 @@ function render(){
     const rows=l=>l.map(row).join('');
     const grp=(list,name,note)=>list.length?`<div class="grp"><h4>${name}</h4><span>${note}</span></div>${rows(list)}`:'';
     const doneN=items.filter(loggedToday).length;
-    return `<section id="sec-${si}"><div class="sechead"><div>${head}${items.length?`<span class="donecount">${doneN} of ${items.length} done today</span>`:''}</div>${items.length&&!s.noPlay?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="link" data-act="start" data-mode="all" data-sec="${si}">Full routine</button></div>`:''}</div>
+    const focusBar=foci.length>1?`<div class="focusbar">
+      <button class="fchip${pick?'':' on'}" data-focus="" data-kp="${esc(kpOf(p,si))}">Everything</button>
+      ${foci.map(x=>`<button class="fchip${pick===x?' on':''}" data-focus="${esc(x)}" data-kp="${esc(kpOf(p,si))}">${esc(x[0].toUpperCase()+x.slice(1))}</button>`).join('')}</div>`:'';
+    return `<section id="sec-${si}">${focusBar}<div class="sechead"><div>${head}${items.length?`<span class="donecount">${doneN} of ${items.length} done today</span>`:''}</div>${items.length&&!s.noPlay?`<div class="gos">${ess.length?`<button class="go" data-act="start" data-mode="e" data-sec="${si}">${playIcon}Essentials</button>`:''}<button class="link" data-act="start" data-mode="all" data-sec="${si}">Full routine</button></div>`:''}</div>
       ${s.flat?rows(items):grp(ess,'Essential','Do these every time')+grp(ext,'Extra','When you have time')}
       <button class="add" data-act="add" data-sec="${si}">+ Add exercise${p.routine?'':' to '+s.title.toLowerCase().replace('pre-','pre-')}</button></section>`;
   }).join('');
@@ -3277,6 +3343,8 @@ document.getElementById('bnav').addEventListener('click',e=>{const b=e.target.cl
 document.body.addEventListener('keydown',e=>{const r=e.target.closest&&e.target.closest('.exrow');
   if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();r.click()}});
 document.body.addEventListener('click',e=>{
+  const fb=e.target.closest('[data-focus]');
+  if(fb){S.focus={...(S.focus||{}),[fb.dataset.kp]:fb.dataset.focus};save();render();return}
   const art0=e.target.closest('article.ex[data-act=seltoggle]');
   if(art0&&!e.target.closest('button,input,select,summary')){const k=art0.dataset.key;SEL.keys=SEL.keys.includes(k)?SEL.keys.filter(x=>x!==k):SEL.keys.concat([k]);selBar();refresh();return}
   const g=e.target.closest&&e.target.closest('g[data-act=tpjump]');
@@ -3370,6 +3438,9 @@ function onAct(b){
     },40);return}
   if(act==='tripopen'){openTrip(b.dataset.id,b.dataset.d);return}
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
+  if(act==='didnew'){if(cur==='today')calSel=dayOf(new Date());openPlan();
+    setTimeout(()=>{const f=document.getElementById('planfrm');
+      f.already.checked=true;f.already.dispatchEvent(new Event('change',{bubbles:true}))},30);return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
   if(act==='gorun'){go('run');return}
@@ -4006,6 +4077,15 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     if(+b.dataset.min>=480&&f.start.dataset.touched!=='1'&&f.start.value>'10:00')f.start.value='08:00';planAuto()});
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'));planAuto()});
   f.start.addEventListener('input',()=>{f.start.dataset.touched='1'});
+  f.already.addEventListener('change',()=>{
+    const h=document.getElementById('paTitle');
+    if(h)h.textContent=f.already.checked?'What did you do?':'Plan a session';
+    if(f.already.checked){const n=new Date();
+      f.date.value=dayOf(n);f.date.dataset.touched='1';
+      f.start.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+      f.start.dataset.touched='1'}
+    planAuto();
+  });
   f.km.addEventListener('input',()=>{f.km.dataset.auto='0';planAuto()});
   f.up.addEventListener('input',planAuto);
   f.detail.addEventListener('input',planAuto);
@@ -4031,8 +4111,19 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     if(backTo)setTimeout(()=>openTrip(backTo.id,backTo.day),60);
     if(PA.tab==='Run')S.runMeta[id]={type:PA.kind,km};
     rememberPlace(det,PA.tab);save();calSel=plan.date;calPicked=true;
-    setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
-    enqueue({op:'plan',plan});scheduleFlush(300);
+    const already=f.already.checked;
+    if(already)plan.status='done';
+    setPlans(plansCache().concat([{...plan,status:already?'done':'planned',pending:true}]));
+    enqueue({op:'plan',plan});
+    if(already){
+      // a session you have already done is a record, not a plan: log it too
+      const row={id:uid(),date:plan.date,time:plan.start,tab:plan.tab,exercise_id:'',
+        exercise:cleanTitle(plan.title),dose:`${plan.minutes} min`,result:'done',
+        completed:km?km+' km':'',seconds:String((+plan.minutes||0)*60),plan_id:id};
+      const l=localLog();l.push(row);setLocalLog(l);
+      if(connected())enqueue({op:'log',row});
+    }
+    scheduleFlush(300);
     setTimeout(()=>{try{document.getElementById('plandlg').close()}catch(_){}refresh()},0);
   });
 })();
