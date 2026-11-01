@@ -759,17 +759,31 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 .tripline{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid var(--acc);
   padding:6px 0 6px 10px;margin:2px 0 4px;color:var(--muted);font-weight:600;font-size:13.5px}
+.flab{align-self:center;margin-right:4px;font:600 12px Barlow,sans-serif;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted)}
+#paFeel{margin-top:10px}
 .didlink{display:block;width:100%;margin:9px 0 2px;padding:2px;text-align:center;
   font:600 14px Barlow,sans-serif;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 .didlink:active{color:var(--acc)}
-.didbox{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;border-radius:12px;
-  border:1.5px solid var(--rule);font-weight:600;font-size:14.5px;cursor:pointer}
-.didbox input{width:20px;height:20px;accent-color:var(--acc);margin:0}
-.didbox:has(input:checked){border-color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent);color:var(--acc)}
+.didbox{display:inline-flex;flex-direction:row;align-items:center;gap:8px;width:auto;align-self:flex-start;
+  margin:0 0 10px;padding:5px 2px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.didbox input{width:17px;height:17px;accent-color:var(--acc);margin:0;flex:0 0 auto}
+.didbox:has(input:checked){color:var(--acc)}
+#planfrm.logmode .didbox{display:none}
 .nudge{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--muted);background:color-mix(in srgb,var(--acc) 10%,transparent);
   border-radius:10px;padding:8px 10px}
 .nudge .link{font-size:13px}
-.pagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pagrid{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.pagrid::-webkit-scrollbar{display:none}
+.pagrid .pacard{flex:0 0 auto;flex-direction:row;gap:7px;padding:9px 15px;border-radius:999px;font-size:15px;white-space:nowrap}
+.pagrid .pacard .ic{width:19px;height:19px}
+#plandlg .pagrid .pacard{padding:9px 14px;gap:7px;font-size:14.5px}
+#plandlg .pagrid .pacard .ic{width:18px;height:18px}
+#paKinds{display:block}
+#paKinds .typechips{display:flex;flex-wrap:wrap;gap:7px}
+.paseg{display:flex;background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:3px;margin:12px 0 10px}
+.paseg button{flex:1;background:none;border:0;border-radius:9px;padding:9px 4px;color:var(--muted);font:600 13.5px Barlow,sans-serif}
+.paseg button.on{background:var(--prop);color:var(--ink)}
 #plandlg form{padding:18px 20px calc(10px + env(safe-area-inset-bottom,0px));max-height:90vh}
 #plandlg .epsec{padding:10px 0 4px}
 #plandlg .pacard{padding:11px 4px;gap:4px;font-size:12.5px}
@@ -1112,6 +1126,8 @@ button.chip::after{display:none}
   <section class="epsec"><h4>When</h4>
     <label class="didbox"><input type="checkbox" name="already"><span>I already did this</span></label>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
+    <div class="durchips" id="paWhenBack" hidden><button type="button" data-day="0">Today</button><button type="button" data-day="-1">Yesterday</button><button type="button" data-day="-2">2 days ago</button></div>
+    <div class="durchips" id="paFeel" hidden><span class="flab">How did it feel?</span><button type="button" data-feel="easy">Easy</button><button type="button" data-feel="ok">OK</button><button type="button" data-feel="hard">Hard</button></div>
     <div class="row2"><label>Day<input name="date" type="date" required></label>
     <label>Start<input name="start" type="time" required></label></div></section>
   <section class="epsec"><h4>How long</h4>
@@ -1146,7 +1162,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='85';
+const BUILD='88';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2880,6 +2896,7 @@ function trainKinds(){
   return out}
 const trainRef=k=>k.startsWith('x:')?k.slice(2):`${k}|e`;
 // what counts as training for each kind of day out
+const TRAINFIRST=['Ice climbing','Nepal'];
 const TRAINFOR={Run:[],
   Climbing:[['climb',0],['climb',1]],
   Bouldering:[['climb',0],['climb',1]],
@@ -2915,9 +2932,18 @@ function rememberPlace(x,tab){x=(x||'').trim();if(!x)return;
 function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
-  PA={tab:null,kind:null};
+  PA={tab:null,kind:null,mode:null};
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
-  f.already.checked=false;
+  f.classList.remove('logmode');f.already.checked=false;
+  {const h=document.getElementById('paTitle');if(h)h.textContent='Plan a session';}
+  PA_FEEL='';
+  document.getElementById('paWhen').hidden=false;
+  document.getElementById('paWhenBack').hidden=true;
+  document.getElementById('paFeel').hidden=true;
+  document.querySelectorAll('#paFeel [data-feel]').forEach(x=>x.classList.remove('on'));
+  {const tl=document.querySelector('.tripline');if(tl)tl.hidden=false;}
+  {const sv=document.querySelector('#planfrm .btn.pri');if(sv)sv.textContent='Add to calendar';}
+  f.date.max='';
   f.detail.value='';f.minutes.value='';f.minutes.dataset.manual='';f.title.value='';f.title.dataset.auto='1';f.km.value='';f.km.dataset.auto='1';f.up.value='';
   document.getElementById('paNums').hidden=true;
   document.getElementById('paGrid').innerHTML=EXTRAS.map(([t])=>`<button type="button" class="pacard" data-pa="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('')
@@ -2958,14 +2984,20 @@ function drawKinds(){
         return `<button type="button" class="exline${trainPicked(k)?' on':''}" data-trex="${esc(k)}" style="--tc:${tc}"><span>${esc(e.name)}</span><em>${esc(e.dose||'')}</em></button>`}).join('')}
         <button type="button" class="exline all${picked?' on':''}" data-trall="${esc(sec)}" style="--tc:${tc}"><span>Everything essential here</span><em>${ess.length||items.length}</em></button></div>`:''}
     </div>`}).join('');
-  document.getElementById('paKindH').textContent=ks.length?'Kind':'What to train';
-  document.getElementById('paKinds').innerHTML=dayOut
-    +(tr.length?`<span class="kindsep">or train for it</span><div class="trlist">${train}</div>`:'')
+  const both=!!(ks.length&&tr.length);
+  if(PA.mode!=='train'&&PA.mode!=='out')PA.mode=TRAINFIRST.includes(PA.tab)&&tr.length?'train':(ks.length?'out':'train');
+  const mode=!ks.length?'train':!tr.length?'out':PA.mode;
+  document.getElementById('paKindH').textContent=both?'What it was':(mode==='train'?'What to train':'Kind');
+  const seg=both?`<div class="paseg"><button type="button" data-mode="train"${mode==='train'?' class="on"':''}>Training</button>
+      <button type="button" data-mode="out"${mode==='out'?' class="on"':''}>A day out</button></div>`:'';
+  document.getElementById('paKinds').innerHTML=seg
+    +(mode==='train'?`<div class="trlist">${train}</div>`:`<div class="typechips">${dayOut}</div>`)
     +(PA.train.length?`<p class="trsum">${esc(trainLabel())} · about ${Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)} min <button type="button" class="link" data-tr-clear="1">Clear</button></p>`:'');
 }
 function paPick(tab){
   const f=document.getElementById('planfrm');
-  PA.tab=tab;PA.train=[];PA.open=null;const kl=KINDS[tab]||[];PA.kind=(S.lastKind||{})[tab]||((kl[0]||[])[0])||null;
+  PA.tab=tab;PA.train=[];PA.open=null;PA.mode=null;const kl=KINDS[tab]||[];
+  PA.kind=TRAINFIRST.includes(tab)?null:((S.lastKind||{})[tab]||((kl[0]||[])[0])||null);
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
   document.getElementById('paKindSec').hidden=!ks.length&&!trainFor(tab).length;
@@ -3462,6 +3494,7 @@ function onAct(b){
   if(act==='plannew'){if(cur==='today')calSel=dayOf(new Date());openPlan();return}
   if(act==='didnew'){if(cur==='today')calSel=dayOf(new Date());openPlan();
     setTimeout(()=>{const f=document.getElementById('planfrm');
+      f.classList.add('logmode');
       f.already.checked=true;f.already.dispatchEvent(new Event('change',{bubbles:true}))},30);return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
@@ -3800,7 +3833,7 @@ let PENDING_TRIP=null;
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null,EP_TYPE=null,EP_KIND=null;
+let EP=null,EP_TYPE=null,EP_KIND=null,PA_FEEL='';
 function guessKind(tab,title){
   const ks=KINDS[tab]||[],t=String(title||'').toLowerCase();
   const hit=ks.slice().sort((a,b)=>b[1].length-a[1].length).find(([k,l])=>t.includes(l.toLowerCase()));
@@ -4081,6 +4114,10 @@ function nudge(inp,by){
 })();
 document.getElementById('paKinds').addEventListener('click',ev=>{
     const sec=ev.target.closest('[data-trsec]');
+    const mb=ev.target.closest('[data-mode]');
+    if(mb){PA.mode=mb.dataset.mode;
+      if(PA.mode==='train'){PA.kind=null}else{PA.train=[];const kl=KINDS[PA.tab]||[];if(!PA.kind)PA.kind=(S.lastKind||{})[PA.tab]||((kl[0]||[])[0])||null}
+      drawKinds();planAuto();return}
     if(sec){const k=sec.dataset.trsec;PA.open=PA.open===k?null:k;drawKinds();planAuto();return}
     const all=ev.target.closest('[data-trall]');
     if(all){const k=all.dataset.trall,whole=`${k}|e`;
@@ -4096,9 +4133,14 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0')f.km.value=(PA.kind==='long'||PA.kind==='mp')?weekInfo(new Date()).long:PA.kind==='race'?42.2:f.km.value;
     planAuto()});
-  document.getElementById('paWhen').addEventListener('click',ev=>{const b=ev.target.closest('[data-day]');if(!b)return;
-    f.date.value=dayOf(addDays(new Date(),+b.dataset.day));
-    document.querySelectorAll('#paWhen button').forEach(x=>x.classList.toggle('on',x===b))});
+  ['paWhen','paWhenBack'].forEach(wid=>{
+    document.getElementById(wid).addEventListener('click',ev=>{const b=ev.target.closest('[data-day]');if(!b)return;
+      f.date.value=dayOf(addDays(new Date(),+b.dataset.day));
+      document.querySelectorAll('#'+wid+' button').forEach(x=>x.classList.toggle('on',x===b))});
+  });
+  document.getElementById('paFeel').addEventListener('click',ev=>{const b=ev.target.closest('[data-feel]');if(!b)return;
+    PA_FEEL=PA_FEEL===b.dataset.feel?'':b.dataset.feel;
+    document.querySelectorAll('#paFeel [data-feel]').forEach(x=>x.classList.toggle('on',x.dataset.feel===PA_FEEL))});
   document.getElementById('paPlaces').addEventListener('click',ev=>{const b=ev.target.closest('[data-place]');if(!b)return;
     f.detail.value=b.dataset.place;planAuto()});
   document.getElementById('durChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
@@ -4109,7 +4151,14 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
   f.start.addEventListener('input',()=>{f.start.dataset.touched='1'});
   f.already.addEventListener('change',()=>{
     const h=document.getElementById('paTitle');
-    if(h)h.textContent=f.already.checked?'What did you do?':'Plan a session';
+    const on=f.already.checked;
+    if(h)h.textContent=on?'What did you do?':'Plan a session';
+    document.getElementById('paWhen').hidden=on;
+    document.getElementById('paWhenBack').hidden=!on;
+    document.getElementById('paFeel').hidden=!on;
+    const tl=document.querySelector('.tripline');if(tl)tl.hidden=on;
+    const sv=document.querySelector('#planfrm .btn.pri');if(sv)sv.textContent=on?'Log it':'Add to calendar';
+    f.date.max=on?dayOf(new Date()):'';
     if(f.already.checked){const n=new Date();
       f.date.value=dayOf(n);f.date.dataset.touched='1';
       f.start.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
@@ -4149,7 +4198,7 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
       // a session you have already done is a record, not a plan: log it too
       const row={id:uid(),date:plan.date,time:plan.start,tab:plan.tab,exercise_id:'',
         exercise:cleanTitle(plan.title),dose:`${plan.minutes} min`,result:'done',
-        completed:km?km+' km':'',seconds:String((+plan.minutes||0)*60),plan_id:id};
+        completed:km?km+' km':'',seconds:String((+plan.minutes||0)*60),feel:PA_FEEL,plan_id:id};
       const l=localLog();l.push(row);setLocalLog(l);
       if(connected())enqueue({op:'log',row});
     }
