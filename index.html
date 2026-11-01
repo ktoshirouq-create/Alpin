@@ -759,9 +759,9 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 .tripline{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid var(--acc);
   padding:6px 0 6px 10px;margin:2px 0 4px;color:var(--muted);font-weight:600;font-size:13.5px}
-.didbtn{display:block;width:100%;margin-top:8px;background:none;border:1.5px solid var(--rule);
-  border-radius:14px;padding:12px;color:var(--muted);font:600 15px Barlow,sans-serif}
-.didbtn:active{border-color:var(--acc);color:var(--acc)}
+.didlink{display:block;width:100%;margin:9px 0 2px;padding:2px;text-align:center;
+  font:600 14px Barlow,sans-serif;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.didlink:active{color:var(--acc)}
 .didbox{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;border-radius:12px;
   border:1.5px solid var(--rule);font-weight:600;font-size:14.5px;cursor:pointer}
 .didbox input{width:20px;height:20px;accent-color:var(--acc);margin:0}
@@ -859,10 +859,12 @@ label.popt span{flex:1}label.popt em{font-style:normal;color:var(--muted);font-s
 #fa.ph-rest .spip.on,#fa.ph-rest .spip.now{background:var(--rest)}
 #fa.running .fanote{max-width:26em;margin-top:10px}
 .fanote{margin:2px 16px 10px;text-align:center;font-size:14.5px;line-height:1.45;color:var(--muted);max-width:30em;margin-left:auto;margin-right:auto}
-.liveadj{flex-basis:100%;margin-top:8px;padding-top:10px;border-top:1px solid var(--rule)}
-.lahead{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.liveadj .chips{justify-content:center}
-.laslot{display:block;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.liveadj{flex-basis:100%;order:-1;margin:0 0 10px;padding:12px 10px 10px;border-radius:14px;
+  border:1.5px solid color-mix(in srgb,var(--acc) 45%,var(--rule));background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.lahead{display:block;font:700 12px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--acc);margin-bottom:10px}
+.liveadj .chips{justify-content:center;gap:7px}
+.liveadj .chip{font-size:14.5px}
+.laslot{display:block;margin-top:9px;font-size:12.5px;color:var(--muted)}
 .falive{display:none;justify-content:center;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
 .falive .chip{border:1.5px solid var(--rule);background:none;color:var(--ink);border-radius:999px;padding:8px 12px;font-weight:600;font-size:14px}
 .falive .lslots{display:flex;gap:4px}
@@ -1144,7 +1146,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='84';
+const BUILD='85';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1903,9 +1905,22 @@ function logEntry(e,result,extra){
   const row={id:uid(),date:dayOf(now),time:`${pad2(now.getHours())}:${pad2(now.getMinutes())}`,
     tab:p.chip,section:sec?sec.title:'',exercise_id:e.id,exercise:e.name,slot:e.L?String(e.lvl+1):'',slot_name:e.L?e.version:'',
     dose:e.dose,result,completed:'',seconds:'',feel:'',note:'',...(extra||{})};
+  // if today's plan asked for this, the plan is what you just did
+  if(!row.plan_id&&result!=='skipped'){const m=planFor(row.date,e.id);if(m){row.plan_id=m.id;markPlanDone(m)}}
   const l=localLog();l.push(row);setLocalLog(l);
   if(connected())enqueue({op:'log',row});
   return row.id;
+}
+function refEx(r){const t=String(r).split('|').pop();return t.includes(':')?t.split(':').pop():t}
+function planFor(date,exId){
+  // a plan that asked for this exercise today, whichever screen you started it from
+  return (plansCache()||[]).find(pl=>pl.date===date&&pl.status!=='done'
+    &&(S.planRefs[pl.id]||[]).some(r=>refEx(r)===exId));
+}
+function markPlanDone(pl){
+  if(!pl||pl.status==='done')return;
+  setPlans(plansCache().map(x=>x.id===pl.id?{...x,status:'done'}:x));
+  enqueue({op:'plan',plan:{...pl,status:'done'}});scheduleFlush(600);
 }
 function updateEntry(id,fields){
   const l=localLog();const r=l.find(x=>x.id===id);if(r)Object.assign(r,fields);setLocalLog(l);
@@ -2114,7 +2129,7 @@ function renderHistory(){
       ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add${dayPlans.length||dayLog.length?' slim':''}" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
-        ${calSel<=todayS?`<button class="didbtn" data-act="didnew">✓ I did something</button>`:''}
+        ${calSel<=todayS?`<button class="link didlink" data-act="didnew">or log what you already did</button>`:''}
         <div class="planmore"><button class="link" data-act="tripnew">${ICON('Hike','inl')} Trip</button>
           <button class="link" data-act="weekbuild" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">Week of exercises</button>
           <button class="link" data-act="runweek" data-w="${Math.max(0,Math.round((mondayOf(parseDay(calSel))-mondayOf(new Date()))/(7*864e5)))}">${ICON('Run','inl')} Running week</button></div></div>
@@ -2169,7 +2184,7 @@ function renderToday(){
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
-    <button class="didbtn" data-act="didnew">✓ I did something</button>
+    <button class="link didlink" data-act="didnew">or log what you already did</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
     <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
@@ -3418,7 +3433,10 @@ function onAct(b){
   if(act==='unlog'){const id=b.dataset.id,row=localLog().find(r=>r.id===id);
     setLocalLog(localLog().filter(r=>r.id!==id));tomb(id);if(connected()){enqueue({op:'unlog',id});scheduleFlush(300)}
     refresh();if(row)undoBar('Removed '+row.exercise,()=>{const l=localLog();l.push(row);setLocalLog(l);if(connected()){enqueue({op:'log',row});scheduleFlush(300)}refresh()});return}
-  if(act==='exday'){const e=sectionItems(p,sec).find(x=>x.id===id);if(!e)return;SEL={on:false,keys:[selKey(p,sec,id)]};openSelDay();return}
+  if(act==='exday'){const ar=b.closest('[data-id]');if(!ar)return;
+    const eid=ar.dataset.id,esec=+ar.dataset.sec;
+    const e=sectionItems(p,esec).find(x=>x.id===eid);if(!e)return;
+    SEL={on:false,keys:[selKey(p,esec,eid)]};openSelDay();return}
   if(act==='selmode'){SEL={on:!SEL.on,keys:SEL.on?[]:SEL.keys};selBar();refresh();return}
   if(act==='seltoggle'){const k=b.dataset.key;SEL.keys=SEL.keys.includes(k)?SEL.keys.filter(x=>x!==k):SEL.keys.concat([k]);selBar();refresh();return}
   if(act==='selend'){SEL={on:false,keys:[]};selBar();refresh();return}
@@ -4355,12 +4373,12 @@ function drawFA(){drawVoiceBtn();
   if(F.ph&&!F.done&&started()&&!(F.run&&F.ph[F.p].work)){
     const isRest=F.ph[F.p].kind==='rest'||F.ph[F.p].kind==='ready';
     const paused=!F.run;
-    lc.innerHTML=`${e&&e.L?`<button type="button" class="chip" data-live="easier">− Easier</button><button type="button" class="chip" data-live="harder">+ Harder</button>`:''}${isRest?'<button type="button" class="chip" data-live="rest30">+30 s rest</button>':''}
-      <button type="button" class="chip" data-live="again">Repeat rep</button>
-      <button type="button" class="chip" data-live="addset">Add a set</button>
-      ${paused&&e&&paramsFor(e).length?`<div class="liveadj"><span class="lahead">Change what is left</span>
+    lc.innerHTML=`${paused&&e&&paramsFor(e).length?`<div class="liveadj"><span class="lahead">Change the rest of this</span>
         <div class="chips">${chipsHTML(e)}</div>
         ${e.L?`<span class="laslot">Slot ${e.lvl+1} · ${esc(e.version||'')}</span>`:''}</div>`:''}
+      ${isRest?'<button type="button" class="chip" data-live="rest30">+30 s rest</button>':''}
+      <button type="button" class="chip" data-live="again">Repeat rep</button>
+      <button type="button" class="chip" data-live="addset">Add a set</button>
 `;
     lc.style.display='flex';
   }else lc.style.display='none';
@@ -4425,18 +4443,6 @@ document.getElementById('faLive').addEventListener('click',ev=>{
       const sr=set.find(x=>x.kind==='rest'&&/set/i.test(x.l))||{t:(e.p.setRest||120),l:'Rest before the extra set',work:false,kind:'rest'};
       F.ph.push({...sr},...set.filter(x=>x.kind!=='rest'||!/set/i.test(x.l)).map(x=>({...x})));F.done=false;drawFA();saveSession();
       undoBar('A set added',()=>{});}return}
-  if(b.dataset.live==='easier'||b.dataset.live==='harder'){
-    if(!e.L)return;
-    const want=e.lvl+(b.dataset.live==='harder'?1:-1);
-    if(want<0||want>=e.L.length){undoBar(want<0?'Already the easiest slot':'Already the hardest slot',()=>{});return}
-    S.levels[e.id]=want;save();
-    const wasRun=F.run,keepP=F.p,keepLeft=F.left;
-    setEx(true);F.p=Math.min(keepP,F.ph.length-1);F.left=Math.min(keepLeft,F.ph[F.p].t);
-    if(wasRun&&!F.run){F.run=true;F.last=Date.now();clearInterval(F.timer);F.timer=setInterval(tick,1000)}
-    drawFA();saveSession();
-    const e2=curEx();
-    undoBar(`Slot ${want+1} from here · ${(e2&&e2.version)||''}`.trim(),()=>{});
-    say(b.dataset.live==='harder'?'Harder':'Easier',true);return}
   if(b.dataset.live==='slot'){const i=+b.dataset.i;S.levels[e.id]=i;save();
     const keepP=F.p,keepLeft=F.left;setEx(true);F.p=Math.min(keepP,F.ph.length-1);F.left=Math.min(keepLeft,F.ph[F.p].t);drawFA();saveSession();
     undoBar('Slot '+(i+1)+' from here on',()=>{});return}
