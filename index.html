@@ -759,9 +759,10 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 .tripline{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid var(--acc);
   padding:6px 0 6px 10px;margin:2px 0 4px;color:var(--muted);font-weight:600;font-size:13.5px}
-.flab{align-self:center;margin-right:4px;font:600 12px Barlow,sans-serif;letter-spacing:.06em;
+.flab{flex:0 0 auto;margin-right:2px;font:600 11.5px Barlow,sans-serif;letter-spacing:.05em;
   text-transform:uppercase;color:var(--muted)}
-#paFeel{margin-top:10px}
+#paFeel{display:flex;flex-wrap:nowrap;align-items:center;gap:7px;margin-top:12px}
+#paFeel button{flex:1 1 0;min-width:0;padding-left:6px;padding-right:6px}
 .didlink{display:block;width:100%;margin:9px 0 2px;padding:2px;text-align:center;
   font:600 14px Barlow,sans-serif;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
 .didlink:active{color:var(--acc)}
@@ -773,11 +774,10 @@ label.popt.one span{font-size:14px}label.popt.one em{font-size:12px}
 .nudge{margin:4px 0 0;font-size:13px;line-height:1.5;color:var(--muted);background:color-mix(in srgb,var(--acc) 10%,transparent);
   border-radius:10px;padding:8px 10px}
 .nudge .link{font-size:13px}
-.pagrid{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.pagrid::-webkit-scrollbar{display:none}
-.pagrid .pacard{flex:0 0 auto;flex-direction:row;gap:7px;padding:9px 15px;border-radius:999px;font-size:15px;white-space:nowrap}
+.pagrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.pagrid .pacard{flex-direction:column;gap:5px;padding:9px 4px;border-radius:13px;font-size:13px}
 .pagrid .pacard .ic{width:19px;height:19px}
-#plandlg .pagrid .pacard{padding:9px 14px;gap:7px;font-size:14.5px}
+#plandlg .pagrid .pacard{padding:8px 3px;gap:4px;font-size:12.5px}
 #plandlg .pagrid .pacard .ic{width:18px;height:18px}
 #paKinds{display:block}
 #paKinds .typechips{display:flex;flex-wrap:wrap;gap:7px}
@@ -1127,7 +1127,7 @@ button.chip::after{display:none}
     <label class="didbox"><input type="checkbox" name="already"><span>I already did this</span></label>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
     <div class="durchips" id="paWhenBack" hidden><button type="button" data-day="0">Today</button><button type="button" data-day="-1">Yesterday</button><button type="button" data-day="-2">2 days ago</button></div>
-    <div class="durchips" id="paFeel" hidden><span class="flab">How did it feel?</span><button type="button" data-feel="easy">Easy</button><button type="button" data-feel="ok">OK</button><button type="button" data-feel="hard">Hard</button></div>
+    <div class="durchips" id="paFeel" hidden><span class="flab">Felt</span><button type="button" data-feel="easy">Easy</button><button type="button" data-feel="ok">OK</button><button type="button" data-feel="hard">Hard</button></div>
     <div class="row2"><label>Day<input name="date" type="date" required></label>
     <label>Start<input name="start" type="time" required></label></div></section>
   <section class="epsec"><h4>How long</h4>
@@ -1162,7 +1162,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='88';
+const BUILD='89';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
