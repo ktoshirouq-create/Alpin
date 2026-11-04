@@ -1183,7 +1183,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='92';
+const BUILD='94';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2970,20 +2970,7 @@ function trainFor(tab){
   return (TRAINFOR[tab]||[]).map(([pid,i])=>{const p=PROGS.find(x=>x.id===pid);
     if(!p||!p.sections[i]||!sectionItems(p,i).length)return null;
     return [`${pid}|${i}`,p.sections.length>1?`${p.chip} · ${p.sections[i].title}`:p.chip]}).filter(Boolean)}
-function singlesFor(tab){
-  const out={};
-  (TRAINFOR[tab]||[]).forEach(([pid,i])=>{const p=PROGS.find(x=>x.id===pid);if(!p||!p.sections[i])return;
-    const grp=p.sections.length>1?`${p.chip} · ${p.sections[i].title}`:p.chip;
-    sectionItems(p,i).forEach(e=>(out[grp]=out[grp]||[]).push([`x:${pid}|${i}|x:${e.id}`,e.name,e.dose]))});
-  return out}
 const isTrainKind=k=>!!k&&(k.startsWith('x:')||k.includes('|'));
-function trainSingles(){
-  const out={};
-  TRAIN_IDS.forEach(pid=>{const p=PROGS.find(x=>x.id===pid);if(!p)return;
-    p.sections.forEach((sec,i)=>sectionItems(p,i).forEach(e=>{
-      const grp=p.sections.length>1?`${p.chip} · ${sec.title}`:p.chip;
-      (out[grp]=out[grp]||[]).push([`x:${pid}|${i}|x:${e.id}`,e.name,e.dose])}))});
-  return out}
 let PA={tab:null,kind:null,train:[],open:null};
 const places=tab=>{const l=(S.places||[]).map(y=>typeof y==='string'?{name:y}:y);
   const mine=l.filter(y=>!tab||!y.tab||y.tab===tab).map(y=>y.name),rest=l.map(y=>y.name).filter(n=>mine.indexOf(n)<0);
@@ -4283,7 +4270,6 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
 })();
 (function(){
   const d=document.getElementById('plandlg'),f=document.getElementById('planfrm'),msg=document.getElementById('planMsg');
-  f.addEventListener('change',ev=>{if(ev.target.matches('#planOpts input'))planAuto()});
   document.getElementById('durChips').addEventListener('click',ev=>{const b=ev.target.closest('[data-min]');if(!b)return;
     f.minutes.value=b.dataset.min;f.minutes.dataset.manual='1';
     document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',x===b));
@@ -4291,21 +4277,6 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.manual='1';document.querySelectorAll('#durChips button').forEach(x=>x.classList.remove('on'));planAuto()});
   f.detail.addEventListener('input',planAuto);
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
-  f.addEventListener('submit',ev=>{
-    if(!ev.submitter||ev.submitter.value!=='save')return;
-    const ch=[...f.querySelectorAll('#planOpts input:checked')];
-    if(!ch.length){ev.preventDefault();msg.textContent='Pick at least one session.';msg.className='syncmsg bad';return}
-    const id=uid(),app=ch.filter(x=>!x.dataset.extra),tabs=[...new Set(app.concat(ch.filter(x=>x.dataset.extra)).map(x=>x.dataset.tab))],det=f.detail.value.trim();
-    const runC=ch.find(x=>x.value==='x:Run'),rt=runC?document.getElementById('prType').value:'',rk=runC?Math.round((parseFloat(document.getElementById('prKm').value)||0)*10)/10:0;
-    const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||45)),
-      title:f.title.value.trim()||tabs.join(' + '),tab:tabs[0],items:ch.map(x=>x.dataset.one?`${x.dataset.label} (${x.dataset.name})`:x===runC?`${RUNLBL[rt]}${rk?': '+rk+' km':''} · ${zoneText(RUNZONE[rt]||[2,2])}${det?' · '+det:''}`:x.dataset.extra?x.dataset.label+(det?': '+det:''):`${x.dataset.label} (≈${x.dataset.min} min)`),
-      link:location.origin+location.pathname+'#plan='+id};
-    S.planRefs[id]=app.map(x=>x.value);if(runC)S.runMeta[id]={type:rt,km:rk};save();calPicked=true;
-    setPlans(plansCache().concat([{...plan,status:'planned',pending:true}]));
-    enqueue({op:'plan',plan});scheduleFlush(300);
-    calSel=plan.date;calMonth=monthStart(new Date(plan.date+'T12:00'));
-    if(cur!=='history'&&cur!=='today'){cur='history'}refresh();
-  });
 })();
 /* ---------- in-app confirm ---------- */
 function ask(title,body,yes,danger){
@@ -4339,8 +4310,6 @@ const SOUND={
   ready:()=>{tone(880,.3,0,.6);buzz(180)},
   done:()=>{tone(784,.18,0,.7);tone(988,.18,.18,.7);tone(1318,.6,.36,.8);
     buzz([500,150,150,150,500,150,900])}};
-function beep(){SOUND.work()}
-
 /* The phone's own voice. No files, works offline, ducks music rather than stopping it. */
 const voiceOn=()=>S.settings.voice!==0;
 let lastSaid='';
