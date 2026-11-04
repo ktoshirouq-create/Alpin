@@ -206,6 +206,10 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .dstep.hi::before{background:#FF8A70;border-color:#FF8A70}
 .dstep em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}.dstep b{display:block;font-size:16px;margin:1px 0 3px}
 .dstep p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.dstep[data-act]{cursor:pointer}
+.dedit{position:absolute;right:0;top:2px;font:600 12px Barlow,sans-serif;color:var(--acc);
+  text-decoration:underline;text-underline-offset:3px;opacity:.75}
+.dmine{margin:6px 0 0!important;padding-left:9px;border-left:2px solid var(--acc);color:var(--ink)!important;font-size:13.5px!important}
 .dnum{display:block;font:600 12.5px Barlow,sans-serif;color:#8EC9F0;margin:0 0 5px}
 .prepl{display:flex;flex-direction:column;gap:8px}
 .prow2{display:flex;gap:12px;padding:12px;border-radius:14px;background:var(--panel)}
@@ -1050,6 +1054,23 @@ button.chip::after{display:none}
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save" id="wbSave">Add to the calendar</button></div>
 </form></dialog>
 
+<dialog id="dayeditdlg"><form method="dialog" id="dayeditfrm">
+  <h2 id="deH">Change this day</h2>
+  <section class="epsec" id="deWhenSec"><h4>Day</h4>
+    <div class="row2"><label>Date<input name="d" type="date"></label>
+      <label>Last day <span class="hint">optional</span><input name="to" type="date"></label></div></section>
+  <section class="epsec"><h4>Title</h4><input name="t" type="text" maxlength="80"></section>
+  <section class="epsec" id="deNumSec"><h4>Times and numbers</h4>
+    <input name="n" type="text" maxlength="90" placeholder="Walk 5–6 h · ≈11 km · 1,740 → 3,207 m"></section>
+  <section class="epsec"><h4 id="deXH">What happens</h4>
+    <textarea name="x" rows="5" maxlength="900"></textarea></section>
+  <div class="dbtns"><button type="button" class="link" id="deReset">Reset this day</button>
+    <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    <button class="btn pri" value="save">Save</button></div>
+  <p class="syncmsg"><button type="button" class="link" id="deAdd">+ Add a day after this one</button>
+    <button type="button" class="link danger" id="deDel">Remove this day</button></p>
+</form></dialog>
+
 <dialog id="editplandlg"><form method="dialog" id="editplanfrm">
   <h2>Change this session</h2>
 
@@ -1162,7 +1183,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='89';
+const BUILD='92';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1316,17 +1337,29 @@ const OLD={
   {cap:'Hand on the wall, swing back',props:[wall(114)],pose:{hip:[74,86],torso:0,far:[74,142],near:[44,132],nearKnee:'back',hand:[112,60],elbow:'down'},arrows:[[30,150,52,150]]},
   {cap:'Swing through to the front',props:[wall(114)],pose:{hip:[74,86],torso:-4,far:[74,142],near:[104,126],hand:[112,60],elbow:'down'},arrows:[[60,150,90,150]]}]},
  anklecircle:{name:'Ankle circles and pumps',dose:'10 each way per foot',focus:'calves',
-  cue:'Stand on one leg or sit on a step. Draw slow circles with the foot, then point and flex. First thing before anything springy.',frames:[]},
+  cue:'Stand on one leg or sit on a step. Draw slow circles with the foot, then point and flex. First thing before anything springy.',frames:[
+  {cap:'One foot off the floor, hand on the wall',props:[wall(118)],pose:{hip:[70,86],torso:0,near:[70,142],far:[86,128],farKnee:'fwd',farFoot:140,hand:[116,76],elbow:'down'}},
+  {cap:'Circle the ankle, then point and flex',props:[wall(118)],pose:{hip:[70,86],torso:0,near:[70,142],far:[86,128],farKnee:'fwd',farFoot:210,hand:[116,76],elbow:'down'},arrows:[[92,140,106,134]]}]},
  toysoldier:{name:'Toy soldiers',dose:'10 per leg',focus:'legs',
-  cue:'Walk forward kicking a straight leg up to meet the opposite hand. Keep the back long; height does not matter, control does.',frames:[]},
+  cue:'Walk forward kicking a straight leg up to meet the opposite hand. Keep the back long; height does not matter, control does.',frames:[
+  {cap:'Reach a hand out in front',pose:{hip:[60,88],torso:2,near:[62,142],far:[56,142],hand:[100,88],elbow:'up'}},
+  {cap:'Kick the straight leg up to meet it',pose:{hip:[60,88],torso:-6,near:[60,142],far:[106,96],farKnee:'fwd',farFoot:200,hand:[104,86],elbow:'up'},arrows:[[78,132,100,102]]}]},
  worldsgreatest:{name:'Deep lunge with a twist',dose:'5 per side',focus:'hips',
-  cue:'Long lunge, hand inside the front foot, then rotate the other arm to the sky and look at it. The best single move for running hips.',frames:[]},
+  cue:'Long lunge, hand inside the front foot, then rotate the other arm to the sky and look at it. The best single move for running hips.',frames:[
+  {cap:'Long lunge, hand inside the front foot',pose:{hip:[72,116],torso:26,near:[106,142],far:[40,140],farKnee:'down',farFoot:180,hand:[96,142],elbow:'down'}},
+  {cap:'Open the top arm to the sky',pose:{hip:[72,116],torso:20,near:[106,142],far:[40,140],farKnee:'down',farFoot:180,hand:[78,36],elbow:'up',hand2:[96,142],elbow2:'down',headAng:-25},arrows:[[96,104,84,56]]}]},
  buttkick:{name:'Butt kicks',dose:'20 steps',focus:'legs',
-  cue:'Jog on the spot or forward, heels flicking to the backside. Quick and light, not powerful.',frames:[]},
+  cue:'Jog on the spot or forward, heels flicking to the backside. Quick and light, not powerful.',frames:[
+  {cap:'Light jog, tall posture',pose:{hip:[62,86],torso:3,near:[66,142],far:[54,140],farKnee:'back',farFoot:170,hand:[78,100],elbow:'back'}},
+  {cap:'Flick the heel up to the backside',pose:{hip:[62,86],torso:3,near:[66,142],far:[44,104],farKnee:'back',farFoot:90,hand:[80,98],elbow:'back'},arrows:[[48,132,44,112]]}]},
  askip:{name:'A-skips',dose:'2 × 20 m',focus:'legs',
-  cue:'Skip with a high knee and a quick foot down under the hip. Tall posture, light sound. Wakes up the stride before a faster run.',frames:[]},
+  cue:'Skip with a high knee and a quick foot down under the hip. Tall posture, light sound. Wakes up the stride before a faster run.',frames:[
+  {cap:'Knee up to hip height',pose:{hip:[62,86],torso:2,near:[64,142],far:[92,86],farKnee:'fwd',farFoot:150,hand:[88,66],elbow:'up'},arrows:[[80,124,90,96]]},
+  {cap:'Foot straight back down under the hip',pose:{hip:[62,86],torso:2,near:[64,142],far:[72,142],farKnee:'fwd',farFoot:170,hand:[72,100],elbow:'back'},arrows:[[94,96,78,130]]}]},
  adductorrock:{name:'Adductor rocks',dose:'8 per side',focus:'hips',
-  cue:'On all fours, one leg straight out to the side, rock the hips back and forward. Opens the groin before hills and stairs.',frames:[]},
+  cue:'On all fours, one leg straight out to the side, rock the hips back and forward. Opens the groin before hills and stairs.',frames:[
+  {cap:'All fours, one leg straight out to the side',pose:{...QUAD,far:[112,142],farKnee:'fwd',farFoot:180}},
+  {cap:'Rock the hips back, keep the leg long',pose:{...QUAD,hip:[40,122],far:[108,142],farKnee:'fwd',farFoot:180,near:[18,142]},arrows:[[62,112,44,116]]}]},
  legswingside:{name:'Leg swings, side to side',dose:'10 per leg',cue:'Hips face forward, the leg crosses in front of the standing foot.',frames:[
   {cap:'Swing out to the side',front:true,pose:{hip:[76,86],L:[70,142],R:[120,126]},arrows:[[96,152,122,146]]},
   {cap:'Swing across in front',front:true,pose:{hip:[80,86],L:[74,142],R:[62,136]},arrows:[[112,150,86,152]]}]},
@@ -1354,7 +1387,9 @@ const OLD={
  armcircle:{name:'Arm circles',dose:'10 forwards, 10 backwards',cue:'Start small, build to big circles. Keep the shoulders down away from the ears.',frames:[
   {cap:'Arms straight out, small to big circles',front:true,pose:{hip:[80,86],L:[70,142],R:[90,142],hands:[[31,48],[129,48]],circles:true}}]},
 
- fingers:{name:'Wrist and finger warm-up',dose:'60 s',time:60,cue:'Wrist circles both ways, then gently pull the fingers back with the palm facing away, 15 s each hand. Open and close fists fast to finish.',frames:[]},
+ fingers:{name:'Wrist and finger warm-up',dose:'60 s',time:60,cue:'Wrist circles both ways, then gently pull the fingers back with the palm facing away, 15 s each hand. Open and close fists fast to finish.',frames:[
+  {cap:'Wrist circles, both ways',pose:{hip:[60,100],torso:0,near:[58,142],far:[64,142],hand:[94,86],elbow:'fwd'},arrows:[[92,74,104,86]]},
+  {cap:'Palm away, pull the fingers back',pose:{hip:[60,100],torso:0,near:[58,142],far:[64,142],hand:[96,84],elbow:'fwd',tip:[10,-8]},arrows:[[106,70,114,80]]}]},
  scap:{name:'Scapular pull-ups',dose:'2 × 8',cue:'Arms stay straight. Pull the shoulder blades down and back, lifting the body a few centimetres.',
   levels:['Feet on a box for assistance','Full hang','2 s hold at the top','One arm at a time, feet assisted'],frames:[
   {cap:'Dead hang, shoulders up by the ears',nofloor:true,props:[bar],pose:{hip:[80,90],torso:0,near:[80,145],far:[78,145],nearFoot:65,farFoot:65,hand:[80,8],hand2:[82,8]}},
@@ -1647,9 +1682,13 @@ Object.assign(EX,{
   frames:[
    {cap:'Sink onto the left leg, right leg straight',front:true,pose:{hip:[56,128],tl:34,L:[44,142],R:[126,142],kL:[38,134],kR:[92,137],hands:[[70,112],[84,112]],elbows:[[50,116],[74,116]]}},
    {cap:'Move slowly across to the other side',front:true,pose:{hip:[104,128],tl:34,L:[34,142],R:[116,142],kL:[68,137],kR:[122,134],hands:[[96,112],[110,112]],elbows:[[86,116],[110,116]]},arrows:[[66,152,98,152]]}]},
- handwarm:{name:'Warm the hands',kind:'hold',P:{sets:1,time:120,rest:0,sides:false},frames:[],
+ handwarm:{name:'Warm the hands',kind:'hold',P:{sets:1,time:120,rest:0,sides:false},frames:[
+  {cap:'Hands in the armpits or pockets',pose:{hip:[60,96],torso:0,near:[58,142],far:[64,142],hand:[70,88],elbow:'back',hand2:[50,88],elbow2:'back'}},
+  {cap:'Swing the arms to push blood down',pose:{hip:[60,96],torso:0,near:[58,142],far:[64,142],hand:[86,128],elbow:'down'},arrows:[[92,96,92,126]]}],
   cue:'Cold fingers are the real injury risk outside. Shake the arms out, hands in your armpits or round a warm bottle, open and close fists. No crimping until they feel normal.'},
- basetraverse:{name:'Traverse the base',kind:'hold',P:{sets:1,time:300,rest:0,sides:false},frames:[],
+ basetraverse:{name:'Traverse the base',kind:'hold',P:{sets:1,time:300,rest:0,sides:false},frames:[
+  {cap:'Easy traverse, feet low',props:[wall(120)],pose:{hip:[76,100],torso:-6,near:[70,142],far:[92,138],farKnee:'fwd',hand:[116,56],elbow:'up'}},
+  {cap:'Weight on the feet, arms straight',props:[wall(120)],pose:{hip:[80,98],torso:-4,near:[74,142],far:[98,134],farKnee:'fwd',hand:[116,50],elbow:'up',hand2:[114,66],elbow2:'up'},arrows:[[60,120,78,120]]}],
   cue:'Move along the bottom of the crag on big holds, both directions. This is what replaces the gym\u2019s easy routes: quiet feet, straight arms, gradually smaller holds.'}
 });
 EX.sideplank.cue='Stack the feet, hips high, one straight line from feet to head.';
@@ -1822,11 +1861,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},focus:{},gone:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},focus:{},gone:{},itin:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf','focus','gone'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf','focus','gone','itin'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=5;
   if(!S0.settings.readyV2){if(S0.settings.ready===10)S0.settings.ready=5;S0.settings.readyV2=1}
   if(!Array.isArray(S0.hidden))S0.hidden=[];
@@ -1882,7 +1921,9 @@ function localLog(){const seen=new Set();return lsGet(LKEY,[]).filter(r=>{if(see
 function setLocalLog(l){l.sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));lsSet(LKEY,l.slice(0,2000))}
 function enqueue(op){op.qid=uid();const q=lsGet(QKEY,[]);q.push(op);lsSet(QKEY,q);scheduleFlush();setTimeout(updateSyncLine,0)}
 let flushT=null,flushing=false;
+let flushFails=0;
 function scheduleFlush(ms){clearTimeout(flushT);flushT=setTimeout(flushQueue,ms==null?8000:ms)}
+function backoffMs(){return Math.min(15*60000,30000*Math.pow(2,Math.min(flushFails-1,5)))}
 async function flushQueue(){
   if(flushing||!connected()||!navigator.onLine)return;
   if(!lsGet(QKEY,[]).length)return;
@@ -1891,7 +1932,8 @@ async function flushQueue(){
     for(let guard=0;guard<60;guard++){
       const q=lsGet(QKEY,[]);if(!q.length)break;
       let batch;
-      if(q[0].op==='log'){const n=q.findIndex(o=>o.op!=='log');batch=q.slice(0,n<0?q.length:n);
+      if(q[0].op==='log'){const n=q.findIndex(o=>o.op!=='log');
+        batch=flushFails>=2?[q[0]]:q.slice(0,n<0?q.length:n);
         await api({action:'log',rows:batch.map(o=>o.row)})}
       else{const op=q[0];batch=[op];
         if(op.op==='update')await api({action:'update',id:op.id,fields:op.fields});
@@ -1903,17 +1945,29 @@ async function flushQueue(){
       lsSet(QKEY,lsGet(QKEY,[]).filter(o=>!sent.has(o.qid)));   // anything added meanwhile stays queued
     }
     setSync({last:Date.now(),error:''});
-  }catch(e){setSync({error:e.message})}
+    flushFails=0;
+  }catch(e){
+    flushFails++;
+    // park whatever failed at the back so the rest of the queue can go through
+    if(flushFails>=3){const q=lsGet(QKEY,[]);
+      if(q.length>1){const bad=q.shift();bad.tries=(bad.tries||0)+1;q.push(bad);lsSet(QKEY,q)}}
+    setSync({error:e.message+(flushFails>1?` · retrying in ${Math.round(backoffMs()/60000)||1} min`:'')});
+    scheduleFlush(backoffMs());
+  }
   finally{flushing=false;if(cur==='history'||cur==='today')render();else updateSyncLine()}
 }
 addEventListener('online',()=>scheduleFlush(500));
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushQueue()});
-setInterval(()=>{if(lsGet(QKEY,[]).length)flushQueue()},60000);
+setInterval(()=>{if(lsGet(QKEY,[]).length&&!flushFails)flushQueue()},60000);
 let stateT=null;
 function isFresh(x){x=x||S;const empty=o=>!o||!Object.keys(o).length;
   return empty(x.custom)&&empty(x.edits)&&empty(x.levels)&&empty(x.tune)&&empty(x.tiers)&&empty(x.slots)&&empty(x.planRefs)&&empty(x.runMeta)&&empty(x.run)&&empty(x.nepal)&&!(x.hidden||[]).length}
+let lastStateSent='';
 function queueState(){if(!connected()||isFresh())return;clearTimeout(stateT);stateT=setTimeout(()=>{
-  const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(JSON.stringify(S)),qid:uid()});lsSet(QKEY,q);scheduleFlush(3000)},4000)}
+  const json=JSON.stringify(S);
+  if(json===lastStateSent)return;          // nothing actually changed
+  lastStateSent=json;
+  const q=lsGet(QKEY,[]).filter(o=>o.op!=='state');q.push({op:'state',state:JSON.parse(json),qid:uid()});lsSet(QKEY,q);scheduleFlush(3000)},4000)}
 
 function logEntry(e,result,extra){
   const now=new Date(),p=PROGS.find(x=>x.sections.some((sc,i)=>(sc.pid||x.id)===e.pid))||prog();
@@ -2384,7 +2438,7 @@ function renderObjective(){
    </div>
    <div class="facts">${TK.facts.map(([a,b])=>`<div><b>${esc(a)}</b><span>${esc(b)}</span></div>`).join('')}</div>
    <h2 class="objh">Day by day</h2>
-   <div class="daystrip">${TK.days.map(x=>`<div class="dstep${x.hi?' hi':''}"><em>${esc(x.to?fmt(x.d)+' – '+fmt(x.to):fmt(x.d))}</em><b>${esc(x.t)}</b>${x.n?`<span class="dnum">${esc(x.n)}</span>`:''}<p>${esc(x.x)}</p></div>`).join('')}</div>
+   <div class="daystrip">${tkDays().map(x=>`<div class="dstep${x.hi?' hi':''}" data-act="dayedit" data-scope="toubkal" data-k="${x.k}"><em>${esc(x.to?fmt(x.d)+' – '+fmt(x.to):fmt(x.d))}</em><b>${esc(x.t)}</b>${x.n?`<span class="dnum">${esc(x.n)}</span>`:''}<p>${esc(x.x)}</p><span class="dedit">Edit</span></div>`).join('')}</div>
    <p class="hint">${esc(TK.note)}</p>
 
   </section>`;
@@ -2511,11 +2565,19 @@ const TPD_CCW=[
  {t:'Lungden → Namche',a:3440,g:'−940 m',h:'7–8 h',wp:['Thame'],v:'Thame, Thamo',x:'Long descent down the quiet Bhote Koshi valley.',at:'Namche'},
  {t:'Namche → Lukla',a:2860,g:'−580 m',h:'7–8 h',wp:['Phakding'],v:'Monjo, Phakding',x:'Long last day back down the valley.',at:'Lukla'},
  {t:'Lukla · buffer day',a:2860,g:'—',h:'—',k:'buffer',v:'Flight or weather day',x:'Keep one spare day here. Lukla flights are cancelled often enough that it matters.',at:'Lukla'}];
+const ITIN=()=>{S.itin=S.itin||{};return S.itin};
+function tkDays(){
+  const own=(ITIN().toubkal||{}).days;
+  return (own&&own.length?own:TK.days).map((x,i)=>({...x,k:i}));
+}
+function tpEdit(key){return ((ITIN().passes||{})[key])||{}}
+function tpKey(x){return `${x.at}|${x.n}`}
 function tpDays(){const o=OS('passes'),dir=o.dir||'cw';
   let d=(dir==='ccw'?TPD_CCW:TPD_CW).slice();
   if(o.island){let i=-1;d.forEach((x,j)=>{if(x.at==='Chhukung')i=j});d=d.slice(0,i+1).concat(TPD_ISLAND,d.slice(i+1))}
   if(o.walkin)d=TPD_WALKIN.concat(d.slice(1));
-  return d.map((x,i)=>({...x,n:i+1}));
+  return d.map((x,i)=>{const y={...x,n:i+1};const e=tpEdit(tpKey(y));
+    return {...y,...(e.t?{t:e.t}:{}),...(e.x?{x:e.x}:{}),note:e.note||''}});
 }
 function tpRouteOrder(){const seen=[],ds=tpDays();
   ds.forEach(x=>{ if(x.k==='pass'&&x.v){const p=Object.keys(TPN).find(n=>x.v.startsWith(n));if(p&&seen[seen.length-1]!==p)seen.push(p)}
@@ -2612,10 +2674,10 @@ function renderPasses(){
    ${tpMap()}
    <p class="hint">Schematic, not to scale. Tap a village to jump to its day.</p>
    <h2 class="objh">Day by day</h2>
-   <div class="daystrip tpdays">${tpDays().map(x=>`<div class="dstep${x.k==='pass'?' hi':''}${x.k==='acc'?' acc':''}${x.k==='buffer'?' buf':''}" id="tpd-${esc(x.at.replace(/\s/g,''))}-${x.n}">
+   <div class="daystrip tpdays">${tpDays().map(x=>`<div class="dstep${x.k==='pass'?' hi':''}${x.k==='acc'?' acc':''}${x.k==='buffer'?' buf':''}" id="tpd-${esc(x.at.replace(/\s/g,''))}-${x.n}" data-act="dayedit" data-scope="passes" data-k="${esc(tpKey(x))}">
       <em>Day ${x.n}${x.k==='acc'?' · acclimatisation':x.k==='buffer'?' · buffer':''}</em><b>${esc(x.t)}</b>
       <span class="dmeta">${esc(x.a.toLocaleString('en').replace(',',' '))} m · ${esc(x.g)} · ${esc(x.h)}${x.v?' · '+esc(x.v):''}</span>
-      <p>${esc(x.x)}</p></div>`).join('')}</div>
+      <p>${esc(x.x)}</p>${x.note?`<p class="dmine">${esc(x.note)}</p>`:''}<span class="dedit">Edit</span></div>`).join('')}</div>
    <h2 class="objh">Villages worth knowing</h2>
    <div class="crs">${TPVILL.map(([a,b2,c])=>`<div><b>${esc(a)} · ${esc(b2)}</b><span>${esc(c)}</span></div>`).join('')}</div>
    <h2 class="objh">Side trips and peaks</h2>
@@ -3047,14 +3109,6 @@ function planAuto(){
       : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
   }
 }
-function openRunLog(pre){
-  const d=document.getElementById('runlogdlg'),f=document.getElementById('runlogfrm');pre=pre||{};
-  f.date.value=pre.date||dayOf(new Date());f.date.max=dayOf(new Date());
-  f.type.innerHTML=Object.keys(RUNLBL).map(t=>`<option value="${t}">${RUNLBL[t]}</option>`).join('');f.type.value=pre.type||'easy';
-  f.km.value=pre.km||'';f.min.value='';f.note.value='';f.dataset.plan=pre.planId||'';
-  f.querySelectorAll('[name=feel]').forEach(x=>x.checked=false);
-  d.showModal();setTimeout(()=>{try{f.km.focus()}catch(e){}},50);
-}
 function openSync(){
   const c=syncCfg(),d=document.getElementById('syncdlg');
   d.querySelector('[name=url]').value=c.url;d.querySelector('[name=token]').value=c.token;
@@ -3440,6 +3494,7 @@ function onAct(b){
     });return}
   if(act==='syncretry'){const n=document.getElementById('syncline');if(n)n.textContent='Trying again…';
     (async()=>{try{await pullPlans();await flushQueue()}catch(e){}updateSyncLine();render()})();return}
+  if(act==='dayedit'){openDayEdit(b.dataset.scope,b.dataset.k);return}
   if(act==='legend'){const base=BASETABS.concat(['Hike']).filter((t,k,a)=>a.indexOf(t)===k);
     document.getElementById('askT').textContent='What the dots mean';
     document.getElementById('askB').innerHTML=`<span class="legend2">${base.map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}</span>
@@ -3833,7 +3888,27 @@ let PENDING_TRIP=null;
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null,EP_TYPE=null,EP_KIND=null,PA_FEEL='';
+let EP=null,EP_TYPE=null,EP_KIND=null,PA_FEEL='',DE=null;
+function openDayEdit(scope,k){
+  const f=document.getElementById('dayeditfrm'),d=document.getElementById('dayeditdlg');
+  DE={scope,k};
+  const tk=scope==='toubkal';
+  document.getElementById('deWhenSec').hidden=!tk;
+  document.getElementById('deNumSec').hidden=!tk;
+  document.getElementById('deAdd').hidden=!tk;
+  document.getElementById('deDel').hidden=!tk;
+  document.getElementById('deXH').textContent=tk?'What happens':'What happens · your notes go in the box below';
+  if(tk){const day=tkDays()[+k]||{};
+    f.d.value=day.d||'';f.to.value=day.to||'';f.t.value=day.t||'';f.n.value=day.n||'';f.x.value=day.x||'';
+  }else{const day=tpDays().find(x=>tpKey(x)===k)||{};
+    f.t.value=day.t||'';f.x.value=day.x||'';}
+  d.showModal();
+}
+function tkOwn(){
+  const it=ITIN();
+  if(!it.toubkal||!it.toubkal.days||!it.toubkal.days.length)it.toubkal={days:TK.days.map(x=>({...x}))};
+  return it.toubkal.days;
+}
 function guessKind(tab,title){
   const ks=KINDS[tab]||[],t=String(title||'').toLowerCase();
   const hit=ks.slice().sort((a,b)=>b[1].length-a[1].length).find(([k,l])=>t.includes(l.toLowerCase()));
@@ -4495,6 +4570,37 @@ document.getElementById('faLive').addEventListener('click',ev=>{
   if(b.dataset.live==='slot'){const i=+b.dataset.i;S.levels[e.id]=i;save();
     const keepP=F.p,keepLeft=F.left;setEx(true);F.p=Math.min(keepP,F.ph.length-1);F.left=Math.min(keepLeft,F.ph[F.p].t);drawFA();saveSession();
     undoBar('Slot '+(i+1)+' from here on',()=>{});return}
+});
+document.getElementById('dayeditfrm').addEventListener('submit',ev=>{
+  const f=ev.target;if(f.returnValue==='cancel'||!DE)return;
+  const v=k=>f[k].value.trim();
+  if(DE.scope==='toubkal'){const days=tkOwn(),i=+DE.k;
+    if(days[i]){days[i]={...days[i],d:v('d')||days[i].d,to:v('to')||undefined,t:v('t'),n:v('n'),x:v('x')};
+      if(!v('to'))delete days[i].to;
+      days.sort((a,b)=>String(a.d).localeCompare(String(b.d)))}
+  }else{const it=ITIN();it.passes=it.passes||{};
+    const e={...(it.passes[DE.k]||{})};e.t=v('t');e.x=v('x');
+    it.passes[DE.k]=e}
+  save();DE=null;render();
+});
+document.getElementById('deReset').addEventListener('click',()=>{
+  if(!DE)return;const it=ITIN();
+  if(DE.scope==='toubkal'){const days=tkOwn(),i=+DE.k,def=TK.days[i];
+    if(def)days[i]={...def}}
+  else if(it.passes)delete it.passes[DE.k];
+  save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
+});
+document.getElementById('deAdd').addEventListener('click',()=>{
+  if(!DE||DE.scope!=='toubkal')return;
+  const days=tkOwn(),i=+DE.k,after=days[i]||{};
+  const nd=after.d?dayOf(addDays(parseDay(after.d),1)):dayOf(new Date());
+  days.splice(i+1,0,{d:nd,t:'New day',x:''});
+  save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
+});
+document.getElementById('deDel').addEventListener('click',()=>{
+  if(!DE||DE.scope!=='toubkal')return;
+  const days=tkOwn();days.splice(+DE.k,1);
+  save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
 });
 document.getElementById('faX').addEventListener('click',()=>closeFA('exit'));
 document.getElementById('faSkipEx').addEventListener('click',()=>{F.skipped=F.skipped||{};F.skipped[F.i]=true;if(F.ph&&!F.done&&started())logFA('partial');
