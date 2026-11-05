@@ -210,6 +210,17 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .dedit{position:absolute;right:0;top:2px;font:600 12px Barlow,sans-serif;color:var(--acc);
   text-decoration:underline;text-underline-offset:3px;opacity:.75}
 .tpdays .dstep.extra::before{border-style:dashed}
+.fests{display:flex;flex-direction:column;gap:10px}
+.fest{border:1px solid var(--rule);border-radius:14px;padding:12px 13px;background:var(--panel)}
+.fest.hit{border-color:color-mix(in srgb,var(--ice) 55%,var(--rule));background:color-mix(in srgb,var(--ice) 9%,var(--panel))}
+.festtop{display:flex;align-items:baseline;gap:10px}
+.festtop b{font:700 18px/1.1 "Barlow Condensed",sans-serif;letter-spacing:.01em}
+.festtop span{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.festsub{display:block;font:600 11.5px Barlow,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:3px 0 7px}
+.fest p{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
+.festwhen{display:block;margin-top:8px;font:600 13.5px Barlow,sans-serif;color:var(--muted)}
+.fest.hit .festwhen{color:var(--ice)}
+.festnote{margin:2px 2px 0;font-size:12.5px;color:var(--far);line-height:1.4}
 .dmine{margin:6px 0 0!important;padding-left:9px;border-left:2px solid var(--acc);color:var(--ink)!important;font-size:13.5px!important}
 .dnum{display:block;font:600 12.5px Barlow,sans-serif;color:#8EC9F0;margin:0 0 5px}
 .prepl{display:flex;flex-direction:column;gap:8px}
@@ -1188,7 +1199,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='98';
+const BUILD='99';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2619,6 +2630,41 @@ function tpDays(){const o=OS('passes'),dir=o.dir||'cw';
     return {...y,...(e.t?{t:e.t}:{}),...(e.x?{x:e.x}:{}),note:e.note||''}})
     .filter(y=>!y.mine||gone.indexOf(y.key)<0);
 }
+/* The two festivals that fall in trekking season. Both follow lunar calendars,
+   so 2027 dates are calculated until Nepal publishes the 2084 calendar. */
+const TPFEST=[
+ {name:'Tihar',sub:'Five days · nationwide',from:'2027-10-27',to:'2027-10-31',
+  x:'The festival of lights. Marigold garlands, oil lamps along every wall, and dogs wearing flowers on day two. Laxmi Puja on the 29th is the big evening. In the Khumbu it is quieter than Kathmandu but the lodges mark it, and Sherpa families light the trails.'},
+ {name:'Mani Rimdu',sub:'Three public days · Tengboche monastery',from:'2027-11-14',to:'2027-11-16',
+  x:'Masked dances in the monastery courtyard below Ama Dablam, after a nineteen-day ritual cycle. The one festival worth building a trek around, and Tengboche fills months ahead if you want a bed there.'}];
+function festWhere(from,to){
+  // where the trek has you on those dates, if anywhere
+  const n=NS(),start=parseDay(n.date),days=tpDays();
+  const f=parseDay(from),t=parseDay(to);
+  const end=addDays(start,days.length-1);
+  if(t<start)return {when:'before you fly out',tone:'off'};
+  if(f>end)return {when:'after you are home',tone:'off'};
+  const hit=days.filter((d,i)=>{const dd=addDays(start,i);return dd>=f&&dd<=t});
+  if(!hit.length)return {when:'around your trek',tone:'off'};
+  const first=hit[0],last=hit[hit.length-1];
+  const place=first.at===last.at?first.at:`${first.at} to ${last.at}`;
+  return {when:`day ${first.n}${first.n===last.n?'':'–'+last.n} · ${place}`,tone:'on'};
+}
+function festPanel(){
+  const n=NS();
+  return `<div class="fests">${TPFEST.map(fe=>{
+    const w=festWhere(fe.from,fe.to);
+    const dd=(ds,o)=>parseDay(ds).toLocaleDateString(undefined,o);
+    const span=`${dd(fe.from,{day:'numeric',month:'short'})} – ${dd(fe.to,{day:'numeric',month:'short',year:'numeric'})}`;
+    return `<div class="fest${w.tone==='on'?' hit':''}">
+      <div class="festtop"><b>${esc(fe.name)}</b><span>${esc(span)}</span></div>
+      <span class="festsub">${esc(fe.sub)}</span>
+      <p>${esc(fe.x)}</p>
+      <span class="festwhen">${w.tone==='on'?'You are on the trail: ':''}${esc(w.when)}</span>
+    </div>`}).join('')}
+    <p class="festnote">Both follow lunar calendars. The 2027 dates are calculated and can move by a day or two until Nepal publishes the official calendar, usually early in the year.${n.fixed?'':' Your trek date is not fixed yet either.'}</p>
+  </div>`;
+}
 function tpRouteOrder(){const seen=[],ds=tpDays();
   ds.forEach(x=>{ if(x.k==='pass'&&x.v){const p=Object.keys(TPN).find(n=>x.v.startsWith(n));if(p&&seen[seen.length-1]!==p)seen.push(p)}
     (x.wp||[]).forEach(w=>{if(TPN[w]&&seen[seen.length-1]!==w)seen.push(w)});
@@ -2718,6 +2764,8 @@ function renderPasses(){
       <em>Day ${x.n}${x.k==='acc'?' · acclimatisation':x.k==='buffer'?' · buffer':''}</em><b>${esc(x.t)}</b>
       <span class="dmeta">${esc(x.a.toLocaleString('en').replace(',',' '))} m · ${esc(x.g)} · ${esc(x.h)}${x.v?' · '+esc(x.v):''}</span>
       <p>${esc(x.x)}</p>${x.note?`<p class="dmine">${esc(x.note)}</p>`:''}<span class="dedit">Edit</span></div>`).join('')}</div>
+   <h2 class="objh">Festivals while you are there</h2>
+   ${festPanel()}
    <h2 class="objh">Villages worth knowing</h2>
    <div class="crs">${TPVILL.map(([a,b2,c])=>`<div><b>${esc(a)} · ${esc(b2)}</b><span>${esc(c)}</span></div>`).join('')}</div>
    <h2 class="objh">Side trips and peaks</h2>
