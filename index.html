@@ -209,6 +209,7 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .dstep[data-act]{cursor:pointer}
 .dedit{position:absolute;right:0;top:2px;font:600 12px Barlow,sans-serif;color:var(--acc);
   text-decoration:underline;text-underline-offset:3px;opacity:.75}
+.tpdays .dstep.extra::before{border-style:dashed}
 .dmine{margin:6px 0 0!important;padding-left:9px;border-left:2px solid var(--acc);color:var(--ink)!important;font-size:13.5px!important}
 .dnum{display:block;font:600 12.5px Barlow,sans-serif;color:#8EC9F0;margin:0 0 5px}
 .prepl{display:flex;flex-direction:column;gap:8px}
@@ -1060,6 +1061,10 @@ button.chip::after{display:none}
     <div class="row2"><label>Date<input name="d" type="date"></label>
       <label>Last day <span class="hint">optional</span><input name="to" type="date"></label></div></section>
   <section class="epsec"><h4>Title</h4><input name="t" type="text" maxlength="80"></section>
+  <section class="epsec" id="deTpSec" hidden><h4>Your own day</h4>
+    <div class="row2"><label>Where<input name="at" type="text" maxlength="40" placeholder="Namche"></label>
+      <label>Altitude, m<input name="a" type="number" min="1000" max="6500" step="1"></label></div>
+    <label>Hours walking <span class="hint">optional</span><input name="h" type="text" maxlength="20" placeholder="4–5 h"></label></section>
   <section class="epsec" id="deNumSec"><h4>Times and numbers</h4>
     <input name="n" type="text" maxlength="90" placeholder="Walk 5–6 h · ≈11 km · 1,740 → 3,207 m"></section>
   <section class="epsec"><h4 id="deXH">What happens</h4>
@@ -1183,7 +1188,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='94';
+const BUILD='98';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -1313,6 +1318,8 @@ const OLD={
   levels:['Knee to wall','Foot 2 cm further back','Light weight resting on the knee'],frames:[
   {cap:'Half kneel, front toes near the wall',props:[wall(128)],pose:{hip:[86,114],torso:0,near:[112,142],far:[58,140],farKnee:'down',farFoot:180,hand:[118,84],elbow:'down'}},
   {cap:'Drive the knee to touch the wall',props:[wall(128)],pose:{hip:[100,116],torso:4,near:[112,142],far:[58,140],farKnee:'down',farFoot:180},arrows:[[98,100,120,100]]}]},
+ packday:{name:'Long day with the pack',dose:'4–7 h, pack as on the day',focus:'legs',
+  cue:'The session that decides a winter summit: hours on your feet with the weight you will actually carry. Boots, not trainers. Steady enough to talk, eat and drink on the move, and keep walking on the way down rather than stopping. Build the hours first, the weight second.',frames:[]},
  longhike:{name:'Long hike',dose:'Once a week',cue:'Add pack weight gradually. It should feel like a long, steady day, not a race.',
   levels:['5 kg pack, 3 h','8 kg pack, 4 h','10 kg pack, 5+ h','10 kg, back-to-back days'],frames:[]},
  hills:{name:'Hill or stair repeats',dose:'Once a week',cue:'Steady uphill effort, walk down easy. Hard but controlled.',
@@ -1500,6 +1507,12 @@ const LV={
   {v:'Foot a fist-width back',p:{}},
   {v:'2 s hold with the knee on the wall',p:{}},
   {v:'Light weight resting on the knee',p:{reps:12}}]},
+ packday:{kind:'text',P:{dose:'4–7 h, pack as on the day'},L:[
+  {v:'3 h, light day pack',p:{dose:'3 h, light pack'}},
+  {v:'4 h, 6–8 kg',p:{dose:'4 h, 6–8 kg'}},
+  {v:'5 h, 10 kg, in boots',p:{dose:'5 h, 10 kg, boots'}},
+  {v:'6 h, 12 kg, some snow underfoot',p:{dose:'6 h, 12 kg, snow'}},
+  {v:'7 h, 12–15 kg, 1,200 m of climbing',p:{dose:'7 h, 12–15 kg, 1,200 m up'}}]},
  longhike:{kind:'text',P:{dose:'Once a week'},L:[
   {v:'2–3 hours, light daypack',p:{}},
   {v:'3–4 hours, 5 kg pack',p:{}},
@@ -1744,6 +1757,23 @@ Object.assign(EX,{
    {cap:'Lift it off the floor',props:[],pose:{hip:[76,86],torso:2,near:[78,142],far:[74,142],hand:[80,122],elbow:'back'},over:['<rect class="prop" x="70" y="114" width="20" height="17" rx="2.5"/><line class="far" x1="80" y1="131" x2="80" y2="134" stroke-width="2.5"/><circle class="plate" cx="80" cy="135" r="9"/><circle class="platehole" cx="80" cy="135" r="2"/>']},
    {cap:'Wide pinch',nofloor:true,raw:pinchClose(58,'wide')},
    {cap:'Narrow pinch',nofloor:true,raw:pinchClose(26,'narrow')}]},
+ lockoff:{name:'Lock-off holds',focus:'pull',kind:'hold',P:{sets:3,time:10,rest:60,sides:true},
+  cue:'Pull up and hold still at the angle you find hardest, usually about 90°. Stop the set when the hold starts sliding rather than grinding out a bad one.',
+  L:[{v:'Feet on a box for help',p:{sets:2,time:8}},{v:'Both hands, hold at 90°',p:{}},
+     {v:'One arm, other hand light on the wall',p:{}},{v:'Three angles: top, 90°, low',p:{time:12}},
+     {v:'One arm with added weight',p:{time:12}}],frames:[]},
+ arc:{name:'Continuous easy climbing',focus:'stamina',kind:'hold',P:{sets:2,time:1200,rest:300,sides:false},
+  cue:'Climb or traverse at a grade you could hold a conversation on, without coming off the wall. Forearms warm, never pumped. This is the multipitch engine: it builds the capillaries that let you climb all day, not the power for one hard move.',
+  L:[{v:'2 × 12 min',p:{time:720}},{v:'2 × 20 min',p:{}},{v:'2 × 25 min',p:{time:1500}},
+     {v:'3 × 20 min',p:{sets:3}},{v:'2 × 30 min on steeper ground',p:{time:1800}}],frames:[]},
+ silentfeet:{name:'Silent feet',focus:'technique',kind:'hold',P:{sets:1,time:600,rest:0,sides:false},
+  cue:'Easy terrain, place every foot without a sound. Look at the hold until the shoe is on it. Slow is the point: noise means you are dropping onto holds rather than placing on them.',
+  L:[{v:'10 min on slab',p:{}},{v:'10 min vertical',p:{}},{v:'15 min, no rechecking a placed foot',p:{time:900}},
+     {v:'15 min on steeper ground',p:{time:900}},{v:'20 min, eyes on the foot until it lands',p:{time:1200}}],frames:[]},
+ tension:{name:'Steep-wall body tension',focus:'core',kind:'hold',P:{sets:4,time:20,rest:60,sides:false},
+  cue:'On an overhang, hang with the feet on and the hips pulled in to the wall, no swinging. Squeeze everything between hands and feet. Drop off as soon as the hips sag.',
+  L:[{v:'Gentle overhang, 15 s',p:{time:15}},{v:'Steeper, 20 s',p:{}},{v:'One hand off, alternating',p:{}},
+     {v:'One foot off',p:{}},{v:'Moving between holds without swinging',p:{time:25}}],frames:[]},
  pullup:{name:'Pull-ups',kind:'reps',P:{sets:5,reps:5,unit:''},
   cue:'3\u20135 reps depending on the day. Start every rep from a dead hang with the shoulders set, chin over the bar, lower under control. Stop a rep before failure.',
   L:[{v:'Bodyweight, 3\u20135 reps',p:{}},{v:'5 kg added',p:{}},{v:'10 kg added',p:{}},{v:'15 kg added',p:{reps:3}},{v:'Typewriters or uneven grip',p:{reps:3}}],
@@ -1836,13 +1866,14 @@ const TRAIN_IDS=['nepal','ice','climb','run','warmup'];
 const PROGS=[
  {id:'nepal',chip:'Nepal',title:'Three Passes prep',lede:'Strength and endurance for Nepal, Oct–Nov 2027. Built for 6–8 hour days with an 8–10 kg pack and three passes over 5,300 m.',sections:[
   {title:'Strength',sub:'Two sessions a week. When every set feels easy, go up a level.',items:['stepup','stepdown','split','rdl','calf','tib','bandwalk','plank','sideplank'],extra:['tib','bandwalk','plank','sideplank']},
-  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['longhike','stair44','sm44','stairs','smsteady','hills','vo2','z2'],extra:['z2','vo2']}]},
+  {title:'Endurance',sub:'The engine. This matters more than anything in the gym.',items:['packday','longhike','stair44','sm44','stairs','smsteady','hills','vo2','z2'],extra:['z2','vo2']}]},
  {id:'ice',chip:'Ice',title:'Ice climbing',lede:'Grip endurance, shoulders and calves for steep ice. Warm up the forearms properly before any hang session.',sections:[
   {title:'Tools and grip',sub:'Twice a week, never on back-to-back days.',items:['toolhang','tooltraverse','lockoff'],extra:['lockoff']},
   {title:'Support work',sub:'After the hangs, or on a separate day.',items:['frontpoint','scap','hangknee','calf','plank'],extra:['calf','plank']}]},
  {id:'climb',chip:'Climbing',title:'Climbing',lede:'Finger strength and pulling. Always start with the pre-climb warm-up.',sections:[
   {title:'Fingers',sub:'Twice a week, not the day before a hard climbing day. Rest at least 48 hours between finger sessions.',items:['hangboard','pinch'],extra:[]},
-  {title:'Pull',sub:'After the finger work or on its own day.',items:['pullup','scap'],extra:[]}]},
+  {title:'Pull',sub:'After the finger work or on its own day.',items:['pullup','lockoff','scap','tension'],extra:['tension']},
+  {title:'On the wall',sub:'Stamina and footwork, the things that decide a long multipitch day. Easy enough to do the day before climbing.',items:['arc','silentfeet'],extra:[]}]},
  {id:'warmup',chip:'Warm up',title:'Warm up',lede:'Pick the one for today\u2019s session. The essentials take a few minutes.',sections:[
   {pid:'prerun',title:'Pre-run',sub:'Dynamic moves before you head out. Keep it loose, no long holds.',routine:true,
    items:['anklecircle','legswing','legswingside',{id:'lunge',...W({sets:1,reps:8,unit:' per leg'})},'worldsgreatest','toysoldier','highknee','buttkick',{id:'pogo',...W({sets:2,reps:20,unit:''})},'askip','adductorrock'],
@@ -2571,13 +2602,22 @@ function tkDays(){
   return (own&&own.length?own:TK.days).map((x,i)=>({...x,k:i}));
 }
 function tpEdit(key){return ((ITIN().passes||{})[key])||{}}
-function tpKey(x){return `${x.at}|${x.n}`}
+function tpKey(x){return x.mine?`mine|${x.key}`:`${x.at}|${x.n}`}
 function tpDays(){const o=OS('passes'),dir=o.dir||'cw';
   let d=(dir==='ccw'?TPD_CCW:TPD_CW).slice();
   if(o.island){let i=-1;d.forEach((x,j)=>{if(x.at==='Chhukung')i=j});d=d.slice(0,i+1).concat(TPD_ISLAND,d.slice(i+1))}
   if(o.walkin)d=TPD_WALKIN.concat(d.slice(1));
+  const extra=((ITIN().passes||{}).added)||[];
+  if(extra.length){const out=[],nth={};
+    d.forEach(x=>{out.push(x);
+      nth[x.at]=(nth[x.at]||0)+1;
+      extra.filter(y=>y.after===x.at&&(y.afterNth||1)===nth[x.at]).forEach(y=>out.push({at:y.at||x.at,
+        t:y.t||'Extra day',a:+y.a||x.a,g:y.g||'+0 m',h:y.h||'—',x:y.x||'',k:y.k||'extra',mine:true,key:y.key}))});
+    d=out}
+  const gone=((ITIN().passes||{}).removed)||[];
   return d.map((x,i)=>{const y={...x,n:i+1};const e=tpEdit(tpKey(y));
-    return {...y,...(e.t?{t:e.t}:{}),...(e.x?{x:e.x}:{}),note:e.note||''}});
+    return {...y,...(e.t?{t:e.t}:{}),...(e.x?{x:e.x}:{}),note:e.note||''}})
+    .filter(y=>!y.mine||gone.indexOf(y.key)<0);
 }
 function tpRouteOrder(){const seen=[],ds=tpDays();
   ds.forEach(x=>{ if(x.k==='pass'&&x.v){const p=Object.keys(TPN).find(n=>x.v.startsWith(n));if(p&&seen[seen.length-1]!==p)seen.push(p)}
@@ -2674,7 +2714,7 @@ function renderPasses(){
    ${tpMap()}
    <p class="hint">Schematic, not to scale. Tap a village to jump to its day.</p>
    <h2 class="objh">Day by day</h2>
-   <div class="daystrip tpdays">${tpDays().map(x=>`<div class="dstep${x.k==='pass'?' hi':''}${x.k==='acc'?' acc':''}${x.k==='buffer'?' buf':''}" id="tpd-${esc(x.at.replace(/\s/g,''))}-${x.n}" data-act="dayedit" data-scope="passes" data-k="${esc(tpKey(x))}">
+   <div class="daystrip tpdays">${tpDays().map(x=>`<div class="dstep${x.k==='pass'?' hi':''}${x.k==='acc'?' acc':''}${x.k==='buffer'?' buf':''}${x.mine?' extra':''}" id="tpd-${esc(x.at.replace(/\s/g,''))}-${x.n}" data-act="dayedit" data-scope="passes" data-k="${esc(tpKey(x))}">
       <em>Day ${x.n}${x.k==='acc'?' · acclimatisation':x.k==='buffer'?' · buffer':''}</em><b>${esc(x.t)}</b>
       <span class="dmeta">${esc(x.a.toLocaleString('en').replace(',',' '))} m · ${esc(x.g)} · ${esc(x.h)}${x.v?' · '+esc(x.v):''}</span>
       <p>${esc(x.x)}</p>${x.note?`<p class="dmine">${esc(x.note)}</p>`:''}<span class="dedit">Edit</span></div>`).join('')}</div>
@@ -2960,8 +3000,8 @@ const trainRef=k=>k.startsWith('x:')?k.slice(2):`${k}|e`;
 // what counts as training for each kind of day out
 const TRAINFIRST=['Ice climbing','Nepal'];
 const TRAINFOR={Run:[],
-  Climbing:[['climb',0],['climb',1]],
-  Bouldering:[['climb',0],['climb',1]],
+  Climbing:[['climb',0],['climb',1],['climb',2]],
+  Bouldering:[['climb',0],['climb',1],['climb',2]],
   'Ice climbing':[['ice',0],['ice',1]],
   Hike:[],
   Nepal:[['nepal',0],['nepal',1]],
@@ -3214,7 +3254,16 @@ function sectionItems(p,si){
       e.tier=o||(e.custom?(S.custom[e.id].tier||'e'):(extra.includes(e.id)?'x':'e'));e.sec=si;return e})
     .filter(Boolean);
 }
-const estimate=items=>Math.max(1,Math.round(items.reduce((a,e)=>a+(e.timed?totalOf(e):45),0)/60));
+function repSeconds(e){
+  // about 3 s a rep, plus the rest between sets, plus a little to set up
+  const p=e.p||{},sets=Math.max(1,+p.sets||1),reps=Math.max(1,+p.reps||10);
+  const sides=p.sides?2:1,work=reps*3*sides,rest=+p.rest||(e.kind==='reps'?60:30);
+  return sets*work+(sets-1)*rest+20;
+}
+// a whole day out has no business being counted in a gym session's length
+const OUTING={longhike:4*3600,hills:45*60,z2:35*60,smsteady:30*60};
+const secondsOf=e=>e.timed?totalOf(e):OUTING[e.id]||(e.kind==='reps'?repSeconds(e):45);
+const estimate=items=>Math.max(1,Math.round(items.reduce((a,e)=>a+secondsOf(e),0)/60));
 
 /* ---------- tuning options (native selects) ---------- */
 const rng=(a,b,s)=>{const o=[];for(let v=a;v<=b;v+=s)o.push(v);return o};
@@ -3292,7 +3341,7 @@ function card(e){
    ${e.L?`<div class="lv"><div class="lvtxt"><span class="lvn">Slot ${e.lvl+1}</span>${esc(e.version)}${e.note?`<span class="slotnote">${esc(e.note)}</span>`:''}</div>${dotsHTML(e,'c')}</div>`:''}
    ${e.warm?`<p class="warmnote">Warm-up dose, separate from your slots</p>`:''}
    ${chips?`<details class="adj" data-oid="${esc(e.pid+':'+e.id)}"${openAdj.has(e.pid+':'+e.id)?' open':''}><summary>Adjust numbers${e.tuned?' <em>edited</em>':''}</summary>
-      <div class="chips">${chipsHTML(e)}${e.timed?`<span class="tot">≈${Math.max(1,Math.round(totalOf(e)/60))} min</span>`:''}</div>
+      <div class="chips">${chipsHTML(e)}<span class="tot">≈${Math.max(1,Math.round(secondsOf(e)/60))} min</span></div>
       ${e.tuned?`<button class="link" data-act="untune" data-key="${esc(e.key)}">Reset ${e.L?'slot '+(e.lvl+1):'to the standard'} numbers</button>`:''}</details>`:''}
    <div class="acts">${e.timed?`<button class="go sm" data-act="one">${playIcon}Start</button>`:''}<button class="go sm alt" data-act="logdone">✓ Done</button></div>
    <div class="acts2"><button class="link" data-act="exday">Add to a day</button><button class="link" data-act="edit">Edit</button>${e.custom?'':`<button class="link" data-act="hide">Hide</button>`}</div>
@@ -3339,7 +3388,6 @@ function render(){
     if(WARMFOR[p.id])document.getElementById('main').insertAdjacentHTML('afterbegin',
       `<button class="warmlink" data-act="gowarm" data-sec="${WARMFOR[p.id][0]}">Warm up first → ${WARMFOR[p.id][1]}</button>`);
   }
-  if(p.id==='nepal'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',nepalDash())}catch(err){showErr('Countdown: '+err.message)}}
   if(p.id==='run'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',runDash())}catch(err){showErr('Run plan: '+err.message)}}
   const sess=F.open?null:loadSession();let rb=document.getElementById('resumebar');
   if(sess){const e=resolveSrc(sess.src[sess.i]);
@@ -3448,6 +3496,13 @@ document.body.addEventListener('click',e=>{
 function onAct(b){
   const act=b.dataset.act,art=b.closest('.ex'),p=prog();
   log('tap '+act);
+  // one group per screen; each returns once it has handled the tap
+  for(const h of [actSession,actCalendar,actPlanning,actObjectives,actRows,actCard]){
+    if(h(b,act,p,art)!==false)return;
+  }
+}
+
+function actSession(b,act,p,art){
   if(act==='start'){const all=sectionItems(p,+b.dataset.sec),q=b.dataset.mode==='e';
     openFA((q?all.filter(e=>e.tier==='e'):all),(p.sections.length>1?p.sections[+b.dataset.sec].title:p.title)+(q?', essentials':''));return}
   if(act==='add'){openDlg(null,+b.dataset.sec);return}
@@ -3465,6 +3520,10 @@ function onAct(b){
       if(rows.length){const l=localLog();rows.forEach(r=>{if(!l.some(x=>x.id===r.id))l.push(r);unbury([r.id]);
         if(connected())enqueue({op:'log',row:r})});setLocalLog(l);if(connected())scheduleFlush(300)}
       refresh()});return}
+  return false;
+}
+
+function actCalendar(b,act,p,art){
   if(act==='unhide'){const kps=kpsOf(p);S.hidden=S.hidden.filter(h=>!kps.some(k=>h.startsWith(k+':')));save();refresh();return}
   if(act==='export'){exportData();return}
   if(act==='syncsetup'){openSync();return}
@@ -3511,6 +3570,10 @@ function onAct(b){
     const eid=ar.dataset.id,esec=+ar.dataset.sec;
     const e=sectionItems(p,esec).find(x=>x.id===eid);if(!e)return;
     SEL={on:false,keys:[selKey(p,esec,eid)]};openSelDay();return}
+  return false;
+}
+
+function actPlanning(b,act,p,art){
   if(act==='selmode'){SEL={on:!SEL.on,keys:SEL.on?[]:SEL.keys};selBar();refresh();return}
   if(act==='seltoggle'){const k=b.dataset.key;SEL.keys=SEL.keys.includes(k)?SEL.keys.filter(x=>x!==k):SEL.keys.concat([k]);selBar();refresh();return}
   if(act==='selend'){SEL={on:false,keys:[]};selBar();refresh();return}
@@ -3543,6 +3606,10 @@ function onAct(b){
   if(act==='gorun'){go('run');return}
   if(act==='gocal'){go('history');return}
   if(act==='gonepal'){go('nepal');return}
+  return false;
+}
+
+function actObjectives(b,act,p,art){
   if(act==='objopen'||act==='objgo'){go(b.dataset.go);return}
   if(act==='tpjump'){const el=[...document.querySelectorAll('.tpdays .dstep')].find(x=>x.id.includes('tpd-'+b.dataset.v.replace(/\s/g,'')+'-'));
     if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('flash');setTimeout(()=>el.classList.remove('flash'),1400)}return}
@@ -3562,6 +3629,10 @@ function onAct(b){
       f.longDay.innerHTML=wd.map((n,i)=>`<option value="${i}">${n}</option>`).join('');f.longDay.value=String(r.longDay??1)}
     f.anchorKm.value=Math.round(weekInfo(new Date()).target);f.anchorKm.dataset.was=f.anchorKm.value;f.anchorLong.value=weekInfo(new Date()).long;f.anchorLong.dataset.was=f.anchorLong.value;f.peakKm.value=r.peakKm;f.easyPace.value=fmtPace(r.easyPace);
     document.getElementById('runsetdlg').showModal();return}
+  return false;
+}
+
+function actRows(b,act,p,art){
   if(act==='pdone'&&(plansCache().find(x=>x.id===b.dataset.id)||{}).tab==='Run'){const pl=plansCache().find(x=>x.id===b.dataset.id),m=S.runMeta[pl.id]||{};
     openRunLog({planId:pl.id,date:pl.date,type:m.type||'easy',km:m.km||''});return}
   if(act==='pdone'){const pl=plansCache().find(x=>x.id===b.dataset.id);if(!pl)return;
@@ -3601,6 +3672,10 @@ function onAct(b){
       if(wasRun&&!F.run){F.run=true;F.last=Date.now();clearInterval(F.timer);F.timer=setInterval(tick,1000)}
       drawFA();saveSession();return}
     setTune(b.dataset.key,k,nv);return}
+  return false;
+}
+
+function actCard(b,act,p,art){
   if(!art)return;
   const id=art.dataset.id,sec=+art.dataset.sec;
   if(act==='one'){const e=sectionItems(p,sec).find(x=>x.id===id);if(e)openFA([e],e.name);return}
@@ -3612,7 +3687,9 @@ function onAct(b){
     refresh();
     undoBar('Logged '+e.name+(e.dose?' · '+e.dose:''),()=>{removeEntry(lid);refresh()});return}
   if(act==='edit'){openDlg(id,sec);return}
+  return false;
 }
+
 
 /* ---------- dialog ---------- */
 const dlg=document.getElementById('dlg'),frm=document.getElementById('frm');
@@ -3880,15 +3957,18 @@ function openDayEdit(scope,k){
   const f=document.getElementById('dayeditfrm'),d=document.getElementById('dayeditdlg');
   DE={scope,k};
   const tk=scope==='toubkal';
+  const mine=!tk&&String(k).startsWith('mine|');
   document.getElementById('deWhenSec').hidden=!tk;
   document.getElementById('deNumSec').hidden=!tk;
-  document.getElementById('deAdd').hidden=!tk;
-  document.getElementById('deDel').hidden=!tk;
+  document.getElementById('deTpSec').hidden=tk||!mine;
+  document.getElementById('deAdd').hidden=false;
+  document.getElementById('deDel').hidden=!tk&&!mine;
   document.getElementById('deXH').textContent=tk?'What happens':'What happens · your notes go in the box below';
   if(tk){const day=tkDays()[+k]||{};
     f.d.value=day.d||'';f.to.value=day.to||'';f.t.value=day.t||'';f.n.value=day.n||'';f.x.value=day.x||'';
   }else{const day=tpDays().find(x=>tpKey(x)===k)||{};
-    f.t.value=day.t||'';f.x.value=day.x||'';}
+    f.t.value=day.t||'';f.x.value=day.x||'';
+    f.a.value=day.a||'';f.h.value=day.h&&day.h!=='—'?day.h:'';f.at.value=day.at||'';}
   d.showModal();
 }
 function tkOwn(){
@@ -4548,8 +4628,10 @@ document.getElementById('dayeditfrm').addEventListener('submit',ev=>{
       if(!v('to'))delete days[i].to;
       days.sort((a,b)=>String(a.d).localeCompare(String(b.d)))}
   }else{const it=ITIN();it.passes=it.passes||{};
-    const e={...(it.passes[DE.k]||{})};e.t=v('t');e.x=v('x');
-    it.passes[DE.k]=e}
+    if(String(DE.k).startsWith('mine|')){const key=String(DE.k).slice(5);
+      it.passes.added=(it.passes.added||[]).map(y=>y.key===key
+        ?{...y,t:v('t'),x:v('x'),at:v('at')||y.at,a:+v('a')||y.a,h:v('h')||'—'}:y)}
+    else{const e={...(it.passes[DE.k]||{})};e.t=v('t');e.x=v('x');it.passes[DE.k]=e}}
   save();DE=null;render();
 });
 document.getElementById('deReset').addEventListener('click',()=>{
@@ -4560,15 +4642,26 @@ document.getElementById('deReset').addEventListener('click',()=>{
   save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
 });
 document.getElementById('deAdd').addEventListener('click',()=>{
-  if(!DE||DE.scope!=='toubkal')return;
-  const days=tkOwn(),i=+DE.k,after=days[i]||{};
-  const nd=after.d?dayOf(addDays(parseDay(after.d),1)):dayOf(new Date());
-  days.splice(i+1,0,{d:nd,t:'New day',x:''});
+  if(!DE)return;
+  if(DE.scope==='toubkal'){const days=tkOwn(),i=+DE.k,after=days[i]||{};
+    const nd=after.d?dayOf(addDays(parseDay(after.d),1)):dayOf(new Date());
+    days.splice(i+1,0,{d:nd,t:'New day',x:''});
+  }else{
+    // a day of your own, taking its altitude from the day it follows
+    const it=ITIN();it.passes=it.passes||{};
+    const all=tpDays(),at=all.findIndex(x=>tpKey(x)===DE.k),day=all[at]||{};
+    const nth=all.slice(0,at+1).filter(x=>x.at===day.at&&!x.mine).length;
+    it.passes.added=(it.passes.added||[]).concat([{key:uid(),after:day.at,afterNth:nth,at:day.at,
+      t:'Extra day at '+(day.at||'camp'),a:day.a,g:'+0 m',h:'—',x:'',k:'extra'}]);
+  }
   save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
 });
 document.getElementById('deDel').addEventListener('click',()=>{
-  if(!DE||DE.scope!=='toubkal')return;
-  const days=tkOwn();days.splice(+DE.k,1);
+  if(!DE)return;
+  if(DE.scope==='toubkal'){const days=tkOwn();days.splice(+DE.k,1)}
+  else if(String(DE.k).startsWith('mine|')){const it=ITIN();it.passes=it.passes||{};
+    const key=String(DE.k).slice(5);
+    it.passes.added=(it.passes.added||[]).filter(y=>y.key!==key)}
   save();DE=null;try{document.getElementById('dayeditdlg').close()}catch(e){}render();
 });
 document.getElementById('faX').addEventListener('click',()=>closeFA('exit'));
