@@ -1258,7 +1258,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='104';
+const BUILD='105';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -3326,7 +3326,7 @@ function rememberPlace(x,tab){x=(x||'').trim();if(!x)return;
 function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
-  PA={tab:null,kind:null,mode:null};
+  PA={tab:null,kind:null,mode:null,train:[],open:null};
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
   f.classList.remove('logmode');f.already.checked=false;
   {const h=document.getElementById('paTitle');if(h)h.textContent='Plan a session';}
@@ -3417,6 +3417,7 @@ const DURNAME=m=>m==30?'30 min':m==60?'1 h':m==120?'2 h':m==240?'Half day':m==48
   :m>=60?`${Math.floor(m/60)} h${m%60?' '+(m%60):''}`:`${m} min`;
 function sheetSummary(){
   const f=document.getElementById('planfrm');if(!f)return;
+  PA.train=PA.train||[];
   const set=(id,txt,dim)=>{const el=document.getElementById(id);if(!el)return;
     el.textContent=txt;el.classList.toggle('dim',!!dim)};
   // what
