@@ -212,7 +212,12 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .tpdays .dstep.extra::before{border-style:dashed}
 .shape{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--rule);
   border-radius:14px;padding:11px 12px;margin:0 0 10px;color:var(--ink)}
-.shblock{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--acc);margin-bottom:7px}
+.shblock{display:flex;align-items:baseline;gap:8px;font:600 11px Barlow,sans-serif;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:8px}
+.shadj{margin-left:auto;text-transform:none;letter-spacing:0;font-size:13px;
+  text-decoration:underline;text-underline-offset:3px}
+.shkm{display:block;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.shclash{display:block;margin-top:6px;font-size:12.5px;color:var(--muted)}
 .shrow{display:flex;flex-wrap:wrap;gap:6px}
 .sh{font:600 12.5px Barlow,sans-serif;color:var(--muted);border:1px solid var(--rule);
   border-radius:999px;padding:4px 9px;white-space:nowrap}
@@ -1258,7 +1263,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='105';
+const BUILD='106';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2937,12 +2942,15 @@ function weekShape(){
   const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
   const nice=k=>NICE[k]||k;
   if(!w.sessions.length)return `<p class="shapenone">${esc(w.block.name)} · ${esc(w.block.why)}</p>`;
+  const m=monthSoFar();
   return `<button class="shape" data-act="focusopen">
-    <span class="shblock">${esc(w.block.name)}</span>
+    <span class="shblock">${esc(w.block.name)}${w.life==='busy'?' · busy weeks':w.life==='lots'?' · time to train':''}<span class="shadj">Adjust</span></span>
     <span class="shrow">${w.sessions.map(s=>{
       const done=rows.filter(SESSMATCH[s.key]||(()=>false)).length;
       const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
       return `<span class="sh${done>=need?' done':''}${s.focus?' foc':''}">${done}/${need===want?need:need+'–'+want} ${esc(nice(s.key))}</span>`}).join('')}</span>
+    ${w.km?`<span class="shkm">${w.kmLo&&w.kmLo!==w.km?w.kmLo+'–':''}${w.km} km of running · last four weeks ${m.run} runs, ${Math.round(m.km)} km</span>`:''}
+    ${w.clash.length?`<span class="shclash">${esc(w.clash[0])}</span>`:''}
   </button>`;
 }
 const NICE={run:'runs',ice:'ice',climb:'climbing',boulder:'bouldering',legs:'legs'};
@@ -3722,7 +3730,6 @@ function render(){
       `<button class="warmlink" data-act="gowarm" data-sec="${WARMFOR[p.id][0]}">Warm up first → ${WARMFOR[p.id][1]}</button>`);
   }
   if(p.id==='run'){try{document.getElementById('main').insertAdjacentHTML('afterbegin',runDash())}catch(err){showErr('Run plan: '+err.message)}}
-  if(TRAIN_IDS.includes(p.id)){try{document.getElementById('main').insertAdjacentHTML('afterbegin',focusCard())}catch(err){showErr('This week: '+err.message)}}
   const sess=F.open?null:loadSession();let rb=document.getElementById('resumebar');
   if(sess){const e=resolveSrc(sess.src[sess.i]);
     const where=sess.done?'finished, next up':(sess.ph&&sess.ph[sess.p]?sess.ph[sess.p].l.replace(/^Get ready · /,''):'');
