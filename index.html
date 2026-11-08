@@ -224,6 +224,11 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .sh.done{color:var(--rest);border-color:color-mix(in srgb,var(--rest) 45%,var(--rule))}
 .sh.foc{border-style:dashed}
 .shapenone{margin:0 0 12px;font-size:13.5px;color:var(--muted)}
+.blocknudge{display:block;margin:0 0 14px;padding:12px 13px;border-radius:14px;
+  border:1px solid color-mix(in srgb,var(--acc) 40%,var(--rule));background:color-mix(in srgb,var(--acc) 8%,transparent)}
+.blocknudge b{display:block;font:700 16px/1.2 "Barlow Condensed",sans-serif;letter-spacing:.02em;color:var(--acc);margin-bottom:4px}
+.blocknudge span{display:block;font-size:13.5px;color:var(--muted);line-height:1.45}
+.nudgeacts{display:flex;gap:16px;margin-top:9px}
 .focus{margin:0 0 14px}
 .fhead{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--rule);
   border-radius:16px;padding:13px 14px;color:var(--ink);position:relative}
@@ -244,14 +249,28 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .fseg{display:flex;gap:0;background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:3px}
 .fbtn{flex:1;background:none;border:0;border-radius:9px;padding:8px 4px;color:var(--muted);font:600 13.5px Barlow,sans-serif}
 .fbtn.on{background:var(--prop);color:var(--ink)}
-.funtil{margin-top:10px}
-.ulab{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;
-  color:var(--muted);margin-bottom:6px}
-.uchips{display:flex;flex-wrap:wrap;gap:6px}
+.funtil{margin-top:10px;border-top:1px solid var(--rule);padding-top:8px}
+.funtil>summary{list-style:none;display:flex;align-items:baseline;gap:8px;cursor:pointer}
+.funtil>summary::-webkit-details-marker{display:none}
+.funtil>summary b{flex:1;font-weight:600;font-size:14.5px;color:var(--ink)}
+.uedit{color:var(--acc);font:600 12.5px Barlow,sans-serif;text-decoration:underline;text-underline-offset:3px}
+.ulab{font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.uchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
 .uchip{background:none;border:1.5px solid var(--rule);border-radius:999px;padding:6px 12px;
   color:var(--muted);font:600 13px Barlow,sans-serif}
 .uchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .fmean{display:block;margin-top:7px;font-size:12.5px;color:var(--far)}
+.fispan{margin:-6px 0 14px;font-size:13px;color:var(--muted)}
+.btn.wide{display:block;width:100%;margin:16px 0 0;border-radius:14px;padding:13px;
+  border:1.5px solid color-mix(in srgb,var(--acc) 50%,var(--rule));color:var(--acc);font-weight:600}
+.firow{display:flex;align-items:baseline;gap:10px;padding:8px 2px;border-top:1px solid var(--rule)}
+.firow b{flex:1;font-weight:600;font-size:15px;text-transform:capitalize}
+.firow span{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.firow span.ok{color:var(--rest)}
+.fikey{margin:8px 2px 0;font-size:12.5px;color:var(--far);display:flex;align-items:center;gap:7px}
+.dotok{width:9px;height:9px;border-radius:50%;background:var(--rest);display:inline-block}
+.finext p{margin:0 0 9px;font-size:14px;line-height:1.45;color:var(--muted)}
+.finext p:first-child{color:var(--ink)}
 .offscreen{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .fests{display:flex;flex-direction:column;gap:10px}
 .fest{border:1px solid var(--rule);border-radius:14px;padding:12px 13px;background:var(--panel)}
@@ -1123,6 +1142,22 @@ button.chip::after{display:none}
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" value="save" id="wbSave">Add to the calendar</button></div>
 </form></dialog>
 
+<dialog id="focusinfodlg"><form method="dialog" id="focusinfofrm">
+  <h2>Where you are</h2>
+  <p class="fdblock"><b id="fiBlock"></b><span id="fiWhy"></span></p>
+  <p class="fispan" id="fiSpan"></p>
+  <h4>The week this block wants</h4>
+  <div id="fiWeek"></div>
+  <h4>Last four weeks</h4>
+  <div id="fiHist"></div>
+  <p class="fikey"><i class="dotok"></i> at or above the floor</p>
+  <h4>What I would do next</h4>
+  <div id="fiNext" class="finext"></div>
+  <button type="button" class="btn wide" id="fiFill" hidden></button>
+  <div class="dbtns"><button type="button" class="link" data-act="focusopen">Adjust the dials</button><span></span>
+    <button class="btn pri" value="save">Close</button></div>
+</form></dialog>
+
 <dialog id="focusdlg"><form method="dialog" id="focusfrm">
   <h2>What to focus on</h2>
   <p class="fdblock"><b id="fdBlock"></b><span id="fdWhy"></span></p>
@@ -1271,7 +1306,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='107';
+const BUILD='109';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2376,6 +2411,7 @@ function renderToday(){
     <button class="add" data-act="plannew">+ Plan a session</button>
     <button class="link didlink" data-act="didnew">or log what you already did</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
+    ${blockNudge()}
     ${weekShape()}
     <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
@@ -2945,14 +2981,25 @@ const SESSMATCH={
   boulder:r=>/boulder/i.test((r.exercise||'')+(r.dose||'')+(r.title||'')),
   // one metric, many ways to meet it: a StairMaster session counts like a pack day
   legs:r=>LEGRE.test((r.exercise||'')+' '+(r.title||''))||tabName(r.tab)==='Hike'};
+function blockNudge(){
+  const b=blockOn(new Date());
+  if((S.seenBlock||'')===b.id)return '';
+  if(!S.seenBlock){S.seenBlock=b.id;save();return ''}   // first run, nothing to announce
+  const on=DISC.filter(([id])=>dialOf(id).state!=='tick')
+    .map(([id,l])=>`${l.toLowerCase()} ${dialOf(id).state==='pause'?'paused':'focused'}`);
+  return `<div class="nudge blocknudge"><b>New block · ${esc(b.name)}</b>
+    <span>${esc(b.why)}${on.length?` You still have ${esc(on.join(', '))}.`:''}</span>
+    <span class="nudgeacts"><button type="button" class="link" data-act="focusopen">Adjust</button>
+      <button type="button" class="link" data-act="blockok">Looks right</button></span></div>`;
+}
 function weekShape(){
   const w=weekPlan(new Date()),ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
   const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
   const nice=k=>NICE[k]||k;
   if(!w.sessions.length)return `<h3 class="tlabel">Current focus</h3><p class="shapenone">${esc(w.block.name)} · ${esc(w.block.why)}</p>`;
   const m=monthSoFar();
-  return `<h3 class="tlabel">Current focus</h3><button class="shape" data-act="focusopen">
-    <span class="shblock">${esc(w.block.name)}${w.life==='busy'?' · busy'+(LIFE().until?' until '+shortDay(LIFE().until):''):w.life==='lots'?' · time to train':''}<span class="shadj">Adjust</span></span>
+  return `<h3 class="tlabel">Current focus</h3><button class="shape" data-act="focusinfo">
+    <span class="shblock">${esc(w.block.name)}${w.life==='busy'?' · busy'+(LIFE().until?' until '+shortDay(LIFE().until):''):w.life==='lots'?' · time to train':''}<span class="shadj" data-act="focusopen">Adjust</span></span>
     <span class="shrow">${w.sessions.map(s=>{
       const done=rows.filter(SESSMATCH[s.key]||(()=>false)).length;
       const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
@@ -2989,12 +3036,104 @@ function untilOpts(){
 }
 function untilRow(id,cur){
   const opts=untilOpts(),known=opts.some(([v])=>v===(cur||''));
-  return `<div class="funtil"><span class="ulab">For how long</span>
+  const now=known?(opts.find(([v])=>v===(cur||''))||[])[1]:shortDay(cur);
+  return `<details class="funtil"><summary><span class="ulab">For how long</span>
+      <b>${esc(now)}</b><span class="uedit">Change</span></summary>
     <span class="uchips">${opts.map(([v,l])=>
       `<button type="button" class="uchip${(cur||'')===v?' on':''}" data-until="${esc(id)}" data-val="${esc(v)}">${esc(l)}</button>`).join('')}
-      <button type="button" class="uchip${!known?' on':''}" data-untilpick="${esc(id)}">${known?'Pick a date':esc(niceDay(cur))}</button></span></div>`;
+      <button type="button" class="uchip${!known?' on':''}" data-untilpick="${esc(id)}">${known?'Pick a date':esc(shortDay(cur))}</button></span></details>`;
+}
+/* The whole picture: what this block is for, where you actually are, what to do next. */
+function focusAdvice(w,m){
+  const out=[],life=w.life;
+  const need=k=>{const s=w.sessions.find(x=>x.key===k);return s?Math.ceil(s.lo||s.n):0};
+  const did=k=>m[k]||0;
+  // four weeks is the unit, so compare against four weeks of the floor
+  const gaps=w.sessions.map(s=>({key:s.key,short:need(s.key)*4-did(s.key)}))
+    .filter(x=>x.short>0).sort((a,b)=>b.short-a.short);
+  if(!w.sessions.length)return ['Nothing is expected this block. Rest, travel, or climb for fun.'];
+  if(gaps.length){const g=gaps[0];
+    const how={run:'A 20-minute easy run counts.',ice:'Twenty minutes on the tools counts.',
+      climb:'An hour at the wall counts.',boulder:'A short session counts.',
+      legs:'Twenty minutes on the StairMaster counts, so does a set of step-ups.'}[g.key]||'';
+    out.push(`${NICE[g.key][0].toUpperCase()+NICE[g.key].slice(1)} is the thing that is light: ${g.short} short over four weeks. ${how}`);
+  } else out.push('You are at or above the floor on everything. Nothing needs chasing.');
+  if(life==='busy')out.push('You have told it you are busy, so the week is trimmed to the floor. That is the plan working, not you falling behind.');
+  const paused=DISC.filter(([id])=>dialOf(id).state==='pause').map(([,l])=>l.toLowerCase());
+  if(paused.length)out.push(`Paused: ${paused.join(', ')}.`);
+  const focused=DISC.filter(([id])=>dialOf(id).state==='focus').map(([,l])=>l.toLowerCase());
+  if(focused.length)out.push(`Extra work going into ${focused.join(' and ')}.`);
+  return out;
+}
+const SESSPLAN={
+  run:{tab:'Run',kind:'easy',title:'Easy run',min:45},
+  ice:{tab:'Ice climbing',kind:null,train:['ice|0'],title:'Ice · tools and grip',min:40},
+  climb:{tab:'Climbing',kind:'indoor',title:'Climbing · indoor',min:120},
+  boulder:{tab:'Climbing',kind:'bindoor',title:'Climbing · boulder indoor',min:90},
+  legs:{tab:'Nepal',kind:null,train:['nepal|0'],title:'Legs · step-ups and squats',min:35}};
+function weekGaps(){
+  const w=weekPlan(new Date()),ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
+  const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
+  const plans=plansCache().filter(p=>p.date>=ws&&p.date<=we);
+  const out=[];
+  w.sessions.forEach(s=>{
+    const need=Math.ceil(s.lo||s.n);
+    const done=rows.filter(SESSMATCH[s.key]||(()=>false)).length;
+    const planned=plans.filter(p=>SESSMATCH[s.key]({tab:p.tab,exercise:p.title,title:p.title})).length;
+    const short=need-done-planned;
+    if(short>0&&SESSPLAN[s.key])out.push({key:s.key,n:short});
+  });
+  return out;
+}
+function fillWeek(){
+  const gaps=weekGaps();if(!gaps.length)return 0;
+  const today=dayOf(new Date()),end=dayOf(addDays(mondayOf(new Date()),6));
+  // one session a day, on days that are still empty, from tomorrow on
+  const taken={};plansCache().filter(p=>p.date>=today&&p.date<=end).forEach(p=>{taken[p.date]=1});
+  const free=[];for(let d=parseDay(today);dayOf(d)<=end;d=addDays(d,1)){
+    const ds=dayOf(d);if(!taken[ds])free.push(ds)}
+  let made=0;
+  gaps.forEach(g=>{for(let i=0;i<g.n;i++){
+    const day=free.shift();if(!day)return;
+    const spec=SESSPLAN[g.key],id=uid();
+    const plan={id,date:day,start:notTooEarly(tabStart(spec.tab)||(spec.tab==='Run'?'11:00':'17:00')),
+      minutes:spec.min,title:spec.title,tab:spec.tab,items:[],status:'planned'};
+    if(spec.train)S.planRefs[id]=spec.train.map(r=>`${r}|e`);
+    if(spec.kind)S.kinds={...(S.kinds||{}),[id]:spec.kind};
+    if(spec.tab==='Run')S.runMeta[id]={type:'easy',km:runKmFor('easy',6)};
+    setPlans(plansCache().concat([{...plan,pending:true}]));
+    enqueue({op:'plan',plan});made++;
+  }});
+  save();scheduleFlush(400);refresh();
+  return made;
+}
+function openFocusInfo(){
+  const w=weekPlan(new Date()),m=monthSoFar(),b=w.block;
+  const all=blocks(),i=all.findIndex(x=>x.id===b.id),next=all[i+1];
+  const days=Math.max(0,Math.round((parseDay(b.to)-d0(new Date()))/864e5));
+  document.getElementById('fiBlock').textContent=b.name;
+  document.getElementById('fiWhy').textContent=b.why;
+  document.getElementById('fiSpan').textContent=
+    `${shortDay(b.from)} – ${shortDay(b.to)} · ${days} day${days===1?'':'s'} left${next?` · then ${next.name}`:''}`;
+  document.getElementById('fiWeek').innerHTML=w.sessions.length
+    ? w.sessions.map(s=>{const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
+        return `<div class="firow"><b>${esc(NICE[s.key]||s.key)}</b>
+          <span>${need===want?need:`${need}–${want}`} a week${s.focus?' · focus':''}</span></div>`}).join('')
+    : '<p class="dim">Nothing this block.</p>';
+  document.getElementById('fiHist').innerHTML=['run','legs','ice','climb','boulder'].map(k=>{
+    const n=m[k]||0,s=w.sessions.find(x=>x.key===k),need=s?Math.ceil(s.lo||s.n)*4:0;
+    const ok=need>0&&n>=need;
+    return `<div class="firow"><b>${esc(NICE[k])}</b>
+      <span class="${ok?'ok':''}">${n}${need?` of ${need}`:''}</span></div>`}).join('')
+    +`<div class="firow"><b>running</b><span>${Math.round(m.km)} km</span></div>`;
+  document.getElementById('fiNext').innerHTML=focusAdvice(w,m).map(t=>`<p>${esc(t)}</p>`).join('');
+  const gaps=weekGaps(),fb=document.getElementById('fiFill');
+  fb.hidden=!gaps.length;
+  if(gaps.length)fb.textContent=`Put the missing ${gaps.reduce((a,g)=>a+g.n,0)} in the calendar`;
+  document.getElementById('focusinfodlg').showModal();
 }
 function openFocus(){
+  try{document.getElementById('focusinfodlg').close()}catch(e){}
   const d=document.getElementById('focusdlg'),w=weekPlan(new Date()),life=LIFE();
   document.getElementById('fdBlock').textContent=w.block.name;
   document.getElementById('fdWhy').textContent=w.block.why;
@@ -3909,6 +4048,8 @@ function actCalendar(b,act,p,art){
   if(act==='syncretry'){const n=document.getElementById('syncline');if(n)n.textContent='Trying again…';
     (async()=>{try{await pullPlans();await flushQueue()}catch(e){}updateSyncLine();render()})();return}
   if(act==='focusopen'){openFocus();return}
+  if(act==='focusinfo'){openFocusInfo();return}
+  if(act==='blockok'){S.seenBlock=blockOn(new Date()).id;save();refresh();return}
   if(act==='dayedit'){openDayEdit(b.dataset.scope,b.dataset.k);return}
   if(act==='legend'){const base=BASETABS.concat(['Hike']).filter((t,k,a)=>a.indexOf(t)===k);
     document.getElementById('askT').textContent='What the dots mean';
@@ -5018,6 +5159,11 @@ function applyUntil(id,val){
   if(id==='life')setLife(LIFE().state,val); else setDial(id,'pause',val);
   openFocus();
 }
+document.getElementById('fiFill').addEventListener('click',()=>{
+  const n=fillWeek();
+  try{document.getElementById('focusinfodlg').close()}catch(e){}
+  if(n)undoBar(`${n} session${n===1?'':'s'} added to this week`,()=>{});
+});
 document.getElementById('focusfrm').addEventListener('click',ev=>{
   const u=ev.target.closest('[data-until]');
   if(u){applyUntil(u.dataset.until,u.dataset.val||'');return}
