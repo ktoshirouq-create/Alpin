@@ -263,6 +263,15 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .fispan{margin:-6px 0 14px;font-size:13px;color:var(--muted)}
 .btn.wide{display:block;width:100%;margin:16px 0 0;border-radius:14px;padding:13px;
   border:1.5px solid color-mix(in srgb,var(--acc) 50%,var(--rule));color:var(--acc);font-weight:600}
+.fibar{padding:10px 2px;border-top:1px solid var(--rule)}
+.fitop{display:flex;align-items:baseline;gap:10px}
+.fitop b{flex:1;font-weight:600;font-size:15px;text-transform:capitalize}
+.fitop i{font-style:normal;font-size:13px;color:var(--muted)}
+.fitrack{display:block;height:5px;border-radius:3px;background:var(--prop);margin:7px 0 5px;overflow:hidden}
+.fifill{display:block;height:100%;background:var(--muted);border-radius:3px}
+.fibar.ok .fifill{background:var(--rest)}
+.fibar.foc .fitop i{color:var(--acc)}
+.fifoot{display:block;font-size:12.5px;color:var(--far);font-variant-numeric:tabular-nums}
 .firow{display:flex;align-items:baseline;gap:10px;padding:8px 2px;border-top:1px solid var(--rule)}
 .firow b{flex:1;font-weight:600;font-size:15px;text-transform:capitalize}
 .firow span{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -1146,11 +1155,9 @@ button.chip::after{display:none}
   <h2>Where you are</h2>
   <p class="fdblock"><b id="fiBlock"></b><span id="fiWhy"></span></p>
   <p class="fispan" id="fiSpan"></p>
-  <h4>The week this block wants</h4>
+  <h4>Where the month stands</h4>
   <div id="fiWeek"></div>
-  <h4>Last four weeks</h4>
-  <div id="fiHist"></div>
-  <p class="fikey"><i class="dotok"></i> at or above the floor</p>
+  <p class="fikey"><i class="dotok"></i> green means four weeks of the floor is covered</p>
   <h4>What I would do next</h4>
   <div id="fiNext" class="finext"></div>
   <button type="button" class="btn wide" id="fiFill" hidden></button>
@@ -1306,7 +1313,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='109';
+const BUILD='110';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -3062,7 +3069,7 @@ function focusAdvice(w,m){
   const paused=DISC.filter(([id])=>dialOf(id).state==='pause').map(([,l])=>l.toLowerCase());
   if(paused.length)out.push(`Paused: ${paused.join(', ')}.`);
   const focused=DISC.filter(([id])=>dialOf(id).state==='focus').map(([,l])=>l.toLowerCase());
-  if(focused.length)out.push(`Extra work going into ${focused.join(' and ')}.`);
+  if(focused.length)out.push(`Extra work going into ${focused.length>1?focused.slice(0,-1).join(', ')+' and '+focused.slice(-1):focused[0]}.`);
   return out;
 }
 const SESSPLAN={
@@ -3116,21 +3123,29 @@ function openFocusInfo(){
   document.getElementById('fiSpan').textContent=
     `${shortDay(b.from)} – ${shortDay(b.to)} · ${days} day${days===1?'':'s'} left${next?` · then ${next.name}`:''}`;
   document.getElementById('fiWeek').innerHTML=w.sessions.length
-    ? w.sessions.map(s=>{const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
-        return `<div class="firow"><b>${esc(NICE[s.key]||s.key)}</b>
-          <span>${need===want?need:`${need}–${want}`} a week${s.focus?' · focus':''}</span></div>`}).join('')
-    : '<p class="dim">Nothing this block.</p>';
-  document.getElementById('fiHist').innerHTML=['run','legs','ice','climb','boulder'].map(k=>{
-    const n=m[k]||0,s=w.sessions.find(x=>x.key===k),need=s?Math.ceil(s.lo||s.n)*4:0;
-    const ok=need>0&&n>=need;
-    return `<div class="firow"><b>${esc(NICE[k])}</b>
-      <span class="${ok?'ok':''}">${n}${need?` of ${need}`:''}</span></div>`}).join('')
-    +`<div class="firow"><b>running</b><span>${Math.round(m.km)} km</span></div>`;
+    ? ['run','legs','ice','climb','boulder'].map(k=>{
+        const s=w.sessions.find(x=>x.key===k);
+        const need=s?Math.ceil(s.lo||s.n):0,want=s?Math.ceil(s.n):0;
+        const n=m[k]||0,month=need*4;
+        const pct=month?Math.min(100,Math.round(n/month*100)):0;
+        const ok=month>0&&n>=month;
+        if(!s&&!n)return '';
+        return `<div class="fibar${ok?' ok':''}${s&&s.focus?' foc':''}">
+          <span class="fitop"><b>${esc(NICE[k])}</b>
+            <i>${s?`${need===want?need:need+'–'+want} a week`
+              :dialOf(SESSDIAL[k]).state==='pause'?'paused by you':'not this block'}${s&&s.focus?' · focus':''}</i></span>
+          <span class="fitrack"><span class="fifill" style="width:${pct}%"></span></span>
+          <span class="fifoot">${n} in four weeks${month?` · floor ${month}`:''}${k==='run'&&m.km?` · ${Math.round(m.km)} km`:''}</span>
+        </div>`}).join('')
+    : '<p class="dim">Nothing this block. Rest, travel, or climb for fun.</p>';
   document.getElementById('fiNext').innerHTML=focusAdvice(w,m).map(t=>`<p>${esc(t)}</p>`).join('');
   const gaps=weekGaps(),fb=document.getElementById('fiFill');
   fb.hidden=!gaps.length;
   if(gaps.length)fb.textContent=`Put the missing ${gaps.reduce((a,g)=>a+g.n,0)} in the calendar`;
-  document.getElementById('focusinfodlg').showModal();
+  const dlg=document.getElementById('focusinfodlg');
+  dlg.showModal();
+  dlg.scrollTop=0;
+  const frm=document.getElementById('focusinfofrm');if(frm)frm.scrollTop=0;
 }
 function openFocus(){
   try{document.getElementById('focusinfodlg').close()}catch(e){}
