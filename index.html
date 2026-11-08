@@ -244,8 +244,15 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .fseg{display:flex;gap:0;background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:3px}
 .fbtn{flex:1;background:none;border:0;border-radius:9px;padding:8px 4px;color:var(--muted);font:600 13.5px Barlow,sans-serif}
 .fbtn.on{background:var(--prop);color:var(--ink)}
-.funtil{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;color:var(--muted)}
-.funtil input{flex:1;margin:0}
+.funtil{margin-top:10px}
+.ulab{display:block;font:600 11px Barlow,sans-serif;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.uchips{display:flex;flex-wrap:wrap;gap:6px}
+.uchip{background:none;border:1.5px solid var(--rule);border-radius:999px;padding:6px 12px;
+  color:var(--muted);font:600 13px Barlow,sans-serif}
+.uchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.fmean{display:block;margin-top:7px;font-size:12.5px;color:var(--far)}
+.offscreen{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
 .fests{display:flex;flex-direction:column;gap:10px}
 .fest{border:1px solid var(--rule);border-radius:14px;padding:12px 13px;background:var(--panel)}
 .fest.hit{border-color:color-mix(in srgb,var(--ice) 55%,var(--rule));background:color-mix(in srgb,var(--ice) 9%,var(--panel))}
@@ -1120,6 +1127,7 @@ button.chip::after{display:none}
   <h2>What to focus on</h2>
   <p class="fdblock"><b id="fdBlock"></b><span id="fdWhy"></span></p>
   <div class="frow lifeblock" id="fdLife"></div>
+  <input type="date" id="fdPick" class="offscreen">
   <div id="fdRows"></div>
   <p class="syncmsg">Pause takes something out of the weekly suggestion. Focus adds a session. Toubkal, the marathon and Nepal keep their own shape whatever you set here.</p>
   <div class="dbtns"><span></span><button class="btn pri" value="save">Done</button></div>
@@ -1263,7 +1271,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='106';
+const BUILD='107';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2368,8 +2376,8 @@ function renderToday(){
     <button class="add" data-act="plannew">+ Plan a session</button>
     <button class="link didlink" data-act="didnew">or log what you already did</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
-    <h3 class="tlabel">This week</h3>
     ${weekShape()}
+    <h3 class="tlabel">This week</h3>
     ${(()=>{try{const W=weekInfo(now),km=runKmIn(W.w),pct=Math.min(100,Math.round(km/W.target*100));
       return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>${ICON('Run','inl')} ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
     <div class="weekstrip">${days}</div>
@@ -2941,10 +2949,10 @@ function weekShape(){
   const w=weekPlan(new Date()),ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
   const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
   const nice=k=>NICE[k]||k;
-  if(!w.sessions.length)return `<p class="shapenone">${esc(w.block.name)} · ${esc(w.block.why)}</p>`;
+  if(!w.sessions.length)return `<h3 class="tlabel">Current focus</h3><p class="shapenone">${esc(w.block.name)} · ${esc(w.block.why)}</p>`;
   const m=monthSoFar();
-  return `<button class="shape" data-act="focusopen">
-    <span class="shblock">${esc(w.block.name)}${w.life==='busy'?' · busy weeks':w.life==='lots'?' · time to train':''}<span class="shadj">Adjust</span></span>
+  return `<h3 class="tlabel">Current focus</h3><button class="shape" data-act="focusopen">
+    <span class="shblock">${esc(w.block.name)}${w.life==='busy'?' · busy'+(LIFE().until?' until '+shortDay(LIFE().until):''):w.life==='lots'?' · time to train':''}<span class="shadj">Adjust</span></span>
     <span class="shrow">${w.sessions.map(s=>{
       const done=rows.filter(SESSMATCH[s.key]||(()=>false)).length;
       const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
@@ -2954,12 +2962,13 @@ function weekShape(){
   </button>`;
 }
 const NICE={run:'runs',ice:'ice',climb:'climbing',boulder:'bouldering',legs:'legs'};
+const shortDay=d=>parseDay(d).toLocaleDateString(undefined,{day:'numeric',month:'short'});
 const rangeTxt=s=>s.lo&&s.lo!==s.n?`${s.lo}–${s.n}`:`${s.n}`;
 function focusCard(){
   const w=weekPlan(new Date()),b=w.block,m=monthSoFar();
   return `<section class="focus">
     <button class="fhead" type="button" data-act="focusopen">
-      <span class="fblock">${esc(b.name)}${w.life==='busy'?' · busy weeks':w.life==='lots'?' · time to train':''}</span>
+      <span class="fblock">${esc(b.name)}${w.life==='busy'?' · busy'+(LIFE().until?' until '+shortDay(LIFE().until):''):w.life==='lots'?' · time to train':''}</span>
       <b>${w.sessions.length?w.sessions.map(s=>`${rangeTxt(s)} ${NICE[s.key]||s.key}`).join(' · '):'Nothing planned'}</b>
       ${w.km?`<span class="fkm">${w.kmLo&&w.kmLo!==w.km?w.kmLo+'–':''}${w.km} km of running</span>`:''}
       <span class="fedit">Adjust</span>
@@ -2968,14 +2977,31 @@ function focusCard(){
     ${w.clash.length?`<p class="fclash">${w.clash.map(esc).join('. ')}.</p>`:''}
   </section>`;
 }
+/* How long for, in words. No calendars unless you ask for one. */
+function untilOpts(){
+  const d=new Date(),y=d.getFullYear(),mo=d.getMonth();
+  const xmas=dayOf(new Date(mo>11-1?y+1:y,11,20));
+  const spring=dayOf(new Date(mo>2?y+1:y,2,31));
+  return [['', 'Until I change it'],
+          [dayOf(addDays(d,28)),'4 weeks'],
+          [xmas,'Until Christmas'],
+          [spring,'Until spring']];
+}
+function untilRow(id,cur){
+  const opts=untilOpts(),known=opts.some(([v])=>v===(cur||''));
+  return `<div class="funtil"><span class="ulab">For how long</span>
+    <span class="uchips">${opts.map(([v,l])=>
+      `<button type="button" class="uchip${(cur||'')===v?' on':''}" data-until="${esc(id)}" data-val="${esc(v)}">${esc(l)}</button>`).join('')}
+      <button type="button" class="uchip${!known?' on':''}" data-untilpick="${esc(id)}">${known?'Pick a date':esc(niceDay(cur))}</button></span></div>`;
+}
 function openFocus(){
   const d=document.getElementById('focusdlg'),w=weekPlan(new Date()),life=LIFE();
   document.getElementById('fdBlock').textContent=w.block.name;
   document.getElementById('fdWhy').textContent=w.block.why;
-  document.getElementById('fdLife').innerHTML=`<span class="flabel">How much time this spell</span>
+  document.getElementById('fdLife').innerHTML=`<span class="flabel">How much time have you got</span>
     <span class="fseg">${[['busy','Busy'],['normal','Normal'],['lots','Lots of time']].map(([st,lb])=>
       `<button type="button" class="fbtn${life.state===st?' on':''}" data-life="${st}">${lb}</button>`).join('')}</span>
-    ${life.state!=='normal'?`<label class="funtil">Until<input type="date" data-lifeuntil="1" value="${esc(life.until||'')}" min="${dayOf(new Date())}"></label>`:''}
+    ${life.state!=='normal'?untilRow('life',life.until):''}
     <p class="fnote">Busy trims the week to what actually protects the goal. Nothing is counted against you.</p>`;
   document.getElementById('fdRows').innerHTML=DISC.map(([id,label])=>{
     const dl=dialOf(id);
@@ -2983,8 +3009,9 @@ function openFocus(){
       <span class="flabel">${esc(label)}</span>
       <span class="fwhat">${esc(DISCWHAT[id]||'')}</span>
       <span class="fseg">${['pause','tick','focus'].map(st=>
-        `<button type="button" class="fbtn${dl.state===st?' on':''}" data-dial="${id}" data-state="${st}">${st==='pause'?'Pause':st==='tick'?'Tick over':'Focus'}</button>`).join('')}</span>
-      ${dl.state==='pause'?`<label class="funtil">Until<input type="date" data-until="${id}" value="${esc(dl.until||'')}" min="${dayOf(new Date())}"></label>`:''}
+        `<button type="button" class="fbtn${dl.state===st?' on':''}" data-dial="${id}" data-state="${st}">${st==='pause'?'Pause':st==='tick'?'Keep up':'Focus'}</button>`).join('')}</span>
+      <span class="fmean">${dl.state==='pause'?'None suggested at all.':dl.state==='focus'?'An extra session a week, on top of the block.':'What the block asks for, no more.'}</span>
+      ${dl.state==='pause'?untilRow(id,dl.until):''}
     </div>`}).join('');
   d.showModal();
 }
@@ -4987,13 +5014,23 @@ document.getElementById('tripnewfrm').addEventListener('input',tripSummary);
 document.getElementById('tripnewfrm').addEventListener('click',ev=>{
   if(ev.target.closest('#trKinds'))setTimeout(tripSummary,0);
 });
+function applyUntil(id,val){
+  if(id==='life')setLife(LIFE().state,val); else setDial(id,'pause',val);
+  openFocus();
+}
+document.getElementById('focusfrm').addEventListener('click',ev=>{
+  const u=ev.target.closest('[data-until]');
+  if(u){applyUntil(u.dataset.until,u.dataset.val||'');return}
+  const pick=ev.target.closest('[data-untilpick]');
+  if(pick){const inp=document.getElementById('fdPick');
+    inp.min=dayOf(new Date());inp.value='';
+    inp.onchange=()=>{if(inp.value)applyUntil(pick.dataset.untilpick,inp.value)};
+    if(inp.showPicker)inp.showPicker(); else inp.click();
+    return}
+});
 document.getElementById('fdLife').addEventListener('click',ev=>{
   const b=ev.target.closest('[data-life]');if(!b)return;
   setLife(b.dataset.life,b.dataset.life==='normal'?'':LIFE().until);openFocus();
-});
-document.getElementById('fdLife').addEventListener('change',ev=>{
-  if(!ev.target.closest('[data-lifeuntil]'))return;
-  setLife(LIFE().state,ev.target.value);
 });
 document.getElementById('fdRows').addEventListener('click',ev=>{
   const b=ev.target.closest('[data-dial]');if(!b)return;
