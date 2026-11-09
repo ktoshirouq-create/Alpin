@@ -848,6 +848,7 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .epsec.fold>summary::after{content:'Change';color:var(--acc);font:600 13px Barlow,sans-serif;text-decoration:underline;text-underline-offset:3px}
 .epsec.fold[open]>summary::after{content:'Done'}
 .epsec.fold>.typechips{margin-top:10px}
+.tchip.more{border-style:dashed;color:var(--muted)}
 .tchip.train{border-style:dashed}
 .tchip.train.on{border-style:solid}
 .pickex.single{width:100%;margin-top:2px}
@@ -1313,7 +1314,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='112';
+const BUILD='113';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -3573,10 +3574,41 @@ function trainLabel(){
   const chips=[...new Set(PA.train.map(r=>{const p=PROGS.find(x=>x.id===r.split('|')[0]);return p?p.chip:''}))];
   return `${chips.join(' + ')} · ${list.length} exercises`;
 }
+/* How often you have picked each kind, newest counting double. */
+function kindUse(tab){
+  const out={},rows=localLog().filter(r=>tabName(r.tab)===tab).slice(-60);
+  const cut=dayOf(addDays(new Date(),-90));
+  rows.forEach(r=>{const k=(KINDS[tab]||[]).find(([,l])=>
+    String(r.exercise||r.title||'').toLowerCase().includes(l.toLowerCase()));
+    if(k)out[k[0]]=(out[k[0]]||0)+(r.date>=cut?2:1)});
+  Object.entries(S.kinds||{}).forEach(([id,k])=>{
+    const pl=(plansCache()||[]).find(p=>p.id===id);
+    if(pl&&tabName(pl.tab)===tab)out[k]=(out[k]||0)+(pl.date>=cut?2:1)});
+  return out;
+}
+const SHOWN=4;
+function topKinds(tab,picked){
+  const ks=KINDS[tab]||[];
+  if(ks.length<=SHOWN+1)return {show:ks,rest:[]};
+  const use=kindUse(tab);
+  const ranked=ks.slice().sort((a,b)=>(use[b[0]]||0)-(use[a[0]]||0)||ks.indexOf(a)-ks.indexOf(b));
+  const show=ranked.slice(0,SHOWN);
+  // whatever is selected stays in sight, even if you rarely use it
+  if(picked&&!show.some(([k])=>k===picked)){
+    const sel=ks.find(([k])=>k===picked);
+    if(sel)show.splice(SHOWN-1,1,sel);
+  }
+  return {show,rest:ks.filter(x=>!show.includes(x))};
+}
 function drawKinds(){
   const tab=PA.tab;if(!tab)return;
   const ks=KINDS[tab]||[],tc=colOf(tab),tr=trainFor(tab);
-  const dayOut=ks.map(([k,l])=>`<button type="button" class="tchip${k===PA.kind&&!PA.train.length?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`).join('');
+  const {show,rest}=topKinds(tab,PA.kind);
+  const chip=([k,l])=>`<button type="button" class="tchip${k===PA.kind&&!PA.train.length?' on':''}" data-kind="${k}" style="--tc:${tc}">${esc(l)}</button>`;
+  const dayOut=show.map(chip).join('')
+    +(rest.length?(PA.more
+       ?rest.map(chip).join('')+`<button type="button" class="tchip more" data-kindmore="0">Fewer</button>`
+       :`<button type="button" class="tchip more" data-kindmore="1">${rest.length} more</button>`):'');
   const train=tr.map(([sec,label])=>{
     const p=PROGS.find(x=>x.id===sec.split('|')[0]),si=+sec.split('|')[1];
     const items=p?sectionItems(p,si):[],ess=items.filter(e=>e.tier==='e');
@@ -3603,7 +3635,7 @@ function drawKinds(){
 }
 function paPick(tab){
   const f=document.getElementById('planfrm');
-  PA.tab=tab;PA.train=[];PA.open=null;PA.mode=null;const kl=KINDS[tab]||[];
+  PA.tab=tab;PA.train=[];PA.open=null;PA.mode=null;PA.more=false;const kl=KINDS[tab]||[];
   PA.kind=TRAINFIRST.includes(tab)?null:((S.lastKind||{})[tab]||((kl[0]||[])[0])||null);
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
@@ -4498,7 +4530,7 @@ let PENDING_TRIP=null;
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null,EP_TYPE=null,EP_KIND=null,PA_FEEL='',DE=null;
+let EP=null,EP_TYPE=null,EP_KIND=null,EP_MORE=false,PA_FEEL='',DE=null;
 function openDayEdit(scope,k){
   const f=document.getElementById('dayeditfrm'),d=document.getElementById('dayeditdlg');
   DE={scope,k};
@@ -4550,8 +4582,12 @@ function drawEpKinds(){
   if(head)head.hidden=!ks.length;
   if(!ks.length){EP_KIND=null;if(box)box.innerHTML='';epWhatNow();return}
   if(!ks.some(([k])=>k===EP_KIND))EP_KIND=ks[0][0];
-  document.getElementById('epKinds').innerHTML=ks.map(([k,l])=>
-    `<button type="button" class="tchip${k===EP_KIND?' on':''}" data-epkind="${esc(k)}" style="--tc:${colOf(EP_TYPE)}">${esc(l)}</button>`).join('');
+  const {show,rest}=topKinds(EP_TYPE,EP_KIND);
+  const chip=([k,l])=>`<button type="button" class="tchip${k===EP_KIND?' on':''}" data-epkind="${esc(k)}" style="--tc:${colOf(EP_TYPE)}">${esc(l)}</button>`;
+  document.getElementById('epKinds').innerHTML=show.map(chip).join('')
+    +(rest.length?(EP_MORE
+       ?rest.map(chip).join('')+`<button type="button" class="tchip more" data-epmore="0">Fewer</button>`
+       :`<button type="button" class="tchip more" data-epmore="1">${rest.length} more</button>`):'');
   epWhatNow();
 }
 function openPlanEdit(id){
@@ -4563,6 +4599,7 @@ function openPlanEdit(id){
   document.getElementById('epTypes').innerHTML=types.map(t=>`<button type="button" class="tchip${t===cur0?' on':''}" data-type="${esc(t)}" style="--tc:${colOf(t)}">${ICON(t)}<span>${esc(t)}</span></button>`).join('');
   EP_TYPE=cur0;
   document.getElementById('epWhatRow').open=false;
+  EP_MORE=false;
   EP_KIND=(S.kinds||{})[p.id]||guessKind(cur0,p.title);
   drawEpKinds();
   document.getElementById('epWhatRow').hidden=!!app;
@@ -4588,7 +4625,10 @@ function replacePlan(plan){
   f.minutes.addEventListener('input',()=>{f.minutes.dataset.touched='1';document.querySelectorAll('#epChips button').forEach(x=>x.classList.remove('on'))});
   f.title.addEventListener('input',()=>{f.title.dataset.auto=f.title.value?'0':'1'});
   document.getElementById('epKinds').addEventListener('click',ev=>{
+    const mo=ev.target.closest('[data-epmore]');
+    if(mo){EP_MORE=mo.dataset.epmore==='1';drawEpKinds();return}
     const b=ev.target.closest('[data-epkind]');if(!b)return;
+    EP_MORE=false;
     EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();epWhatNow();
     const km=KINDMIN[EP_KIND];if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+km))}
@@ -4804,6 +4844,8 @@ function nudge(inp,by){
 })();
 document.getElementById('paKinds').addEventListener('click',ev=>{
     const sec=ev.target.closest('[data-trsec]');
+    const km=ev.target.closest('[data-kindmore]');
+    if(km){PA.more=km.dataset.kindmore==='1';drawKinds();return}
     const mb=ev.target.closest('[data-mode]');
     if(mb){PA.mode=mb.dataset.mode;
       if(PA.mode==='train'){PA.kind=null}else{PA.train=[];const kl=KINDS[PA.tab]||[];if(!PA.kind)PA.kind=(S.lastKind||{})[PA.tab]||((kl[0]||[])[0])||null}
@@ -4819,6 +4861,7 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
       drawKinds();planAuto();return}
     if(ev.target.closest('[data-tr-clear]')){PA.train=[];drawKinds();planAuto();return}
     const b=ev.target.closest('[data-kind]');if(!b)return;
+    PA.more=false;   // picking one folds the long list away again
     PA.kind=b.dataset.kind;PA.train=[];S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
     drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0'){const v=runDefKm(PA.kind);if(v)f.km.value=v}
