@@ -217,7 +217,7 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .shadj{margin-left:auto;text-transform:none;letter-spacing:0;font-size:13px;
   text-decoration:underline;text-underline-offset:3px}
 .shkm{display:block;margin-top:8px;font-size:12.5px;color:var(--muted)}
-.shclash{display:block;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.shsum{display:block;margin-top:7px;font-size:13px;color:var(--ink);line-height:1.4}
 .shrow{display:flex;flex-wrap:wrap;gap:6px}
 .sh{font:600 12.5px Barlow,sans-serif;color:var(--muted);border:1px solid var(--rule);
   border-radius:999px;padding:4px 9px;white-space:nowrap}
@@ -1313,7 +1313,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='110';
+const BUILD='112';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2999,6 +2999,24 @@ function blockNudge(){
     <span class="nudgeacts"><button type="button" class="link" data-act="focusopen">Adjust</button>
       <button type="button" class="link" data-act="blockok">Looks right</button></span></div>`;
 }
+function cardLine(w,m){
+  if(!w.sessions.length)return w.block.why;
+  const ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
+  const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
+  // what is short this week, biggest gap first
+  const short=w.sessions.map(s=>({k:s.key,n:Math.ceil(s.lo||s.n)-rows.filter(SESSMATCH[s.key]||(()=>false)).length}))
+    .filter(x=>x.n>0).sort((a,b)=>b.n-a.n);
+  // anything logged at all this week, not whether a metric is finished
+  const anything=rows.filter(r=>Object.values(SESSMATCH).some(fn=>fn(r))).length;
+  const dow=new Date().getDay(),late=dow===0||dow>=5;
+  if(!short.length)return 'Everything this week is covered.';
+  if(!anything&&!late)return `Nothing logged yet. The easiest start is ${NICE[short[0].k]}.`;
+  const near=late?' Sunday is the last chance.':'';
+  const one=x=>`${x.n} ${x.n===1?NICE[x.k].replace(/s$/,''):NICE[x.k]}`;
+  if(short.length===1)return `${one(short[0])} short this week.${near}`;
+  if(short.length===2)return `${one(short[0])} and ${one(short[1])} short.${near}`;
+  return `Short on ${NICE[short[0].k]}, ${NICE[short[1].k]} and ${short.length-2} more.${near}`;
+}
 function weekShape(){
   const w=weekPlan(new Date()),ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
   const rows=localLog().filter(r=>r.date>=ws&&r.date<=we&&r.result!=='skipped');
@@ -3011,12 +3029,14 @@ function weekShape(){
       const done=rows.filter(SESSMATCH[s.key]||(()=>false)).length;
       const need=Math.ceil(s.lo||s.n),want=Math.ceil(s.n);
       return `<span class="sh${done>=need?' done':''}${s.focus?' foc':''}">${done}/${need===want?need:need+'–'+want} ${esc(nice(s.key))}</span>`}).join('')}</span>
-    ${w.km?`<span class="shkm">${w.kmLo&&w.kmLo!==w.km?w.kmLo+'–':''}${w.km} km of running · last four weeks ${m.run} runs, ${Math.round(m.km)} km</span>`:''}
-    ${w.clash.length?`<span class="shclash">${esc(w.clash[0])}</span>`:''}
+    ${w.km?`<span class="shkm">${w.kmLo&&w.kmLo!==w.km?w.kmLo+'–':''}${w.km} km a week · last four weeks ${countOf(m.run,'run')}, ${Math.round(m.km)} km</span>`:''}
+    <span class="shsum">${esc(cardLine(w,m))}</span>
   </button>`;
 }
 const NICE={run:'runs',ice:'ice',climb:'climbing',boulder:'bouldering',legs:'legs'};
 const shortDay=d=>parseDay(d).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+const SING={runs:'run',ice:'ice session',climbing:'climb',bouldering:'boulder session',legs:'leg session'};
+const countOf=(n,key)=>`${n} ${n===1?(SING[NICE[key]]||NICE[key]):NICE[key]}`;
 const rangeTxt=s=>s.lo&&s.lo!==s.n?`${s.lo}–${s.n}`:`${s.n}`;
 function focusCard(){
   const w=weekPlan(new Date()),b=w.block,m=monthSoFar();
@@ -3062,8 +3082,9 @@ function focusAdvice(w,m){
   if(gaps.length){const g=gaps[0];
     const how={run:'A 20-minute easy run counts.',ice:'Twenty minutes on the tools counts.',
       climb:'An hour at the wall counts.',boulder:'A short session counts.',
-      legs:'Twenty minutes on the StairMaster counts, so does a set of step-ups.'}[g.key]||'';
-    out.push(`${NICE[g.key][0].toUpperCase()+NICE[g.key].slice(1)} is the thing that is light: ${g.short} short over four weeks. ${how}`);
+      legs:'Twenty minutes on the StairMaster counts, and so does a set of step-ups.'}[g.key]||'';
+    const name={run:'Running',ice:'Ice',climb:'Climbing',boulder:'Bouldering',legs:'Leg work'}[g.key]||NICE[g.key];
+    out.push(`${name} is the thing that is light, ${countOf(g.short,g.key)} behind over four weeks. ${how}`);
   } else out.push('You are at or above the floor on everything. Nothing needs chasing.');
   if(life==='busy')out.push('You have told it you are busy, so the week is trimmed to the floor. That is the plan working, not you falling behind.');
   const paused=DISC.filter(([id])=>dialOf(id).state==='pause').map(([,l])=>l.toLowerCase());
@@ -3185,7 +3206,7 @@ function weekPlan(date){
     if(life.state==='busy'&&hi>0){hi=Math.max(lo,Math.floor(hi*mul));}
     if(life.state==='lots'&&hi>0)hi=Math.ceil(hi*mul);
     if(dial.state==='pause'&&ideal>=1)
-      clash.push(`${b.name} wants ${ideal===1?'a':ideal} ${SESSLBL[k]}, and ${DISC.find(d=>d[0]===SESSDIAL[k])[1].toLowerCase()} is paused`);
+      clash.push(`${b.name} asks for ${ideal===1?'one':ideal} ${ideal===1?SESSLBL[k].replace(/s$/,''):SESSLBL[k]} a week, and you have ${DISC.find(d=>d[0]===SESSDIAL[k])[1].toLowerCase()} paused`);
     if(hi>0||lo>0)out.push({key:k,n:Math.round(hi*10)/10,lo:Math.round(lo*10)/10,focus:dial.state==='focus'});
   });
   const rd=dialOf('run');
