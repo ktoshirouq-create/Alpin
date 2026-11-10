@@ -93,8 +93,16 @@ body[data-view="train"] header{padding-top:14px}
 .wkchart span{position:relative;flex:1;height:100%;background:var(--panel);border-radius:4px;overflow:hidden}
 .wkchart i{position:absolute;left:0;right:0;bottom:0;background:var(--acc);border-radius:4px}
 .wkchart u{position:absolute;left:0;right:0;height:2px;background:var(--ink);opacity:.5}
+.wkwhat{margin:14px 0 6px;font:600 11.5px Barlow,sans-serif;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--muted)}
+.wkwhy{margin:10px 0 0;font-size:13px;color:var(--muted);line-height:1.45;
+  border-left:2px solid var(--tc);padding-left:10px}
+ol.wklist{counter-reset:wk;list-style:none;padding:0}
+ol.wklist li{position:relative;padding-left:26px;counter-increment:wk}
+ol.wklist li::before{content:counter(wk);position:absolute;left:0;top:1px;width:18px;height:18px;
+  border-radius:50%;background:var(--prop);color:var(--muted);font:700 11px/18px Barlow,sans-serif;text-align:center}
 .wklist{list-style:none;margin:0 0 14px;padding:0;font-size:14px;line-height:1.45}.wklist li{padding:6px 0;border-top:1px solid var(--rule)}
-.wklist b{display:block;font-size:13px;color:var(--muted);font-weight:600}
+.wklist b{display:inline;font-weight:600;color:var(--ink);margin:0}
 .wkbtns{display:flex;gap:8px;margin-bottom:6px}
 :root{--ice:#3FA7D6}
 .nepcard{margin-top:12px;padding:16px 16px 12px;border-radius:20px;overflow:hidden;position:relative;
@@ -151,16 +159,23 @@ body[data-view="train"] header{padding-top:14px}
 .nocon p{margin:0;font-size:14px;line-height:1.45;flex:1}.nocon b{display:block}
 .syncextra{display:flex;flex-wrap:wrap;gap:6px 16px}
 .objtiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.tflags{position:absolute;top:7px;left:-2px;right:-2px;width:104%;height:15px;pointer-events:none;opacity:.9}
+.owm{position:absolute;right:-12px;bottom:-16px;opacity:.17;pointer-events:none;color:var(--oc)}
+.owm{line-height:0}
+.owm svg.ic{width:66px!important;height:66px!important;color:var(--oc);stroke-width:1.1}
+.otile.t-nepal{padding-top:24px}
+.otile em svg{width:17px;height:17px}
 .otile{position:relative;overflow:hidden;text-align:left;border:0;border-radius:14px;padding:11px 11px 10px;display:flex;flex-direction:column;gap:1px;border-top:4px solid var(--oc);
   background:linear-gradient(165deg,color-mix(in srgb,var(--oc) 24%,var(--panel)),var(--panel) 72%)}
 .otile.t-marathon{background:linear-gradient(165deg,#223040,#141B23 72%);border-top-color:#F2F0EB}
 .otile.t-marathon .ic{color:#F2F0EB}
 .otile.t-nepal{background:linear-gradient(165deg,#2C3E57,#1B2636 72%)}
 .otile.t-toubkal{background:linear-gradient(165deg,#24476A,#10223A 72%)}
-.otile i{font-style:normal;font-size:10.5px;color:var(--muted);margin-top:-2px}
+.otile{color:#E7EDF2}
+.otile i{font-style:normal;font-size:10.5px;color:#9FB0BD;margin-top:-2px}
 .otile .ic{color:var(--oc)}
 .otile em{font-style:normal;font-size:18px}.otile b{font:700 28px/1 "Barlow Condensed",sans-serif;font-variant-numeric:tabular-nums}
-.otile span{font-size:11px;line-height:1.2;color:var(--muted)}
+.otile span{font-size:11px;line-height:1.2;color:#9FB0BD}
 
 body[data-view="obj"] #flags,body[data-view="obj"] #progs{display:none}
 .objpage{padding-top:8px}
@@ -260,7 +275,21 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
   color:var(--muted);font:600 13px Barlow,sans-serif}
 .uchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .fmean{display:block;margin-top:7px;font-size:12.5px;color:var(--far)}
-.fispan{margin:-6px 0 14px;font-size:13px;color:var(--muted)}
+.fispan{margin:-6px 0 10px;font-size:13px;color:var(--muted)}
+.ystrip{margin:0 0 18px}
+.ybar{position:relative;height:8px;border-radius:4px;background:var(--prop);margin:44px 0 6px}
+.yblk{position:absolute;top:0;height:8px;background:var(--yc);opacity:.45;border-radius:4px}
+.yblk.here{opacity:1}
+.ynow{position:absolute;top:50%;transform:translate(-50%,-50%);width:3px;height:18px;border-radius:2px;
+  background:var(--acc);box-shadow:0 0 0 2px var(--panel)}
+.yobj{position:absolute;bottom:10px;transform:translateX(-50%);text-align:center}
+.yobj.hi{bottom:28px}
+.yobj.hi::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:18px;background:var(--rule)}
+.yobj b{display:block;font:700 10.5px "Barlow Condensed",sans-serif;letter-spacing:.04em;
+  color:var(--muted);white-space:nowrap;margin-bottom:3px}
+.yobj i{display:block;width:7px;height:7px;border-radius:50%;background:var(--ink);margin:0 auto}
+.yfoot{display:flex;justify-content:space-between;font-size:11.5px;color:var(--far)}
+.yfoot span:nth-child(2){color:var(--acc);font-weight:600}
 .btn.wide{display:block;width:100%;margin:16px 0 0;border-radius:14px;padding:13px;
   border:1.5px solid color-mix(in srgb,var(--acc) 50%,var(--rule));color:var(--acc);font-weight:600}
 .fibar{padding:10px 2px;border-top:1px solid var(--rule)}
@@ -446,11 +475,26 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .monthcard{margin-top:14px;padding:14px 16px;border-radius:14px;border:1.5px solid var(--rule)}
 .monthcard h3{font:700 20px/1 "Barlow Condensed",sans-serif;margin:0 0 6px}.monthcard p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
 #runweekdlg form,#runlogdlg form,#runsetdlg form{padding:20px;display:flex;flex-direction:column;gap:12px}
-.rwrows{display:flex;flex-direction:column;gap:8px}
-.rwrow{display:grid;grid-template-columns:1fr 1.5fr auto;grid-template-areas:"d t x" "k s x";gap:6px;padding:10px;border-radius:12px;background:var(--panel)}
+.rwrows{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.rwdays{grid-area:days;order:1;display:flex;gap:5px;margin-bottom:6px}
+.rwday{flex:1;background:var(--bg);border:1.5px solid var(--rule);border-radius:10px;padding:6px 0 5px;
+  color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px;position:relative}
+.rwday b{font:600 10.5px Barlow,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.rwday i{font-style:normal;font:700 14px/1 "Barlow Condensed",sans-serif;color:var(--ink)}
+.rwday.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,transparent)}
+.rwday.on i,.rwday.on b{color:var(--acc)}
+.rwday.off{opacity:.33}
+.rwday.qui i{color:var(--muted)}
+.rwday em{position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--muted)}
+.rwtypes{grid-area:kinds;order:2;display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}
+.rwchip{background:none;border:1.5px solid var(--rule);border-radius:999px;padding:5px 11px;
+  color:var(--muted);font:600 12.5px Barlow,sans-serif;white-space:nowrap}
+.rwchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.rwchip.more{border-style:dashed}
+.rwrow{display:grid;grid-template-columns:1fr 1fr auto;grid-template-areas:"days days days" "kinds kinds kinds" "k s x";gap:6px;padding:10px;border-radius:12px;background:var(--panel)}
 .rwrow select,.rwrow input{font-size:15px;padding:8px;border:1.5px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0}
-.rwrow [data-f=date]{grid-area:d}.rwrow [data-f=type]{grid-area:t}.rwrow .kmin{grid-area:k;display:flex;align-items:center;gap:6px;flex-direction:row;font-weight:400}
-.rwrow .kmin input{width:5.5em}.rwrow [data-f=start]{grid-area:s}.rwrow .hx{grid-area:x;align-self:center}
+.rwrow .kmin{order:3;grid-area:k;display:flex;align-items:center;gap:6px;flex-direction:row;font-weight:400}
+.rwrow .kmin input{width:5.5em}.rwrow [data-f=start]{order:4;grid-area:s}.rwrow .hx{order:5;grid-area:x;align-self:center}
 .feelrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}.feelrow>span{color:var(--muted);margin-right:4px}
 .feelrow label{flex-direction:row;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--rule);border-radius:999px;font-weight:600}
 .feelrow input{accent-color:var(--acc)}
@@ -461,6 +505,14 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .tlabel{font:700 22px/1 "Barlow Condensed",sans-serif;margin:26px 0 10px}
 .todaysec .tlabel:first-of-type{margin-top:16px}
 .nextcard{background:var(--panel);border-radius:18px;padding:18px 18px 16px;border-left:6px solid var(--tc)}
+.nextcard.hero{position:relative;overflow:hidden;border-left:0;
+  background:linear-gradient(150deg,color-mix(in srgb,var(--tc) 22%,var(--panel)),var(--panel) 66%);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--tc) 35%,transparent)}
+.nc-wm{position:absolute;right:-18px;bottom:-26px;opacity:.13;pointer-events:none;line-height:0}
+.nc-wm svg.ic{width:118px!important;height:118px!important;color:var(--tc);stroke-width:1}
+.nextcard.hero .nc-when{color:var(--tc)}
+.nextcard.hero h2{letter-spacing:.01em}
+.nextcard.hero .nc-btns{position:relative;z-index:1}
 .nextcard h2{font-size:30px;line-height:1.05;margin:6px 0 8px}
 .nc-when{font-weight:600;color:var(--tc);font-size:15px}
 .nextcard.empty .nc-when{color:var(--muted)}
@@ -736,7 +788,8 @@ label.popt .ic{width:17px;height:17px;margin-right:2px;color:var(--muted)}
 .legend2 i.ring{background:none!important;border:1.5px solid var(--muted);box-sizing:border-box}
 .legend2.small{font-size:13px;color:var(--muted)}
 .legnote{display:block;font-size:13px;line-height:1.5;color:var(--muted)}
-h1 .hdate{display:block;font:400 14px/1.3 Barlow,sans-serif;color:var(--muted);margin-top:2px;letter-spacing:0}
+h1 .hdate{display:inline;font:400 15px/1.3 Barlow,sans-serif;color:var(--muted);letter-spacing:0;margin-left:9px}
+h1 .hdate::before{content:'· '}
 body[data-view="today"] header{padding-bottom:4px}
 body[data-view="history"] header{display:none}
 body[data-view="history"] #main{padding-top:14px}
@@ -1156,6 +1209,7 @@ button.chip::after{display:none}
   <h2>Where you are</h2>
   <p class="fdblock"><b id="fiBlock"></b><span id="fiWhy"></span></p>
   <p class="fispan" id="fiSpan"></p>
+  <div id="fiYear"></div>
   <h4>Where the month stands</h4>
   <div id="fiWeek"></div>
   <p class="fikey"><i class="dotok"></i> green means four weeks of the floor is covered</p>
@@ -1314,7 +1368,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='113';
+const BUILD='117';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2377,7 +2431,7 @@ function renderToday(){
   const now=new Date(),todayS=dayOf(now),tom=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1));
   calDay=calDay||todayS;
   const hh=now.getHours(),greet=hh<5?'Late night':hh<12?'Good morning':hh<18?'Good afternoon':'Good evening';
-  document.getElementById('ptitle').innerHTML=`${esc(greet)}<small class="hdate">${esc(now.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'}))}</small>`;
+  document.getElementById('ptitle').innerHTML=`${esc(greet)}<small class="hdate">${esc(now.toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'}))}</small>`;
   document.getElementById('plede').textContent='';
   document.title='Training guide';
   const all=localLog(),plans=plansCache(),logBy={};all.forEach(r=>{(logBy[r.date]=logBy[r.date]||[]).push(r)});
@@ -2387,8 +2441,11 @@ function renderToday(){
   const next=open[0],rest=open.slice(1),soon=rest.filter(p=>p.date<=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+7)));
   const when=p=>(p.date===todayS?(p.start<nowHM?'Today, planned for ':'Today ')+p.start:p.date===tom?'Tomorrow '+p.start:niceDay(p.date)+' · '+p.start);
   const refs=p=>(S.planRefs[p.id]||[]);
-  const nextCard=next?`<div class="nextcard" style="--tc:${colOf(next.tab)}">
-      <div class="nc-top"><span class="nc-when">${esc(when(next))} · ${esc(String(next.minutes))} min${next.pending?' · <em>waiting to reach the calendar</em>':''}</span>
+  const nxDays=next?Math.round((d0(parseDay(next.date))-d0(now))/864e5):0;
+  const nxSoon=next?(nxDays<=0?'today':nxDays===1?'tomorrow':`in ${nxDays} days`):'';
+  const nextCard=next?`<div class="nextcard hero" style="--tc:${colOf(next.tab)}">
+      ${ICON(tabName(next.tab))?`<span class="nc-wm">${ICON(tabName(next.tab))}</span>`:''}
+      <div class="nc-top"><span class="nc-when">${esc(nxDays<=6?nxSoon+' · '+niceDay(next.date).split(',')[0]+' '+next.start:when(next))} · ${esc(String(next.minutes))} min${next.pending?' · <em>waiting to reach the calendar</em>':''}</span>
         <span class="nc-links"><button class="link" data-act="pedit" data-id="${esc(next.id)}">Change</button><button class="link" data-act="calday" data-d="${next.date}">Calendar</button></span></div>
       <h2>${esc(cleanTitle(next.title))}</h2>
       ${(next.items||[]).length?`<p class="nc-items">${(next.items||[]).map(esc).join('<br>')}</p>`:''}
@@ -2413,7 +2470,7 @@ function renderToday(){
   document.getElementById('main').innerHTML=`<section class="todaysec">
     ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
-      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile t-${o.id}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
+      .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile t-${o.id}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}">${o.id==='nepal'?tileFlags():''}${o.id==='nepal'?'':`<span class="owm">${o.icon}</span>`}<em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
     ${resume}
     <h3 class="tlabel">Next up</h3>${nextCard}
     <button class="add" data-act="plannew">+ Plan a session</button>
@@ -2848,6 +2905,14 @@ function tpRoute(dir,prog){
    <text x="${x0}" y="${H-6}" class="tkpt">${R[0][0]}</text><text x="${x1}" y="${H-6}" text-anchor="end" class="tkpt">${R[R.length-1][0]}</text>
    <circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="8" class="youglow"/><circle cx="${fx.toFixed(1)}" cy="${fy.toFixed(1)}" r="4.5" class="you"/></svg>`;
 }
+function tileFlags(){
+  const cols=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'];
+  return `<svg class="tflags" viewBox="0 0 120 18" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 4 Q30 11 60 7 Q90 3 120 9" fill="none" stroke="#C3CBD8" stroke-width=".7" opacity=".5"/>
+    ${[...Array(8)].map((_,i)=>{const x=3+i*15,y=4+Math.sin(i/1.9)*2+i*.5;
+      return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="8" height="7" rx="1"
+        fill="${cols[i%5]}" opacity=".7" transform="rotate(${(i%3)-1} ${x.toFixed(1)} ${y.toFixed(1)})"/>`}).join('')}
+  </svg>`}
 function tpFlags(){
   const cols=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'];
   return `<svg class="tpflags" viewBox="0 0 340 22" preserveAspectRatio="none" aria-hidden="true">
@@ -3036,6 +3101,7 @@ function weekShape(){
 }
 const NICE={run:'runs',ice:'ice',climb:'climbing',boulder:'bouldering',legs:'legs'};
 const shortDay=d=>parseDay(d).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+const RUNSHORT={long:'Long',easy:'Easy',tempo:'Tempo',threshold:'Threshold',intervals:'Intervals',trail:'Trail',mp:'Marathon pace',race:'Race'};
 const SING={runs:'run',ice:'ice session',climbing:'climb',bouldering:'boulder session',legs:'leg session'};
 const countOf=(n,key)=>`${n} ${n===1?(SING[NICE[key]]||NICE[key]):NICE[key]}`;
 const rangeTxt=s=>s.lo&&s.lo!==s.n?`${s.lo}–${s.n}`:`${s.n}`;
@@ -3136,6 +3202,26 @@ function fillWeek(){
   save();scheduleFlush(400);refresh();
   return made;
 }
+function yearStrip(){
+  const all=blocks().filter(b=>b.id!=='after');
+  // the strip runs from today, not from wherever the first block nominally began
+  const a=d0(new Date()),z=parseDay(all[all.length-1].to);
+  const span=z-a||1,pc=d=>Math.max(0,Math.min(100,((typeof d==='string'?parseDay(d):d)-a)/span*100));
+  const cols={toubkal:'#8EC9F0',morocco:'#8EC9F0',icebase:'#8EC9F0',half:'#4CC38A',
+    marathon:'#4CC38A',bridge:'#E8C46A',trek:'#E8C46A'};
+  const now=dayOf(new Date()),hereId=blockOn(new Date()).id;
+  const objs=[['toubkal',TK.start,'Toubkal'],['marathon',RS().race,'Marathon'],['nepal',NS().date,'Nepal']];
+  return `<div class="ystrip">
+    <div class="ybar">${all.map(b=>{
+      if(parseDay(b.to)<a)return '';
+      const l=pc(b.from),w=Math.max(1.5,pc(b.to)-l);
+      return `<span class="yblk${b.id===hereId?' here':''}" style="left:${l}%;width:${w}%;--yc:${cols[b.id]||'#9AAAB6'}" title="${esc(b.name)}"></span>`}).join('')}
+      <span class="ynow" style="left:${pc(now)}%"></span>
+      ${objs.map(([id,d,label],i)=>`<span class="yobj${i%2?' hi':''}" style="left:${pc(d)}%"><b>${esc(label)}</b><i></i></span>`).join('')}
+    </div>
+    <div class="yfoot"><span>today</span><span>${esc(blockOn(new Date()).name)}</span><span>${esc(parseDay(all[all.length-1].to).toLocaleDateString(undefined,{month:'short',year:'numeric'}))}</span></div>
+  </div>`;
+}
 function openFocusInfo(){
   const w=weekPlan(new Date()),m=monthSoFar(),b=w.block;
   const all=blocks(),i=all.findIndex(x=>x.id===b.id),next=all[i+1];
@@ -3144,6 +3230,7 @@ function openFocusInfo(){
   document.getElementById('fiWhy').textContent=b.why;
   document.getElementById('fiSpan').textContent=
     `${shortDay(b.from)} – ${shortDay(b.to)} · ${days} day${days===1?'':'s'} left${next?` · then ${next.name}`:''}`;
+  document.getElementById('fiYear').innerHTML=yearStrip();
   document.getElementById('fiWeek').innerHTML=w.sessions.length
     ? ['run','legs','ice','climb','boulder'].map(k=>{
         const s=w.sessions.find(x=>x.key===k);
@@ -3290,6 +3377,14 @@ function tabStart(tab){
   const m=Math.round(mins[Math.floor(mins.length/2)]/15)*15;
   return notTooEarly(String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0'));
 }
+/* Which run types you actually use, newest counting double. */
+function runUse(){
+  const out={},cut=dayOf(addDays(new Date(),-120));
+  localLog().filter(r=>tabName(r.tab)==='Run'&&r.result!=='skipped').slice(-60).forEach(r=>{
+    const t=Object.keys(RUNLBL).find(k=>RUNLBL[k]===r.exercise||RUNEX[k]===r.exercise_id);
+    if(t)out[t]=(out[t]||0)+(r.date>=cut?2:1)});
+  return out;
+}
 function runDefKm(kind){
   if(kind==='race')return 42.2;
   const h=runHistory(kind);
@@ -3433,11 +3528,16 @@ function runDash(){
         <p class="kmtxt"><b>${Math.round(done*10)/10} km</b> of ${W.target} km · ${diff>=1?`<em class="ok">${diff} km ahead</em>`:diff<=-1?`<em class="beh">${Math.abs(diff)} km behind</em>`:'<em class="ok">on track</em>'}</p>`})()}
       ${(()=>{const have=weekExisting(W.w);if(!have.length)return'';
         return `<div class="runchips">${have.map(x=>`<span class="rchip${x.done?' done':''}">${esc(parseDay(x.date).toLocaleDateString(undefined,{weekday:'short'}))} ${esc((RUNLBL[x.type]||'Run').replace(' run','').toLowerCase())} ${x.km||''}${x.done?' ✓':''}</span>`).join('')}</div>`})()}
-      <ul class="wklist">
-        ${W.ph!=='race'?`<li><b>Long run</b> ${lr} km · about ${lmin} min · ${zoneText([2,2]).replace('Zone 2 · ','')}</li>`:''}
-        <li><b>Quality</b> ${esc(qtxt)}</li>
-        <li><b>Easy runs</b> fill the rest, 30–50 min, all conversational</li>
-      </ul>
+      <p class="wkwhat">What to run this week</p>
+      <ol class="wklist">
+        ${W.ph!=='race'?`<li><b>One long run</b>, ${lr} km, about ${lmin} min at ${zoneText([2,2]).replace('Zone 2 · ','')}. The one that matters most.</li>`:''}
+        <li>${W.ph==='base'
+          ?(W.idx>=4?`<b>Strides, not a hard session.</b> After one of your easy runs, 6 × 20 seconds fast with a walk back. Base weeks have no hard run on purpose.`
+                    :`<b>Nothing hard yet.</b> Every run this week is easy. The speed comes later, once the base is in.`)
+          :`<b>One harder run.</b> ${esc(qtxt)}`}</li>
+        <li><b>${W.runs>2?`The other ${W.runs-2===1?'run':`${W.runs-2} runs`} easy`:'Anything else easy'}</b>, 30–50 min, slow enough to talk the whole way.</li>
+      </ol>
+      ${W.cutback?'<p class="wkwhy">A cutback week: less volume on purpose, so the last three weeks of training stick. Do not make it up.</p>':''}
       <div class="wkbtns"><button class="go" data-act="runlog">Log a run</button><button class="link" data-act="gocal">Plan runs in the calendar</button></div>
     </div>
     ${(()=>{const bars=[...Array(8)].map((_,i)=>{const ws=addDays(W.w,-7*(7-i)),wi=weekInfo(ws);
@@ -3477,11 +3577,24 @@ function drawRunWeek(){
   const awayNote=awayO&&!RW.loading?`<p class="hint">${awayO.icon} Away for ${esc(awayO.name)} on ${awayDays.length} day${awayDays.length>1?'s':''} this week, so no runs are planned then.</p>`:'';
   const note=awayNote+(RW.loading?'<p class="empty">Checking your calendar…</p>':'')+(RW.loading?'':RW.short?`<p class="hint">Every run day this week already has a run. Step to another week with ‹ ›, or add one anyway.</p>`:thin?`<p class="hint">With ${runDays.length} run days, this week comes to about ${Math.round(tot)} km of the ${W.target} km target. That's fine; tick another day in Run settings if you want to close the gap.</p>`:RW.short?`<p class="hint">Only ${RW.runs.length} of your run days are free this week, so the rest of the distance goes on those runs. Tick more days in Run settings if you want another run.</p>`:'');
   document.getElementById('rwRows').innerHTML=haveHTML+note+(RW.loading?'':RW.runs.length?RW.runs.map((x,i)=>`<div class="rwrow" data-i="${i}">
-    <select data-f="date" aria-label="Day">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);return `<option value="${ds}"${ds===x.date?' selected':''}${ds<today?' disabled':''}>${d.toLocaleDateString(undefined,{weekday:'short',day:'numeric'})}${rn?' · run planned':''}${o?' · '+o.join(''):''}${runDays.includes(di)?'':' · not a run day'}</option>`}).join('')}</select>
-    <select data-f="type" aria-label="Run type">${Object.keys(RUNLBL).map(t=>`<option value="${t}"${t===x.type?' selected':''}>${RUNLBL[t]}</option>`).join('')}</select>
+<div class="rwdays">${days.map((d,di)=>{const ds=dayOf(d),o=others[ds],rn=(RW.have||[]).some(h=>h.date===ds);
+      const past=ds<today,taken=RW.runs.some((r,ri)=>r.date===ds&&ri!==i);
+      return `<button type="button" class="rwday${ds===x.date?' on':''}${past||taken?' off':''}${runDays.includes(di)?'':' qui'}"
+        ${past||taken?'disabled':''} data-rd="${i}" data-d="${ds}"
+        title="${esc(d.toLocaleDateString(undefined,{weekday:'long',day:'numeric'}))}${rn?' · run planned':''}${o?' · '+o.join(''):''}">
+        <b>${esc(d.toLocaleDateString(undefined,{weekday:'narrow'}))}</b><i>${d.getDate()}</i>${rn||o?'<em></em>':''}</button>`}).join('')}</div>
+<div class="rwtypes">${(() => {
+      const order=['long','easy','tempo','threshold','intervals','trail','mp','race'];
+      const use=runUse();const ranked=order.slice().sort((a,b)=>(use[b]||0)-(use[a]||0)||order.indexOf(a)-order.indexOf(b));
+      const show=ranked.slice(0,3);
+      if(!show.includes(x.type))show.splice(2,1,x.type);
+      const chip=t=>`<button type="button" class="rwchip${t===x.type?' on':''}" data-rt="${i}" data-t="${t}">${esc(RUNSHORT[t]||RUNLBL[t])}</button>`;
+      const rest=order.filter(t=>!show.includes(t));
+      return show.map(chip).join('')+(RW.more===i?rest.map(chip).join('')+`<button type="button" class="rwchip more" data-rmore="-1">Fewer</button>`
+        :`<button type="button" class="rwchip more" data-rmore="${i}">${rest.length} more</button>`)})()}</div>
     <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
     <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
-    <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
+            <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
     :((RW.have||[]).length?`<p class="empty">${dayOf(RW.ws)===dayOf(mondayOf(new Date()))?'This week':'That week'} is already planned. Step to another week with ‹ ›.</p>`:'<p class="empty">No run days left. Step to another week with ‹ ›.</p>'));
 }
 function openRunLog(pre){
@@ -4487,7 +4600,19 @@ let PENDING_TRIP=null;
     if(k==='type'&&x.type==='race')x.km=42.2;
     if(k==='type'||k==='km'){RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()}
     if(k==='date'){RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()}});
-  wf.addEventListener('click',ev=>{const b=ev.target.closest('[data-rm]');if(!b)return;RW.runs.splice(+b.dataset.rm,1);drawRunWeek()});
+  wf.addEventListener('click',ev=>{
+    const more=ev.target.closest('[data-rmore]');
+    if(more){RW.more=+more.dataset.rmore;drawRunWeek();return}
+    const dd=ev.target.closest('[data-rd]');
+    if(dd){RW.runs[+dd.dataset.rd].date=dd.dataset.d;
+      RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek();return}
+    const t=ev.target.closest('[data-rt]');
+    if(t){const x=RW.runs[+t.dataset.rt];x.type=t.dataset.t;RW.more=-1;
+      // the distance follows what you usually run of that kind
+      x.km=x.type==='race'?42.2:runKmFor(x.type,x.km);
+      x.start=runStartFor(x.type);
+      RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek();return}
+    const b=ev.target.closest('[data-rm]');if(!b)return;RW.runs.splice(+b.dataset.rm,1);drawRunWeek()});
   document.getElementById('rwAdd').addEventListener('click',()=>{const today=dayOf(new Date());let d=RW.ws;for(let i=0;i<7;i++){const ds=dayOf(addDays(RW.ws,i));if(ds>=today&&!RW.runs.some(r=>r.date===ds)){d=addDays(RW.ws,i);break}}
     RW.runs.push({date:dayOf(d)<today?today:dayOf(d),type:'easy',km:runKmFor('easy',6),start:runStartFor('easy')});RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek()});
   wf.addEventListener('submit',ev=>{
