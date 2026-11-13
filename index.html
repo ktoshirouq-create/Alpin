@@ -504,6 +504,28 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 #resumebar,#undobar{bottom:calc(env(safe-area-inset-bottom,0px) + 84px)!important}
 .tlabel{font:700 22px/1 "Barlow Condensed",sans-serif;margin:26px 0 10px}
 .todaysec .tlabel:first-of-type{margin-top:16px}
+.tl{list-style:none;margin:0 0 18px;padding:0 0 0 22px;position:relative}
+.tl::before{content:"";position:absolute;left:5px;top:8px;bottom:10px;width:2px;background:var(--rule)}
+.tl-item{position:relative;margin-bottom:16px}
+.tl-item:last-child{margin-bottom:0}
+.tl-item::before{content:"";position:absolute;left:-21px;top:4px;width:12px;height:12px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--tc,var(--rule))}
+.tl-item.now::before{background:var(--acc);border-color:var(--acc)}
+.tl-item.now .tl-time{color:var(--acc);font-weight:700}
+.tl-item.done::before,.tl-item.logged::before{background:var(--tc);opacity:.65}
+.tl-time{display:block;font:600 11.5px Barlow,sans-serif;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--muted)}
+.tl-card{background:var(--panel);border-radius:14px;padding:12px 13px;margin-top:6px;
+  border-left:3px solid var(--tc,var(--rule))}
+.tl-card h4{font:700 22px/1.12 "Barlow Condensed",sans-serif;margin:0 0 3px}
+.tl-card p{margin:0;font-size:13px;color:var(--muted)}
+.tl-card.thin{padding:9px 12px;display:flex;align-items:baseline;gap:9px;opacity:.72}
+.tl-card.thin b{font-weight:600;font-size:14.5px}
+.tl-card.thin span{font-size:12.5px;color:var(--muted)}
+.tl-acts{display:flex;align-items:center;gap:14px;margin-top:11px}
+.tl-ghost{border:1.5px dashed var(--rule);border-radius:14px;padding:12px 13px;margin-top:6px;
+  color:var(--far);font-size:13.5px}
+.tl-item.ghost::before{border-color:var(--rule)}
 .nextcard{background:var(--panel);border-radius:18px;padding:18px 18px 16px;border-left:6px solid var(--tc)}
 .nextcard.hero{position:relative;overflow:hidden;border-left:0;
   background:linear-gradient(150deg,color-mix(in srgb,var(--tc) 22%,var(--panel)),var(--panel) 66%);
@@ -1368,7 +1390,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='117';
+const BUILD='118';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2438,7 +2460,7 @@ function renderToday(){
   const nowHM=`${pad2(hh)}:${pad2(now.getMinutes())}`;
   const isDone=p=>p.status==='done'||(logBy[p.date]||[]).some(r=>r.plan_id===p.id);
   const open=plans.filter(p=>!isDone(p)&&(p.date>todayS||(p.date===todayS))).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-  const next=open[0],rest=open.slice(1),soon=rest.filter(p=>p.date<=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+7)));
+  const next=open[0],rest=open.slice(1),soon=rest.filter(p=>p.date>todayS&&p.date<=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+7)));
   const when=p=>(p.date===todayS?(p.start<nowHM?'Today, planned for ':'Today ')+p.start:p.date===tom?'Tomorrow '+p.start:niceDay(p.date)+' · '+p.start);
   const refs=p=>(S.planRefs[p.id]||[]);
   const nxDays=next?Math.round((d0(parseDay(next.date))-d0(now))/864e5):0;
@@ -2453,6 +2475,39 @@ function renderToday(){
         :(next.date<=todayS?`<button class="go" data-act="pdone" data-id="${esc(next.id)}">✓ Done</button>`:'')}
         </div></div>`
     :`<div class="nextcard empty" style="--tc:var(--rule)"><h2>Nothing planned</h2><p class="nc-items">Plan your next session and it shows up here and in your Training calendar.</p></div>`;
+  // everything on today, planned or already done, in clock order
+  const todayPlans=plans.filter(p=>p.date===todayS).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  const todayLogs=(logBy[todayS]||[]).filter(r=>r.result!=='skipped'&&!DOTLESS.includes(tabName(r.tab))&&!r.plan_id);
+  const dayItems=[
+    ...todayPlans.map(p=>({t:p.start||'',kind:isDone(p)?'done':'plan',p})),
+    ...todayLogs.map(r=>({t:r.time||'',kind:'log',r}))
+  ].sort((a,b)=>(a.t||'99').localeCompare(b.t||'99'));
+  const nowPos=dayItems.filter(x=>(x.t||'99')<=nowHM).length;
+  const dayRow=(x)=>{
+    if(x.kind==='log'){const r=x.r;
+      return `<li class="tl-item logged" style="--tc:${colOf(tabName(r.tab))}">
+        <span class="tl-time">${esc(r.time||'')}</span>
+        <div class="tl-card thin"><b>${esc(r.exercise||cleanTitle(r.title||'Session'))}</b>
+          <span>${esc(r.completed||r.dose||'logged')}</span></div></li>`}
+    const p=x.p,done=x.kind==='done';
+    return `<li class="tl-item${done?' done':''}" style="--tc:${colOf(tabName(p.tab))}">
+      <span class="tl-time">${esc(p.start||'')}${p.minutes?` · ${p.minutes} min`:''}</span>
+      <div class="tl-card${done?' thin':''}">
+        ${done?`<b>${esc(cleanTitle(p.title))}</b><span>done</span>`
+        :`<h4>${esc(cleanTitle(p.title))}</h4>
+          ${(p.items||[]).length?`<p>${esc((p.items||[])[0])}</p>`:''}
+          <div class="tl-acts">
+            ${refs(p).length?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
+              :`<button class="go sm" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`}
+            <button class="link" data-act="pedit" data-id="${esc(p.id)}">Change</button>
+          </div>`}
+      </div></li>`};
+  const dayTL=`<ol class="tl">
+    ${dayItems.slice(0,nowPos).map(dayRow).join('')}
+    <li class="tl-item now"><span class="tl-time">now · ${esc(nowHM)}</span></li>
+    ${dayItems.slice(nowPos).map(dayRow).join('')}
+    ${dayItems.length?'':`<li class="tl-item ghost"><div class="tl-ghost">Nothing on today.${next?'':' Plan something, or log what you did.'}</div></li>`}
+  </ol>`;
   const quick=[['warmup|2|e','Pre-climb'],['warmup|3|e','Stretch'],['warmup|0|e','Pre-run'],['ice|0|e','Ice tools']];
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
   const days=[...Array(7)].map((_,i)=>{const d=new Date(wk.getFullYear(),wk.getMonth(),wk.getDate()+i),ds=dayOf(d);
@@ -2472,7 +2527,10 @@ function renderToday(){
     <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
       .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile t-${o.id}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}">${o.id==='nepal'?tileFlags():''}${o.id==='nepal'?'':`<span class="owm">${o.icon}</span>`}<em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
     ${resume}
-    <h3 class="tlabel">Next up</h3>${nextCard}
+    <h3 class="tlabel">${esc(now.toLocaleDateString(undefined,{weekday:'long'}))}</h3>
+    ${dayTL}
+    ${next&&next.date!==todayS?`<h3 class="tlabel">Next up</h3>${nextCard}`:''}
+    ${!next?nextCard:''}
     <button class="add" data-act="plannew">+ Plan a session</button>
     <button class="link didlink" data-act="didnew">or log what you already did</button>
     ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
