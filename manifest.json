@@ -7,10 +7,20 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0B151D",
+  "background_color": "#0F1922",
   "theme_color": "#0B151D",
   "icons": [
-    { "src": "icon.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon.png", "sizes": "192x192 512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-v2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

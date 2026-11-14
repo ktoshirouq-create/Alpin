@@ -1,7 +1,7 @@
 // Offline support. The page itself is always fetched fresh when online,
 // so edits to index.html show up without touching this file.
-const CACHE = 'training-guide-122';
-const CORE = ['./', './index.html', './manifest.json', './icon.png'];
+const CACHE = 'training-guide-123';
+const CORE = ['./', './index.html', './manifest.json', './icon-v2.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
