@@ -1417,7 +1417,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='121';
+const BUILD='122';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -3752,9 +3752,19 @@ const KINDS={Run:[['easy','Easy'],['long','Long'],['tempo','Tempo'],['threshold'
   Other:[['gym','Gym'],['mobility','Mobility'],['skitour','Ski touring'],['ski','Skiing'],['bike','Cycling'],['swim','Swim'],['rest','Rest'],['travel','Travel']]};
 const TAGS={Run:[['trail','Trail'],['hills','Hills']],
   Climbing:[['indoor','Indoor'],['outdoor','Outdoor'],['multi','Multipitch'],['alpine','Alpine']],
+  'Ice climbing':[['indoor','Indoor']],
   Hike:[['peak','Peak'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe']]};
 // pairs that cannot both be true
-const STICKY=['indoor','outdoor'];
+const STICKY={Climbing:['indoor','outdoor']};
+// a kind and a tag that cannot both be true: there is no indoor multipitch or alpine ice
+const KINDX={'Ice climbing':{indoor:['multi','alpine']}};
+function tagKindFix(tab,kind,tags){     // after a tag change: move the kind off anything the tags rule out
+  const bad=(tags||[]).flatMap(t=>((KINDX[tab]||{})[t])||[]);
+  return bad.includes(kind)?(((KINDS[tab]||[]).find(([k])=>!bad.includes(k))||[])[0]||kind):kind;
+}
+function kindTagFix(tab,kind,tags){     // after a kind change: drop any tag that kind rules out
+  return (tags||[]).filter(t=>!(((KINDX[tab]||{})[t])||[]).includes(kind));
+}
 const TAGX={indoor:['outdoor','multi','alpine'],outdoor:['indoor'],multi:['indoor'],alpine:['indoor']};
 const PACKS=[['','None'],['light','Light'],['medium','Medium'],['heavy','Heavy']];
 const PACKMEAN={'':'Nothing worth counting.',light:'A day bag, under about 6 kg.',medium:'Roughly 6 to 12 kg.',heavy:'12 kg and up, the Nepal kind.'};
@@ -3931,7 +3941,7 @@ function drawKinds(){
   const both=!!(ks.length&&tr.length);
   if(PA.mode!=='train'&&PA.mode!=='out')PA.mode=TRAINFIRST.includes(PA.tab)&&tr.length?'train':(ks.length?'out':'train');
   const mode=!ks.length?'train':!tr.length?'out':PA.mode;
-  document.getElementById('paKindH').textContent=both?'What it was':(mode==='train'?'What to train':'Kind');
+  document.getElementById('paKindH').textContent=both?(document.getElementById('planfrm').already.checked?'What it was':'What it is'):(mode==='train'?'What to train':'Kind');
   const seg=both?`<div class="paseg"><button type="button" data-mode="train"${mode==='train'?' class="on"':''}>Training</button>
       <button type="button" data-mode="out"${mode==='out'?' class="on"':''}>A day out</button></div>`:'';
   const out=mode!=='train'&&!PA.train.length;
@@ -3950,7 +3960,7 @@ function paPick(tab){
   {const last=normKind(tab,(S.lastKind||{})[tab]||''),lt=(S.lastTags||{})[tab];
    const ok=kl.some(([k])=>k===last.kind);
    PA.kind=TRAINFIRST.includes(tab)?null:(ok?last.kind:((kl[0]||[])[0])||null);
-   PA.tags=(Array.isArray(lt)?lt:last.tags).filter(k=>tagLabel(tab,k)&&STICKY.includes(k));
+   PA.tags=(Array.isArray(lt)?lt:last.tags).filter(k=>tagLabel(tab,k)&&(STICKY[tab]||[]).includes(k));
    PA.pack=tab==='Hike'?((S.lastTags||{})._pack||last.pack||''):'';
    f.packkg.value='';}
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
@@ -4997,13 +5007,13 @@ function replacePlan(plan){
     if(mo){EP_MORE=mo.dataset.epmore==='1';drawEpKinds();return}
     const b=ev.target.closest('[data-epkind]');if(!b)return;
     EP_MORE=false;
-    EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();epWhatNow();
+    EP_KIND=b.dataset.epkind;EP_TAGS=kindTagFix(EP_TYPE,EP_KIND,EP_TAGS);drawEpKinds();epTitleNow();epWhatNow();
     const km=kindMinutes(EP_KIND,EP_TAGS);if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+km))}
   });
   document.getElementById('epTags').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-eptag]');if(!b)return;
-    EP_TAGS=toggleTag(EP_TYPE,EP_TAGS||[],b.dataset.eptag);drawEpKinds();epTitleNow();epWhatNow()});
+    EP_TAGS=toggleTag(EP_TYPE,EP_TAGS||[],b.dataset.eptag);EP_KIND=tagKindFix(EP_TYPE,EP_KIND,EP_TAGS);drawEpKinds();epTitleNow();epWhatNow()});
   document.getElementById('epPack').addEventListener('click',ev=>{
     const sb=ev.target.closest('.stepbtn');
     if(sb&&!f.eppackkg.value)f.eppackkg.value=(PACKKG[EP_PACK]||8)-(+sb.dataset.step);
@@ -5244,13 +5254,14 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     if(ev.target.closest('[data-tr-clear]')){PA.train=[];drawKinds();planAuto();return}
     const b=ev.target.closest('[data-kind]');if(!b)return;
     PA.more=false;   // picking one folds the long list away again
-    PA.kind=b.dataset.kind;PA.train=[];S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
+    PA.kind=b.dataset.kind;PA.train=[];PA.tags=kindTagFix(PA.tab,PA.kind,PA.tags);S.lastKind={...(S.lastKind||{}),[PA.tab]:PA.kind};save();
     drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0'){const v=runDefKm(PA.kind);if(v)f.km.value=v}
     planAuto()});
   document.getElementById('paTags').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-tag]');if(!b)return;
     PA.tags=toggleTag(PA.tab,PA.tags||[],b.dataset.tag);
+    {const k=tagKindFix(PA.tab,PA.kind,PA.tags);if(k!==PA.kind){PA.kind=k;S.lastKind={...(S.lastKind||{}),[PA.tab]:k}}}
     S.lastTags={...(S.lastTags||{}),[PA.tab]:PA.tags};save();
     drawKinds();paNudge();planAuto()});
   document.getElementById('paPack').addEventListener('click',ev=>{
