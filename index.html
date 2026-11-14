@@ -54,7 +54,8 @@ body{width:100%;max-width:100%;overflow-x:hidden}
 body>nav#bnav{flex:0 0 auto}
 body>dialog{flex:0 0 auto}
 html{height:100%;overscroll-behavior-y:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
-body:not([data-view="today"]) #flags{display:none}
+#flags{display:none}
+body[data-view="today"] header{display:none}
 body:not([data-view="train"]) #progs{display:none}
 body[data-view="train"] h1{font-size:clamp(34px,9vw,52px)}
 body[data-view="train"] header{padding-top:14px}
@@ -491,6 +492,7 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
   color:var(--muted);font:600 12.5px Barlow,sans-serif;white-space:nowrap}
 .rwchip.on{border-color:var(--acc);color:var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
 .rwchip.more{border-style:dashed}
+.rwchip.tag{border-radius:9px;margin-left:auto}
 .rwrow{display:grid;grid-template-columns:1fr 1fr auto;grid-template-areas:"days days days" "kinds kinds kinds" "k s x";gap:6px;padding:10px;border-radius:12px;background:var(--panel)}
 .rwrow select,.rwrow input{font-size:15px;padding:8px;border:1.5px solid var(--rule);border-radius:8px;background:var(--bg);color:var(--ink);min-width:0}
 .rwrow .kmin{order:3;grid-area:k;display:flex;align-items:center;gap:6px;flex-direction:row;font-weight:400}
@@ -822,7 +824,20 @@ body[data-view="history"] .calhead{margin-top:10px}
 .syncmini{line-height:1.2}
 body[data-view="today"] h1{font-size:clamp(30px,8vw,42px)}
 body[data-view="today"] #plede{display:none}
-body[data-view="today"] .objtiles{margin-top:10px}
+.todaysec{padding-top:0!important}
+.thero{position:relative;height:214px;overflow:hidden;margin:0 -18px}
+.th-string{position:absolute;left:0;top:0;width:100%;height:58px}
+.th-stars{position:absolute;left:0;top:0;width:100%;height:96px}
+.th-ridge{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:118px}
+.th-ridge .r1{fill:#1E3044}.th-ridge .rs{fill:#4A617A;opacity:.75}.th-ridge .r2{fill:#162230}.th-ridge .r3{fill:var(--bg)}
+.thero[data-sky="night"] .r1{fill:#16202E}.thero[data-sky="night"] .rs{fill:#33455A}.thero[data-sky="night"] .r2{fill:#111A25}
+.thero[data-sky="dusk"] .r1{fill:#2A2740}.thero[data-sky="dusk"] .rs{fill:#6A5670}.thero[data-sky="dusk"] .r2{fill:#1B1B2B}
+.thero[data-sky="dawn"] .r1{fill:#2A3550}.thero[data-sky="dawn"] .rs{fill:#8A7C8C}.thero[data-sky="dawn"] .r2{fill:#1A2334}
+.thero[data-sky="morning"] .r1{fill:#22384E}.thero[data-sky="morning"] .rs{fill:#6D8AA6}
+.th-txt{position:absolute;left:18px;top:52px;color:#EDF2F6}
+.th-k{display:block;font:600 11.5px Barlow,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#B4C3D2}
+.th-t{display:block;font:700 36px/1 "Barlow Condensed","Arial Narrow",sans-serif;margin-top:4px;letter-spacing:-.005em}
+body[data-view="today"] .objtiles{margin-top:-30px;position:relative}
 body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:10px 0 0;font-size:12px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:5px}
@@ -924,6 +939,12 @@ body[data-view="today"] .todaysec .tlabel:first-of-type{margin-top:18px}
 .epsec.fold[open]>summary::after{content:'Done'}
 .epsec.fold>.typechips{margin-top:10px}
 .tchip.more{border-style:dashed;color:var(--muted)}
+.tagh{margin:14px 0 8px}
+.tchip.tag{border-radius:10px}
+.tchip.tag.on::before{content:'✓ ';font-weight:700}
+.packseg{margin-top:0}
+.packkg{display:block;margin-top:12px;max-width:190px}
+#paPack{margin-top:2px}
 .tchip.train{border-style:dashed}
 .tchip.train.on{border-style:solid}
 .pickex.single{width:100%;margin-top:2px}
@@ -1278,7 +1299,10 @@ button.chip::after{display:none}
 
   <details class="epsec fold" id="epWhatRow"><summary><span class="ic" id="epIcon"></span><b id="epWhatNow"></b></summary>
     <div class="subhead">Activity</div><div class="typechips" id="epTypes"></div>
-    <div class="subhead" id="epKindHead">Kind</div><div class="typechips" id="epKinds"></div></details>
+    <div class="subhead" id="epKindHead">Kind</div><div class="typechips" id="epKinds"></div>
+    <div id="epTags"></div>
+    <div id="epPack" hidden><div id="epPackSeg"></div>
+      <label class="packkg" id="epKgLab" hidden>Weight, kg <span class="hint">optional</span><span class="stepper"><button type="button" class="stepbtn" data-step="-1" aria-label="less">–</button><input name="eppackkg" type="number" inputmode="decimal" min="1" max="40" step="1"><button type="button" class="stepbtn" data-step="1" aria-label="more">+</button></span></label></div></details>
 
   <section class="epsec" id="epRun" hidden><h4>The run</h4>
     <div class="row2"><label>Type<select name="rtype"></select></label>
@@ -1347,9 +1371,12 @@ button.chip::after{display:none}
   <details class="shline" id="lnWhat" open><summary><span class="k">What</span><b class="v" id="svWhat">Pick one</b><span class="a"></span></summary>
    <div class="pagrid" id="paGrid"></div>
    <div id="paKindSec" hidden><h4 id="paKindH">Kind</h4><div class="typechips" id="paKinds"></div>
+    <div id="paTags"></div>
     <p class="nudge" id="paNudge" hidden></p>
     <div class="row2" id="paNums" hidden><label id="paKmLab">Distance, km<span class="stepper"><button type="button" class="stepbtn" data-step="-0.5" aria-label="less">–</button><input name="km" type="number" inputmode="decimal" min="1" max="99" step="0.5"><button type="button" class="stepbtn" data-step="0.5" aria-label="more">+</button></span></label>
-      <label id="paUpLab" hidden>Ascent, m<span class="stepper"><button type="button" class="stepbtn" data-step="-50" aria-label="less">–</button><input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"><button type="button" class="stepbtn" data-step="50" aria-label="more">+</button></span></label></div></div></details>
+      <label id="paUpLab" hidden>Ascent, m<span class="stepper"><button type="button" class="stepbtn" data-step="-50" aria-label="less">–</button><input name="up" type="number" inputmode="numeric" min="0" max="4000" step="50"><button type="button" class="stepbtn" data-step="50" aria-label="more">+</button></span></label></div>
+    <div id="paPack" hidden><div id="paPackSeg"></div>
+      <label class="packkg" id="paKgLab" hidden>Weight, kg <span class="hint">optional</span><span class="stepper"><button type="button" class="stepbtn" data-step="-1" aria-label="less">–</button><input name="packkg" type="number" inputmode="decimal" min="1" max="40" step="1"><button type="button" class="stepbtn" data-step="1" aria-label="more">+</button></span></label></div></div></details>
   <details class="shline" id="lnWhen"><summary><span class="k">When</span><b class="v" id="svWhen"></b><span class="a"></span></summary>
     <label class="didbox"><input type="checkbox" name="already"><span>I already did this</span></label>
     <div class="durchips" id="paWhen"><button type="button" data-day="0">Today</button><button type="button" data-day="1">Tomorrow</button><button type="button" data-day="2">In 2 days</button></div>
@@ -1390,7 +1417,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='118';
+const BUILD='121';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2100,11 +2127,11 @@ const PROGS=[
 
 /* ---------- state ---------- */
 const KEY='tpg:v3';
-const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},focus:{},gone:{},itin:{},dials:{},kinds:{},lastKind:{},places:[],trips:{},tripOf:{}});
+const blank=()=>({custom:{},edits:{},hidden:[],levels:{},tune:{},tiers:{},slots:{},settings:{ready:5,readyV2:1},planRefs:{},run:{},runMeta:{},nepal:{},obj:{},focus:{},gone:{},itin:{},dials:{},kinds:{},kx:{},lastTags:{},lastKind:{},places:[],trips:{},tripOf:{}});
 const READY_OPTS=[0,3,5,10,15];
 function clean(raw){
   const S0=Object.assign(blank(),raw||{});
-  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','lastKind','trips','tripOf','focus','gone','itin','dials'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
+  ['custom','edits','levels','tune','tiers','slots','settings','planRefs','run','runMeta','nepal','obj','kinds','kx','lastTags','lastKind','trips','tripOf','focus','gone','itin','dials'].forEach(k=>{if(!S0[k]||typeof S0[k]!=='object'||Array.isArray(S0[k]))S0[k]={}});
   if(!READY_OPTS.includes(S0.settings.ready))S0.settings.ready=5;
   if(!S0.settings.readyV2){if(S0.settings.ready===10)S0.settings.ready=5;S0.settings.readyV2=1}
   if(!Array.isArray(S0.hidden))S0.hidden=[];
@@ -2449,6 +2476,53 @@ function renderHistory(){
    </section>`;
   document.getElementById('foot').innerHTML='';
 }
+/* ── The top of Today: one scene. A sky that follows the real daylight in Oslo,
+      a ridge along the bottom, the flags strung across it. ── */
+function skyPhase(now){
+  const start=new Date(now.getFullYear(),0,0),N=Math.floor((now-start)/864e5);
+  const lat=59.91*Math.PI/180,decl=-23.44*Math.cos(2*Math.PI/365*(N+10))*Math.PI/180;
+  const c=Math.max(-1,Math.min(1,-Math.tan(lat)*Math.tan(decl)));
+  const half=Math.acos(c)*180/Math.PI/15;                 // half the daylight, in hours
+  const noon=12-(10.75+now.getTimezoneOffset()/4)/15;     // solar noon on the clock (offset is minutes west)
+  const rise=noon-half,set=noon+half,h=now.getHours()+now.getMinutes()/60;
+  const ph=h<rise-.8||h>set+2.2?'night':h<rise+.6?'dawn':h<noon?'morning':h<set-.8?'afternoon':'dusk';
+  return {ph,rise,set};
+}
+const SKIES={
+  night:'linear-gradient(180deg,#0E1828 0%,#101B2B 55%,#131E2C 100%)',
+  dawn:'radial-gradient(120% 80% at 20% 108%,rgba(240,170,120,.42),transparent 60%),linear-gradient(180deg,#34486A 0%,#4A5878 60%,#5A5F78 100%)',
+  morning:'linear-gradient(180deg,#44668C 0%,#3A5878 45%,#2C4460 100%)',
+  afternoon:'radial-gradient(120% 90% at 82% -12%,rgba(238,160,99,.36),transparent 58%),linear-gradient(180deg,#2C445E 0%,#243A50 45%,#1B2B3B 100%)',
+  dusk:'radial-gradient(130% 80% at 76% 104%,rgba(232,120,110,.4),transparent 62%),linear-gradient(180deg,#2C2A48 0%,#3A2F4F 55%,#4A3552 100%)'};
+// the phone's status bar takes the colour of the top of the sky, so there is no seam
+const SKYTOP={night:'#0E1828',dawn:'#34486A',morning:'#44668C',afternoon:'#2C445E',dusk:'#2C2A48'};
+function setChrome(col){const m=document.querySelector('meta[name="theme-color"]');if(m&&m.content!==col)m.content=col}
+function heroFlags(){
+  const cols=['#2F5DA8','#F4F3EE','#C8372D','#2E8B57','#E8B92F'],W=400,n=22,size=9;
+  const at=t=>[t*W,6+20*4*t*(1-t)];
+  let d='';for(let i=0;i<=40;i++){const [x,y]=at(i/40);d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)}
+  let out=`<path d="${d}" fill="none" stroke="#C3CBD8" stroke-width=".8" opacity=".6"/>`;
+  for(let i=0;i<n;i++){const t=(i+.5)/n,[x,y]=at(t),[x2,y2]=at(t+.01),a=Math.atan2(y2-y,x2-x)*180/Math.PI;
+    out+=`<rect x="${(x-size/2).toFixed(1)}" y="${y.toFixed(1)}" width="${size}" height="7.4" rx="1" fill="${cols[i%5]}" opacity=".92" transform="rotate(${a.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`}
+  return `<svg class="th-string" viewBox="0 0 400 58" preserveAspectRatio="none" aria-hidden="true">${out}</svg>`;
+}
+function todayHero(now,greet){
+  const {ph}=skyPhase(now);
+  const stars=ph==='night'?[[32,22],[78,40],[131,16],[170,46],[224,30],[262,12],[318,38],[352,20],[376,48],[104,58]]
+    .map(([x,y],i)=>`<circle cx="${x}" cy="${y}" r="${i%3?0.8:1.2}" fill="#DCE6F2" opacity="${i%2?.55:.8}"/>`).join(''):'';
+  return `<div class="thero" data-sky="${ph}" style="background:${SKIES[ph]}">
+    ${stars?`<svg class="th-stars" viewBox="0 0 400 80" preserveAspectRatio="none" aria-hidden="true">${stars}</svg>`:''}
+    ${heroFlags()}
+    <svg class="th-ridge" viewBox="0 0 400 112" preserveAspectRatio="none" aria-hidden="true">
+      <path class="r1" d="M0 70 L40 54 L66 64 L110 30 L134 48 L158 40 L250 46 L284 18 L310 40 L334 34 L368 58 L400 46 L400 112 L0 112Z"/>
+      <path class="rs" d="M284 18 L294 30 L287 31 L300 42 L310 40Z M110 30 L119 40 L112 41 L124 49 L134 48Z M334 34 L342 44 L337 45 L350 54 L368 58Z"/>
+      <path class="r2" d="M0 92 L46 74 L88 88 L136 66 L176 82 L220 64 L266 84 L310 70 L356 86 L400 74 L400 112 L0 112Z"/>
+      <path class="r3" d="M0 106 L60 96 L120 104 L190 94 L260 104 L330 96 L400 102 L400 112 L0 112Z"/>
+    </svg>
+    <div class="th-txt"><span class="th-k">${esc(now.toLocaleDateString(undefined,{weekday:'long'}))} · ${esc(now.toLocaleDateString(undefined,{day:'numeric',month:'long'}))}</span>
+      <span class="th-t">${esc(greet)}</span></div>
+  </div>`;
+}
 function renderToday(){
   const now=new Date(),todayS=dayOf(now),tom=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+1));
   calDay=calDay||todayS;
@@ -2523,9 +2597,10 @@ function renderToday(){
       <button class="go sm" data-act="resume">Resume</button><button class="link" data-act="discard">Discard</button></div>`}
   const cdN=cdParts(nepalLeft()).d,cdR=Math.max(0,Math.round((d0(parseDay(RS().race))-d0(now))/864e5));
   document.getElementById('main').innerHTML=`<section class="todaysec">
-    ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
+    ${todayHero(now,greet)}
     <div class="objtiles">${OBJS().map(o=>{const t=parseDay(o.date);t.setHours(o.kind==='race'?9:6,0,0,0);const ms=t-now;return {...o,left:ms>0?Math.floor(ms/864e5):Math.round((d0(t)-d0(now))/864e5)}}).filter(o=>o.left>=-((parseDay(o.end)-parseDay(o.date))/864e5))
       .sort((a,b)=>a.left-b.left).map(o=>`<button class="otile t-${o.id}" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}">${o.id==='nepal'?tileFlags():''}${o.id==='nepal'?'':`<span class="owm">${o.icon}</span>`}<em>${o.icon}</em><b>${o.left>0?o.left:o.left===0?'Today':'Now'}</b><i>${o.left>0?'days':''}</i><span>${esc(o.name)}</span></button>`).join('')}</div>
+    ${connected()?'':`<div class="nocon"><p><b>This browser isn\u2019t connected to your Sheet.</b> Your plans and history are safe in Google; connect to see them here.</p><button class="go sm" data-act="syncsetup">Connect</button></div>`}
     ${resume}
     <h3 class="tlabel">${esc(now.toLocaleDateString(undefined,{weekday:'long'}))}</h3>
     ${dayTL}
@@ -3221,8 +3296,8 @@ function focusAdvice(w,m){
 const SESSPLAN={
   run:{tab:'Run',kind:'easy',title:'Easy run',min:45},
   ice:{tab:'Ice climbing',kind:null,train:['ice|0'],title:'Ice · tools and grip',min:40},
-  climb:{tab:'Climbing',kind:'indoor',title:'Climbing · indoor',min:120},
-  boulder:{tab:'Climbing',kind:'bindoor',title:'Climbing · boulder indoor',min:90},
+  climb:{tab:'Climbing',kind:'sport',tags:['indoor'],title:'Climbing · sport · indoor',min:120},
+  boulder:{tab:'Climbing',kind:'boulder',tags:['indoor'],title:'Climbing · boulder · indoor',min:90},
   legs:{tab:'Nepal',kind:null,train:['nepal|0'],title:'Legs · step-ups and squats',min:35}};
 function weekGaps(){
   const w=weekPlan(new Date()),ws=dayOf(mondayOf(new Date())),we=dayOf(addDays(mondayOf(new Date()),6));
@@ -3253,6 +3328,7 @@ function fillWeek(){
       minutes:spec.min,title:spec.title,tab:spec.tab,items:[],status:'planned'};
     if(spec.train)S.planRefs[id]=spec.train.map(r=>`${r}|e`);
     if(spec.kind)S.kinds={...(S.kinds||{}),[id]:spec.kind};
+    if(spec.tags)S.kx={...(S.kx||{}),[id]:{t:spec.tags}};
     if(spec.tab==='Run')S.runMeta[id]={type:'easy',km:runKmFor('easy',6)};
     setPlans(plansCache().concat([{...plan,pending:true}]));
     enqueue({op:'plan',plan});made++;
@@ -3642,14 +3718,16 @@ function drawRunWeek(){
         title="${esc(d.toLocaleDateString(undefined,{weekday:'long',day:'numeric'}))}${rn?' · run planned':''}${o?' · '+o.join(''):''}">
         <b>${esc(d.toLocaleDateString(undefined,{weekday:'narrow'}))}</b><i>${d.getDate()}</i>${rn||o?'<em></em>':''}</button>`}).join('')}</div>
 <div class="rwtypes">${(() => {
-      const order=['long','easy','tempo','threshold','intervals','trail','mp','race'];
+      if(x.type==='trail'){x.type='easy';x.trail=true}
+      const order=['long','easy','tempo','threshold','intervals','mp','race'];
       const use=runUse();const ranked=order.slice().sort((a,b)=>(use[b]||0)-(use[a]||0)||order.indexOf(a)-order.indexOf(b));
       const show=ranked.slice(0,3);
       if(!show.includes(x.type))show.splice(2,1,x.type);
       const chip=t=>`<button type="button" class="rwchip${t===x.type?' on':''}" data-rt="${i}" data-t="${t}">${esc(RUNSHORT[t]||RUNLBL[t])}</button>`;
       const rest=order.filter(t=>!show.includes(t));
       return show.map(chip).join('')+(RW.more===i?rest.map(chip).join('')+`<button type="button" class="rwchip more" data-rmore="-1">Fewer</button>`
-        :`<button type="button" class="rwchip more" data-rmore="${i}">${rest.length} more</button>`)})()}</div>
+        :`<button type="button" class="rwchip more" data-rmore="${i}">${rest.length} more</button>`)
+        +`<button type="button" class="rwchip tag${x.trail?' on':''}" data-rtrail="${i}">${x.trail?'✓ ':''}Trail</button>`})()}</div>
     <label class="kmin"><input data-f="km" type="number" inputmode="decimal" min="1" max="50" step="0.5" value="${x.km}" aria-label="Kilometres">km</label>
     <input data-f="start" type="time" value="${x.start}" aria-label="Start time">
             <button type="button" class="link hx" data-rm="${i}" aria-label="Remove run">✕</button></div>`).join('')
@@ -3663,18 +3741,73 @@ function openRunLog(pre){
   f.querySelectorAll('[name=feel]').forEach(x=>x.checked=false);
   d.showModal();setTimeout(()=>{try{f.km.focus()}catch(e){}},50);
 }
-const KINDS={Run:[['easy','Easy'],['long','Long'],['recovery','Recovery'],['tempo','Tempo'],['intervals','Intervals'],['hills','Hills'],['mp','Marathon pace'],['trail','Trail'],['race','Race']],
-  Climbing:[['indoor','Indoor'],['toprope','Top rope'],['sport','Sport'],['trad','Trad'],['multi','Multipitch'],['alpine','Alpine'],['bindoor','Boulder indoor'],['boutdoor','Boulder outdoor'],['board','Board'],['circuits','Circuits']],
+/* A kind answers one question (what sort of session). Things that can be true at the
+   same time (the ground, indoors or out, a pack) are tags you add on top. */
+const KINDS={Run:[['easy','Easy'],['long','Long'],['tempo','Tempo'],['threshold','Threshold'],['intervals','Intervals'],['mp','Marathon pace'],['race','Race']],
+  Climbing:[['sport','Sport'],['toprope','Top rope'],['trad','Trad'],['boulder','Boulder'],['board','Board'],['circuits','Circuits']],
   Bouldering:[['indoor','Indoor'],['outdoor','Outdoor'],['board','Board'],['circuits','Circuits']],
   'Ice climbing':[['crag','Ice cragging'],['multi','Multipitch'],['mixed','Mixed'],['alpine','Alpine']],
-  Hike:[['day','Day hike'],['pack','With pack'],['peak','Peak'],['overnight','Overnight'],['hut','Hut to hut'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe'],['approach','Approach']],
+  Hike:[['day','Day hike'],['overnight','Overnight'],['hut','Hut to hut'],['approach','Approach']],
   Nepal:[],
   Other:[['gym','Gym'],['mobility','Mobility'],['skitour','Ski touring'],['ski','Skiing'],['bike','Cycling'],['swim','Swim'],['rest','Rest'],['travel','Travel']]};
-const KINDMIN={day:180,pack:300,peak:480,overnight:420,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
+const TAGS={Run:[['trail','Trail'],['hills','Hills']],
+  Climbing:[['indoor','Indoor'],['outdoor','Outdoor'],['multi','Multipitch'],['alpine','Alpine']],
+  Hike:[['peak','Peak'],['scramble','Scramble'],['ferrata','Via ferrata'],['snowshoe','Snowshoe']]};
+// pairs that cannot both be true
+const STICKY=['indoor','outdoor'];
+const TAGX={indoor:['outdoor','multi','alpine'],outdoor:['indoor'],multi:['indoor'],alpine:['indoor']};
+const PACKS=[['','None'],['light','Light'],['medium','Medium'],['heavy','Heavy']];
+const PACKMEAN={'':'Nothing worth counting.',light:'A day bag, under about 6 kg.',medium:'Roughly 6 to 12 kg.',heavy:'12 kg and up, the Nepal kind.'};
+const PACKPERKM={light:1,medium:3,heavy:5};
+const PACKKG={light:4,medium:9,heavy:13};             // where the weight stepper starts          // extra minutes a kilometre
+// what the old single list used to call things, so nothing saved before is lost
+const OLDKIND={Hike:{pack:['day',[],'medium'],peak:['day',['peak']],scramble:['day',['scramble']],ferrata:['day',['ferrata']],snowshoe:['day',['snowshoe']]},
+  Climbing:{indoor:['sport',['indoor']],multi:['trad',['multi']],alpine:['trad',['alpine']],bindoor:['boulder',['indoor']],boutdoor:['boulder',['outdoor']]},
+  Run:{trail:['easy',['trail']],hills:['easy',['hills']],recovery:['easy',[]]}};
+function normKind(tab,k){
+  const o=(OLDKIND[tab]||{})[k];
+  return o?{kind:o[0],tags:o[1]||[],pack:o[2]||''}:{kind:k,tags:[],pack:''};
+}
+const tagLabel=(tab,k)=>((TAGS[tab]||[]).find(x=>x[0]===k)||[])[1]||'';
+function toggleTag(tab,list,k){
+  if(list.includes(k))return list.filter(x=>x!==k);
+  const keep=list.filter(x=>!(TAGX[k]||[]).includes(x)).concat([k]);
+  return (TAGS[tab]||[]).map(x=>x[0]).filter(x=>keep.includes(x));
+}
+const packText=p=>p&&p.lvl?(p.kg?`${p.kg} kg pack`:`${p.lvl} pack`):'';
+// the words a kind, its tags and the pack add to a title
+const extraWords=(tab,tags,pack)=>[...(tags||[]).map(k=>tagLabel(tab,k).toLowerCase()),packText(pack)].filter(Boolean);
+const TAGMIN={indoor:180,multi:480,alpine:600,peak:480,scramble:360,ferrata:300,snowshoe:240};
+function kindMinutes(kind,tags){
+  let m=KINDMIN[kind]||0;
+  (tags||[]).forEach(t=>{const v=TAGMIN[t];if(!v)return;m=t==='indoor'?Math.min(m||v,v):Math.max(m,v)});
+  return m;
+}
+function tagsHTML(tab,tags,attr){
+  const ts=TAGS[tab]||[];if(!ts.length)return '';
+  return `<h4 class="tagh">Any that apply</h4><div class="typechips tagchips">${ts.map(([k,l])=>
+    `<button type="button" class="tchip tag${tags.includes(k)?' on':''}" data-${attr}="${k}" style="--tc:${colOf(tab)}">${esc(l)}</button>`).join('')}</div>`;
+}
+function packHTML(pack,attr){
+  const lvl=(pack&&pack.lvl)||'';
+  return `<h4 class="tagh">Pack</h4>
+    <span class="fseg packseg">${PACKS.map(([k,l])=>`<button type="button" class="fbtn${lvl===k?' on':''}" data-${attr}="${k}">${l}</button>`).join('')}</span>
+    <span class="fmean">${esc(PACKMEAN[lvl])}</span>`;
+}
+// read tags and a pack back out of a title written before these were stored
+function guessExtra(tab,title){
+  const t=String(title||'').toLowerCase();
+  const tags=(TAGS[tab]||[]).filter(([k,l])=>t.includes(l.toLowerCase())).map(x=>x[0]);
+  const kg=(t.match(/(\d+(?:\.\d+)?)\s*kg/)||[])[1];
+  const lvl=tab!=='Hike'?'':(t.match(/\b(light|medium|heavy) pack/)||[])[1]||(kg?(+kg>=12?'heavy':+kg>=6?'medium':'light'):/with pack/.test(t)?'medium':'');
+  return {tags,pack:{lvl,kg:kg?+kg:0}};
+}
+const KINDMIN={day:180,pack:300,peak:480,boulder:120,overnight:420,hut:480,scramble:360,ferrata:300,snowshoe:240,approach:120,
   indoor:180,toprope:150,sport:300,trad:420,multi:480,alpine:600,board:90,circuits:120,crag:360,mixed:360,
   gym:60,mobility:20,skitour:300,ski:240,bike:120,swim:60,rest:0,travel:240};
 const needsKm=t=>t==='Run'||t==='Hike';
 const MULTIDAY=['overnight','hut','alpine','multi','skitour','travel'];
+const isMulti=(kind,tags)=>MULTIDAY.includes(kind)||(tags||[]).some(t=>MULTIDAY.includes(t)&&t!=='multi');
 const needsUp=t=>t==='Hike';
 const kindLabel=(tab,k)=>((KINDS[tab]||[]).find(x=>x[0]===k)||[])[1]||trainKinds().reduce((a,x)=>x[0]===k?x[1]:a,'');
 function trainKinds(){
@@ -3708,7 +3841,7 @@ function rememberPlace(x,tab){x=(x||'').trim();if(!x)return;
 function openPlan(){
   if(!connected()){ask('Connect your Sheet first','Planned sessions go into your Training calendar through the Google Sheet.','Connect').then(ok=>{if(ok)openSync()});return}
   const f=document.getElementById('planfrm'),td=dayOf(new Date());
-  PA={tab:null,kind:null,mode:null,train:[],open:null};
+  PA={tab:null,kind:null,mode:null,train:[],open:null,tags:[],pack:''};
   f.date.value=calSel&&calSel>=td?calSel:td;f.start.value=f.start.value||'17:00';f.start.dataset.touched='';
   f.classList.remove('logmode');f.already.checked=false;
   {const h=document.getElementById('paTitle');if(h)h.textContent='Plan a session';}
@@ -3754,13 +3887,14 @@ function kindUse(tab){
     if(k)out[k[0]]=(out[k[0]]||0)+(r.date>=cut?2:1)});
   Object.entries(S.kinds||{}).forEach(([id,k])=>{
     const pl=(plansCache()||[]).find(p=>p.id===id);
-    if(pl&&tabName(pl.tab)===tab)out[k]=(out[k]||0)+(pl.date>=cut?2:1)});
+    const nk=normKind(tab,k).kind;
+    if(pl&&tabName(pl.tab)===tab)out[nk]=(out[nk]||0)+(pl.date>=cut?2:1)});
   return out;
 }
 const SHOWN=4;
 function topKinds(tab,picked){
   const ks=KINDS[tab]||[];
-  if(ks.length<=SHOWN+1)return {show:ks,rest:[]};
+  if(ks.length<=SHOWN+2)return {show:ks,rest:[]};
   const use=kindUse(tab);
   const ranked=ks.slice().sort((a,b)=>(use[b[0]]||0)-(use[a[0]]||0)||ks.indexOf(a)-ks.indexOf(b));
   const show=ranked.slice(0,SHOWN);
@@ -3800,6 +3934,12 @@ function drawKinds(){
   document.getElementById('paKindH').textContent=both?'What it was':(mode==='train'?'What to train':'Kind');
   const seg=both?`<div class="paseg"><button type="button" data-mode="train"${mode==='train'?' class="on"':''}>Training</button>
       <button type="button" data-mode="out"${mode==='out'?' class="on"':''}>A day out</button></div>`:'';
+  const out=mode!=='train'&&!PA.train.length;
+  document.getElementById('paTags').innerHTML=out?tagsHTML(tab,PA.tags||[],'tag'):'';
+  const pk=document.getElementById('paPack');
+  pk.hidden=!(out&&tab==='Hike');
+  if(!pk.hidden){document.getElementById('paPackSeg').innerHTML=packHTML({lvl:PA.pack},'pack');
+    document.getElementById('paKgLab').hidden=!PA.pack}
   document.getElementById('paKinds').innerHTML=seg
     +(mode==='train'?`<div class="trlist">${train}</div>`:`<div class="typechips">${dayOut}</div>`)
     +(PA.train.length?`<p class="trsum">${esc(trainLabel())} · about ${Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)} min <button type="button" class="link" data-tr-clear="1">Clear</button></p>`:'');
@@ -3807,7 +3947,12 @@ function drawKinds(){
 function paPick(tab){
   const f=document.getElementById('planfrm');
   PA.tab=tab;PA.train=[];PA.open=null;PA.mode=null;PA.more=false;const kl=KINDS[tab]||[];
-  PA.kind=TRAINFIRST.includes(tab)?null:((S.lastKind||{})[tab]||((kl[0]||[])[0])||null);
+  {const last=normKind(tab,(S.lastKind||{})[tab]||''),lt=(S.lastTags||{})[tab];
+   const ok=kl.some(([k])=>k===last.kind);
+   PA.kind=TRAINFIRST.includes(tab)?null:(ok?last.kind:((kl[0]||[])[0])||null);
+   PA.tags=(Array.isArray(lt)?lt:last.tags).filter(k=>tagLabel(tab,k)&&STICKY.includes(k));
+   PA.pack=tab==='Hike'?((S.lastTags||{})._pack||last.pack||''):'';
+   f.packkg.value='';}
   document.querySelectorAll('#paGrid .pacard').forEach(x=>x.classList.toggle('on',x.dataset.pa===tab));
   const ks=KINDS[tab]||[];
   document.getElementById('paKindSec').hidden=!ks.length&&!trainFor(tab).length;
@@ -3822,12 +3967,18 @@ function paPick(tab){
   planAuto();
 }
 function paNudge(){
-  const n=document.getElementById('paNudge'),multi=MULTIDAY.includes(PA.kind);
+  const n=document.getElementById('paNudge'),multi=isMulti(PA.kind,PA.tags);
   n.hidden=!multi;
   if(multi)n.innerHTML=`Staying out overnight? <button type="button" class="link" data-act="toTrip">Plan this as a trip</button> and each day gets its own plan.`;
 }
 const DURNAME=m=>m==30?'30 min':m==60?'1 h':m==120?'2 h':m==240?'Half day':m==480?'Full day'
   :m>=60?`${Math.floor(m/60)} h${m%60?' '+(m%60):''}`:`${m} min`;
+function paPack(){
+  const f=document.getElementById('planfrm');
+  return PA.tab==='Hike'&&PA.pack?{lvl:PA.pack,kg:Math.round((parseFloat(f.packkg.value)||0)*10)/10}:null;
+}
+// how fast a run of this kind goes on this ground
+const runPaceOn=(kind,tags)=>runPace(kind)*((tags||[]).includes('trail')?1.25:1)*((tags||[]).includes('hills')?1.1:1);
 function sheetSummary(){
   const f=document.getElementById('planfrm');if(!f)return;
   PA.train=PA.train||[];
@@ -3836,7 +3987,8 @@ function sheetSummary(){
   // what
   const kl=PA.kind?kindLabel(PA.tab,PA.kind):'';
   const tr=PA.train.length?`${PA.train.length} picked`:'';
-  set('svWhat',PA.tab?`${PA.tab}${kl?' · '+kl.toLowerCase():tr?' · '+tr:''}`:'Pick one',!PA.tab);
+  const xw=PA.train.length?[]:extraWords(PA.tab,PA.tags,paPack());
+  set('svWhat',PA.tab?`${PA.tab}${kl?' · '+[kl.toLowerCase(),...xw].join(' · '):tr?' · '+tr:''}`:'Pick one',!PA.tab);
   // when
   const d=f.date.value,t=f.start.value,td=dayOf(new Date());
   const dayTxt=!d?'':d===td?'Today':d===dayOf(addDays(new Date(),1))?'Tomorrow'
@@ -3854,17 +4006,17 @@ function planAuto(){
   const det=f.detail.value.trim(),km=parseFloat(f.km.value)||0;
   if(f.minutes.dataset.manual!=='1'){
     const base=PA.train.length?Math.max(5,Math.round(estimate(refsToList(PA.train))/5)*5)
-      :KINDMIN[PA.kind]||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
+      :kindMinutes(PA.kind,PA.tags)||(EXTRAS.find(x=>x[0]===PA.tab)||[])[1]||60;
     const upm=parseInt(f.up.value,10)||0;
-    f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPace(PA.kind)/5)*5)
-      :PA.tab==='Hike'&&(km||upm)?Math.max(30,Math.round((km*12+upm/9+(PA.kind==='pack'?km*3:0))/15)*15)
+    f.minutes.value=PA.tab==='Run'&&km?Math.max(15,Math.round(km*runPaceOn(PA.kind,PA.tags)/5)*5)
+      :PA.tab==='Hike'&&(km||upm)?Math.max(30,Math.round((km*12+upm/9+km*(PACKPERKM[PA.pack]||0))/15)*15)
       :base||60;
     document.querySelectorAll('#durChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
   }
   sheetSummary();
   {const hint=document.getElementById('durHint'),mins=parseInt(f.minutes.value,10)||0,upm=parseInt(f.up.value,10)||0;
-    const est=PA.tab==='Run'&&km?Math.round(km*runPace(PA.kind)/5)*5
-      :PA.tab==='Hike'&&(km||upm)?Math.round((km*12+upm/9+(PA.kind==='pack'?km*3:0))/15)*15:0;
+    const est=PA.tab==='Run'&&km?Math.round(km*runPaceOn(PA.kind,PA.tags)/5)*5
+      :PA.tab==='Hike'&&(km||upm)?Math.round((km*12+upm/9+km*(PACKPERKM[PA.pack]||0))/15)*15:0;
     const hrs=m=>m>=90?(Math.round(m/30)/2)+' h':m+' min';
     const what=`${km?km+' km':''}${km&&upm?' with ':''}${upm?upm+' m up':''}`;
     if(est){hint.hidden=false;
@@ -3877,9 +4029,10 @@ function planAuto(){
     const upt=parseInt(f.up.value,10)||0;
     const nums=PA.tab==='Hike'&&(km||upt)?' · '+[km?km+' km':'',upt?upt+' m up':''].filter(Boolean).join(', '):'';
     if(PA.train.length){f.title.value=`${trainLabel()}${det?' · '+det:''}`;}
-    else f.title.value=PA.tab==='Run'
-      ? `${RUNLBL[PA.kind]||'Run'}${km?' · '+km+' km':''}${det?' · '+det:''}`
-      : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}${nums}`;
+    else{const xw=extraWords(PA.tab,PA.tags,paPack()).map(x=>' · '+x).join('');
+      f.title.value=PA.tab==='Run'
+      ? `${RUNLBL[PA.kind]||'Run'}${xw}${km?' · '+km+' km':''}${det?' · '+det:''}`
+      : `${PA.tab}${kl?' · '+kl.toLowerCase():''}${xw}${det?' · '+det:''}${nums}`;}
   }
 }
 function openSync(){
@@ -4095,6 +4248,7 @@ function card(e){
 }
 function render(){
   const p=prog();
+  setChrome(p.id==='today'?SKYTOP[skyPhase(new Date()).ph]:'#0B151D');
   document.getElementById('ptitle').textContent=p.title;
   document.getElementById('plede').textContent=TRAIN_IDS.includes(p.id)?p.lede:'';
   document.title=p.title;
@@ -4349,7 +4503,15 @@ function actPlanning(b,act,p,art){
   if(act==='didnew'){if(cur==='today')calSel=dayOf(new Date());openPlan();
     setTimeout(()=>{const f=document.getElementById('planfrm');
       f.classList.add('logmode');
-      f.already.checked=true;f.already.dispatchEvent(new Event('change',{bubbles:true}))},30);return}
+      f.already.checked=true;f.already.dispatchEvent(new Event('change',{bubbles:true}));
+      // logging from a day you tapped in the calendar means that day, not today
+      const td=dayOf(new Date());
+      if(cur==='history'&&calSel&&calSel<td){
+        f.date.value=calSel;f.date.dataset.touched='1';
+        f.start.value='12:00';f.start.dataset.touched='';   // the hour follows the activity you pick
+        const back=Math.round((d0(parseDay(td))-d0(parseDay(calSel)))/864e5);
+        document.querySelectorAll('#paWhenBack button').forEach(x=>x.classList.toggle('on',+x.dataset.day===-back));
+        sheetSummary()}},30);return}
   if(act==='quick'){const [key,label]=[b.dataset.key,b.dataset.label];const list=refsToList([key]);if(list.length)openFA(list,label);return}
   if(act==='runweek'){openRunWeek(b.dataset.w);return}
   if(act==='gorun'){go('run');return}
@@ -4664,6 +4826,8 @@ let PENDING_TRIP=null;
     const dd=ev.target.closest('[data-rd]');
     if(dd){RW.runs[+dd.dataset.rd].date=dd.dataset.d;
       RW.runs.sort((a,b)=>a.date.localeCompare(b.date));drawRunWeek();return}
+    const tr=ev.target.closest('[data-rtrail]');
+    if(tr){const x=RW.runs[+tr.dataset.rtrail];x.trail=!x.trail;drawRunWeek();return}
     const t=ev.target.closest('[data-rt]');
     if(t){const x=RW.runs[+t.dataset.rt];x.type=t.dataset.t;RW.more=-1;
       // the distance follows what you usually run of that kind
@@ -4678,10 +4842,12 @@ let PENDING_TRIP=null;
     const msg=document.getElementById('rwMsg');
     if(!RW.runs.length){ev.preventDefault();msg.textContent='Nothing to add.';msg.className='syncmsg bad';return}
     const add=[];RW.runs.forEach(x=>{const id=uid(),km=Math.round((+x.km||0)*10)/10,lbl=RUNLBL[x.type]||'Run';
-      const minutes=Math.max(15,Math.round(km*runPace(x.type)/5)*5);
+      const tg=x.trail?['trail']:[],tw=x.trail?' · trail':'';
+      const minutes=Math.max(15,Math.round(km*runPaceOn(x.type,tg)/5)*5);
       const ex=EX[RUNEX[x.type]],lv=ex&&ex.L?ex.L[Math.min(S.levels[RUNEX[x.type]]||0,4)]:null;
-      const plan={id,date:x.date,start:x.start||'11:00',minutes,title:`${lbl} · ${km} km`,tab:'Run',
-        items:[`${lbl}: ${km} km`,zoneText(RUNZONE[x.type]||[2,2])].concat((x.type==='tempo'||x.type==='intervals')&&lv?[`Main set: ${lv.v}`]:[]),
+      if(x.trail)S.kx={...(S.kx||{}),[id]:{t:tg}};
+      const plan={id,date:x.date,start:x.start||'11:00',minutes,title:`${lbl}${tw} · ${km} km`,tab:'Run',
+        items:[`${lbl}${tw}: ${km} km`,zoneText(RUNZONE[x.type]||[2,2])].concat((x.type==='tempo'||x.type==='intervals')&&lv?[`Main set: ${lv.v}`]:[]),
         link:location.origin+location.pathname+'#plan='+id};
       S.runMeta[id]={type:x.type,km};add.push(plan)});
     save();setPlans(plansCache().concat(add.map(p=>({...p,status:'planned',pending:true}))));
@@ -4713,7 +4879,7 @@ let PENDING_TRIP=null;
   });
 })();
 /* ---------- changing a planned session ---------- */
-let EP=null,EP_TYPE=null,EP_KIND=null,EP_MORE=false,PA_FEEL='',DE=null;
+let EP=null,EP_TYPE=null,EP_KIND=null,EP_TAGS=[],EP_PACK='',EP_MORE=false,PA_FEEL='',DE=null;
 function openDayEdit(scope,k){
   const f=document.getElementById('dayeditfrm'),d=document.getElementById('dayeditdlg');
   DE={scope,k};
@@ -4742,20 +4908,30 @@ function guessKind(tab,title){
   const hit=ks.slice().sort((a,b)=>b[1].length-a[1].length).find(([k,l])=>t.includes(l.toLowerCase()));
   return hit?hit[0]:null;
 }
+const OLDWORDS=['with pack','peak','scramble','via ferrata','snowshoe','indoor','multipitch','alpine','boulder indoor','boulder outdoor'];
+function epPack(){
+  const f=document.getElementById('editplanfrm');
+  return EP_TYPE==='Hike'&&EP_PACK?{lvl:EP_PACK,kg:Math.round((parseFloat(f.eppackkg.value)||0)*10)/10}:null;
+}
 function epTitleNow(){
   const f=document.getElementById('editplanfrm');
   if(f.title.dataset.auto==='0')return;
   const kl=((KINDS[EP_TYPE]||[]).find(x=>x[0]===EP_KIND)||[])[1];
-  const parts=(f.title.value||'').split(' · ').slice(1)
-    .filter(x=>!(KINDS[EP_TYPE]||[]).some(([k,l])=>l.toLowerCase()===x.toLowerCase()));
+  // drop every word a kind, a tag or a pack put there, then put the current ones back
+  const ours=x=>{const t=x.toLowerCase().trim();
+    return (KINDS[EP_TYPE]||[]).some(([k,l])=>l.toLowerCase()===t)||(TAGS[EP_TYPE]||[]).some(([k,l])=>l.toLowerCase()===t)
+      ||OLDWORDS.includes(t)||/^((light|medium|heavy)|\d+(\.\d+)? kg) pack$/.test(t)};
+  const parts=(f.title.value||'').split(' · ').slice(1).filter(x=>!ours(x));
   const det=parts.join(' · ').trim();
   if(EP_TYPE==='Run')return;
-  f.title.value=`${EP_TYPE}${kl?' · '+kl.toLowerCase():''}${det?' · '+det:''}`.trim();
+  const xw=extraWords(EP_TYPE,EP_TAGS,epPack()).map(x=>' · '+x).join('');
+  f.title.value=`${EP_TYPE}${kl?' · '+kl.toLowerCase():''}${xw}${det?' · '+det:''}`.trim();
 }
 function epWhatNow(){
   const kl=((KINDS[EP_TYPE]||[]).find(x=>x[0]===EP_KIND)||[])[1];
   const n=document.getElementById('epWhatNow');
-  if(n)n.innerHTML=`${esc(EP_TYPE||'')}${kl?` <i>· ${esc(kl.toLowerCase())}</i>`:''}`;
+  const xw=EP_TYPE==='Run'?[]:extraWords(EP_TYPE,EP_TAGS,epPack());
+  if(n)n.innerHTML=`${esc(EP_TYPE||'')}${kl?` <i>· ${esc([kl.toLowerCase(),...xw].join(' · '))}</i>`:''}`;
   const ic=document.getElementById('epIcon');
   if(ic)ic.innerHTML=EP_TYPE?ICON(EP_TYPE):'';
   if(ic)ic.style.color=colOf(EP_TYPE||'');
@@ -4763,6 +4939,11 @@ function epWhatNow(){
 function drawEpKinds(){
   const ks=KINDS[EP_TYPE]||[],head=document.getElementById('epKindHead'),box=document.getElementById('epKinds');
   if(head)head.hidden=!ks.length;
+  {const run=EP_TYPE==='Run';EP_TAGS=(EP_TAGS||[]).filter(k=>tagLabel(EP_TYPE,k));
+   document.getElementById('epTags').innerHTML=run?'':tagsHTML(EP_TYPE,EP_TAGS,'eptag');
+   const pk=document.getElementById('epPack');pk.hidden=EP_TYPE!=='Hike';
+   if(!pk.hidden){document.getElementById('epPackSeg').innerHTML=packHTML({lvl:EP_PACK},'eppack');
+     document.getElementById('epKgLab').hidden=!EP_PACK}}
   if(!ks.length){EP_KIND=null;if(box)box.innerHTML='';epWhatNow();return}
   if(!ks.some(([k])=>k===EP_KIND))EP_KIND=ks[0][0];
   const {show,rest}=topKinds(EP_TYPE,EP_KIND);
@@ -4783,7 +4964,11 @@ function openPlanEdit(id){
   EP_TYPE=cur0;
   document.getElementById('epWhatRow').open=false;
   EP_MORE=false;
-  EP_KIND=(S.kinds||{})[p.id]||guessKind(cur0,p.title);
+  {const saved=(S.kinds||{})[p.id],nk=saved?normKind(cur0,saved):null,kx=(S.kx||{})[p.id],g=guessExtra(cur0,p.title);
+   EP_KIND=(nk&&nk.kind)||guessKind(cur0,p.title);
+   EP_TAGS=kx?(kx.t||[]).slice():[...new Set([...(nk?nk.tags:[]),...g.tags])];
+   EP_PACK=kx?(kx.p||''):((nk&&nk.pack)||g.pack.lvl||'');
+   f.eppackkg.value=kx?(kx.kg||''):(g.pack.kg||'');}
   drawEpKinds();
   document.getElementById('epWhatRow').hidden=!!app;
   const isRun=cur0==='Run',m=S.runMeta[p.id]||{};
@@ -4813,9 +4998,18 @@ function replacePlan(plan){
     const b=ev.target.closest('[data-epkind]');if(!b)return;
     EP_MORE=false;
     EP_KIND=b.dataset.epkind;drawEpKinds();epTitleNow();epWhatNow();
-    const km=KINDMIN[EP_KIND];if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
+    const km=kindMinutes(EP_KIND,EP_TAGS);if(km&&!f.minutes.dataset.touched){f.minutes.value=km;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+km))}
   });
+  document.getElementById('epTags').addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-eptag]');if(!b)return;
+    EP_TAGS=toggleTag(EP_TYPE,EP_TAGS||[],b.dataset.eptag);drawEpKinds();epTitleNow();epWhatNow()});
+  document.getElementById('epPack').addEventListener('click',ev=>{
+    const sb=ev.target.closest('.stepbtn');
+    if(sb&&!f.eppackkg.value)f.eppackkg.value=(PACKKG[EP_PACK]||8)-(+sb.dataset.step);
+    const b=ev.target.closest('[data-eppack]');if(!b)return;
+    EP_PACK=b.dataset.eppack;if(!EP_PACK)f.eppackkg.value='';drawEpKinds();epTitleNow();epWhatNow()});
+  f.eppackkg.addEventListener('input',()=>{epTitleNow();epWhatNow()});
   document.getElementById('epTypes').addEventListener('click',ev=>{
     const b=ev.target.closest('[data-type]');if(!b)return;
     document.querySelectorAll('#epTypes .tchip').forEach(x=>x.classList.toggle('on',x===b));
@@ -4827,7 +5021,7 @@ function replacePlan(plan){
       document.getElementById('epRun').hidden=t!=='Run';
       if(t==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10;if(!keepTitle)f.title.value=`${RUNLBL[f.rtype.value]||'Run'}${km?' · '+km+' km':''}`}
       else if(!keepTitle)f.title.value=`${t}${det?' · '+det:''}`.trim();
-      EP_KIND=guessKind(t,f.title.value);drawEpKinds();epWhatNow();
+      EP_KIND=guessKind(t,f.title.value);EP_TAGS=[];EP_PACK='';f.eppackkg.value='';drawEpKinds();epWhatNow();
       const def=(EXTRAS.find(x=>x[0]===t)||[])[1];if(def&&!f.minutes.dataset.touched)f.minutes.value=def;
       document.querySelectorAll('#epChips button').forEach(x=>x.classList.toggle('on',+x.dataset.min===+f.minutes.value));
     }});
@@ -4851,6 +5045,11 @@ function replacePlan(plan){
     const p={...EP,tab:newTab,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),title:cleanTitle(f.title.value)||cleanTitle(EP.title)};
     if(EP_KIND&&(KINDS[newTab]||[]).some(([k])=>k===EP_KIND))S.kinds={...(S.kinds||{}),[p.id]:EP_KIND};
     else{const kk={...(S.kinds||{})};delete kk[p.id];S.kinds=kk}
+    {const pk=newTab==='Hike'&&EP_PACK?{p:EP_PACK,kg:Math.round((parseFloat(f.eppackkg.value)||0)*10)/10}:{};
+     const tg=newTab==='Run'?[]:(EP_TAGS||[]).filter(k=>tagLabel(newTab,k));
+     const kx={...(S.kx||{})};
+     if(tg.length||pk.p)kx[p.id]={t:tg,...pk};else delete kx[p.id];
+     S.kx=kx;}
     if(newTab!=='Run'){delete S.runMeta[p.id];const det=(p.title.split(' · ').slice(1).join(' · ')||'').trim();p.items=[newTab+(det?': '+det:'')]}
     if(newTab==='Run'){const km=Math.round((parseFloat(f.rkm.value)||0)*10)/10,ty=f.rtype.value;
       S.runMeta[p.id]={type:ty,km};p.items=[`${RUNLBL[ty]}${km?': '+km+' km':''}`,zoneText(RUNZONE[ty]||[2,2])]}
@@ -5031,7 +5230,7 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     if(km){PA.more=km.dataset.kindmore==='1';drawKinds();return}
     const mb=ev.target.closest('[data-mode]');
     if(mb){PA.mode=mb.dataset.mode;
-      if(PA.mode==='train'){PA.kind=null}else{PA.train=[];const kl=KINDS[PA.tab]||[];if(!PA.kind)PA.kind=(S.lastKind||{})[PA.tab]||((kl[0]||[])[0])||null}
+      if(PA.mode==='train'){PA.kind=null}else{PA.train=[];const kl=KINDS[PA.tab]||[];if(!PA.kind){const lk=normKind(PA.tab,(S.lastKind||{})[PA.tab]||'').kind;PA.kind=(kl.some(([k])=>k===lk)?lk:((kl[0]||[])[0]))||null}}
       drawKinds();planAuto();return}
     if(sec){const k=sec.dataset.trsec;PA.open=PA.open===k?null:k;drawKinds();planAuto();return}
     const all=ev.target.closest('[data-trall]');
@@ -5049,6 +5248,19 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     drawKinds();paNudge();
     if(PA.tab==='Run'&&f.km.dataset.auto!=='0'){const v=runDefKm(PA.kind);if(v)f.km.value=v}
     planAuto()});
+  document.getElementById('paTags').addEventListener('click',ev=>{
+    const b=ev.target.closest('[data-tag]');if(!b)return;
+    PA.tags=toggleTag(PA.tab,PA.tags||[],b.dataset.tag);
+    S.lastTags={...(S.lastTags||{}),[PA.tab]:PA.tags};save();
+    drawKinds();paNudge();planAuto()});
+  document.getElementById('paPack').addEventListener('click',ev=>{
+    const sb=ev.target.closest('.stepbtn');   // the first tap lands on a likely weight, not on 1 kg
+    if(sb&&!f.packkg.value)f.packkg.value=(PACKKG[PA.pack]||8)-(+sb.dataset.step);
+    const b=ev.target.closest('[data-pack]');if(!b)return;
+    PA.pack=b.dataset.pack;if(!PA.pack)f.packkg.value='';
+    S.lastTags={...(S.lastTags||{}),_pack:PA.pack};save();
+    drawKinds();planAuto()});
+  f.packkg.addEventListener('input',planAuto);
   ['paWhen','paWhenBack'].forEach(wid=>{
     document.getElementById(wid).addEventListener('click',ev=>{const b=ev.target.closest('[data-day]');if(!b)return;
       f.date.value=dayOf(addDays(new Date(),+b.dataset.day));
@@ -5084,7 +5296,7 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
       f.date.value=dayOf(n);f.date.dataset.touched='1';
       f.start.value=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
       f.start.dataset.touched='1'}
-    planAuto();
+    planAuto();sheetSummary();   // the When line must follow even before an activity is picked
   });
   f.km.addEventListener('input',()=>{f.km.dataset.auto='0';planAuto()});
   f.up.addEventListener('input',planAuto);
@@ -5097,10 +5309,12 @@ document.getElementById('paKinds').addEventListener('click',ev=>{
     const id=uid(),det=f.detail.value.trim(),km=Math.round((parseFloat(f.km.value)||0)*10)/10,kl=kindLabel(PA.tab,PA.kind);
     const plan={id,date:f.date.value,start:f.start.value,minutes:Math.max(5,Math.min(720,parseInt(f.minutes.value,10)||60)),
       title:cleanTitle(f.title.value)||PA.tab,tab:PA.tab,
-      items:[PA.tab==='Run'?`${RUNLBL[PA.kind]||'Run'}${km?': '+km+' km':''} · ${zoneText(RUNZONE[PA.kind]||[2,2])}`
-        :`${PA.tab}${kl?' · '+kl:''}${det?' · '+det:''}${PA.tab==='Hike'&&(km||(parseInt(f.up.value,10)||0))?' · '+[km?km+' km':'',(parseInt(f.up.value,10)||0)?(parseInt(f.up.value,10))+' m up':''].filter(Boolean).join(', '):''}`],
+      items:[PA.tab==='Run'?`${RUNLBL[PA.kind]||'Run'}${(PA.tags||[]).map(k=>' · '+tagLabel('Run',k).toLowerCase()).join('')}${km?': '+km+' km':''} · ${zoneText(RUNZONE[PA.kind]||[2,2])}`
+        :`${PA.tab}${kl?' · '+kl:''}${extraWords(PA.tab,PA.tags,paPack()).map(x=>' · '+x).join('')}${det?' · '+det:''}${PA.tab==='Hike'&&(km||(parseInt(f.up.value,10)||0))?' · '+[km?km+' km':'',(parseInt(f.up.value,10)||0)?(parseInt(f.up.value,10))+' m up':''].filter(Boolean).join(', '):''}`],
       link:location.origin+location.pathname+'#plan='+id};
     S.kinds={...(S.kinds||{}),[id]:PA.kind};
+    {const pk=paPack(),tg=PA.train.length?[]:(PA.tags||[]);
+     if(tg.length||pk)S.kx={...(S.kx||{}),[id]:{t:tg,...(pk?{p:pk.lvl,kg:pk.kg||0}:{})}};}
     if(PA.train.length){const refs=PA.train.slice(),list=refsToList(refs);
       S.planRefs[id]=refs;plan.tab=(PROGS.find(x=>x.id===refs[0].split('|')[0])||{}).chip||'Climbing';
       plan.title=cleanTitle(f.title.value)||trainLabel()||'Training';
