@@ -1417,7 +1417,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='123';
+const BUILD='124';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2534,7 +2534,7 @@ function renderToday(){
   const nowHM=`${pad2(hh)}:${pad2(now.getMinutes())}`;
   const isDone=p=>p.status==='done'||(logBy[p.date]||[]).some(r=>r.plan_id===p.id);
   const open=plans.filter(p=>!isDone(p)&&(p.date>todayS||(p.date===todayS))).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-  const next=open[0],rest=open.slice(1),soon=rest.filter(p=>p.date>todayS&&p.date<=dayOf(new Date(now.getFullYear(),now.getMonth(),now.getDate()+7)));
+  const next=open.find(p=>p.date>todayS);
   const when=p=>(p.date===todayS?(p.start<nowHM?'Today, planned for ':'Today ')+p.start:p.date===tom?'Tomorrow '+p.start:niceDay(p.date)+' · '+p.start);
   const refs=p=>(S.planRefs[p.id]||[]);
   const nxDays=next?Math.round((d0(parseDay(next.date))-d0(now))/864e5):0;
@@ -2582,7 +2582,6 @@ function renderToday(){
     ${dayItems.slice(nowPos).map(dayRow).join('')}
     ${dayItems.length?'':`<li class="tl-item ghost"><div class="tl-ghost">Nothing on today.${next?'':' Plan something, or log what you did.'}</div></li>`}
   </ol>`;
-  const quick=[['warmup|2|e','Pre-climb'],['warmup|3|e','Stretch'],['warmup|0|e','Pre-run'],['ice|0|e','Ice tools']];
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
   const days=[...Array(7)].map((_,i)=>{const d=new Date(wk.getFullYear(),wk.getMonth(),wk.getDate()+i),ds=dayOf(d);
     const dl=(logBy[ds]||[]).filter(r=>r.result!=='skipped'&&!DOTLESS.includes(tabName(r.tab)));
@@ -2604,11 +2603,10 @@ function renderToday(){
     ${resume}
     <h3 class="tlabel">${esc(now.toLocaleDateString(undefined,{weekday:'long'}))}</h3>
     ${dayTL}
-    ${next&&next.date!==todayS?`<h3 class="tlabel">Next up</h3>${nextCard}`:''}
-    ${!next?nextCard:''}
+    ${next?`<h3 class="tlabel">Next up</h3>${nextCard}`:''}
+    ${!open.length?nextCard:''}
     <button class="add" data-act="plannew">+ Plan a session</button>
     <button class="link didlink" data-act="didnew">or log what you already did</button>
-    ${soon.length?`<h3 class="tlabel">Coming up</h3>${soon.slice(0,5).map(p=>`<button class="upc" data-act="calday" data-d="${p.date}" style="--tc:${colOf(p.tab)}"><b>${esc(when(p))}</b><span>${esc(cleanTitle(p.title))}</span></button>`).join('')}`:''}
     ${blockNudge()}
     ${weekShape()}
     <h3 class="tlabel">This week</h3>
@@ -2616,8 +2614,6 @@ function renderToday(){
       return `<button class="runline" data-act="gorun" style="--tc:${W.phase.col}"><span><b>${ICON('Run','inl')} ${Math.round(km*10)/10} / ${W.target} km</b> · long run ${W.long} km</span><em>${W.phase.name} · week ${W.idx}</em><i><u style="width:${pct}%"></u></i></button>`}catch(e){return ''}})()}
     <div class="weekstrip">${days}</div>
     <div class="weekbox"><div><b>${new Set(week.map(r=>r.date)).size}</b><span>days</span></div><div><b>${week.length}</b><span>exercises</span></div><div><b>${Math.round(secs/60)}</b><span>timed minutes</span></div></div>
-    <h3 class="tlabel">Quick start</h3>
-    <div class="quick">${quick.map(([k,l])=>{const n=refsToList([k]).length;return n?`<button class="qbtn" data-act="quick" data-key="${k}" data-label="${esc(l)}">${playIcon}<b>${esc(l)}</b><span>${n} exercises</span></button>`:''}).join('')}</div>
     <p class="sub tsync" id="syncline">${syncLine()}</p>
   </section>`;
   document.getElementById('foot').innerHTML='';
