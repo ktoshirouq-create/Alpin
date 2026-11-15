@@ -525,6 +525,20 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .tl-card.thin b{font-weight:600;font-size:14.5px}
 .tl-card.thin span{font-size:12.5px;color:var(--muted)}
 .tl-acts{display:flex;align-items:center;gap:14px;margin-top:11px}
+.tl-item.busy::before{border-color:var(--far);background:var(--bg);border-style:dashed}
+.tl-card.thin.busy{border-left-color:var(--far);border-left-style:dashed;background:none;border:1px dashed var(--rule);opacity:1}
+.tl-card.thin.busy b{color:var(--muted);font-weight:600}
+.busylist{margin:2px 0 10px}
+.busyrow{display:flex;align-items:baseline;gap:10px;padding:8px 12px;border:1px dashed var(--rule);border-radius:12px;margin-bottom:6px;color:var(--muted)}
+.busyrow span{font:600 12px Barlow,sans-serif;letter-spacing:.04em;white-space:nowrap}
+.busyrow b{flex:1;font-weight:600;font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.busyrow em{font-style:normal;font-size:12px;color:var(--far);white-space:nowrap}
+.callist{margin:6px 0 4px}
+dialog label.calrow{display:flex;flex-direction:row;align-items:center;gap:11px;padding:12px 2px;border-top:1px solid var(--rule);font-weight:500;font-size:15.5px}
+dialog label.calrow:first-child{border-top:0}
+.calrow input{width:20px;height:20px;margin:0;flex:0 0 auto}
+.calrow i{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.calrow small{color:var(--far);font-weight:400;margin-left:6px}
 .tl-ghost{border:1.5px dashed var(--rule);border-radius:14px;padding:12px 13px;margin-top:6px;
   color:var(--far);font-size:13.5px}
 .tl-item.ghost::before{border-color:var(--rule)}
@@ -1200,7 +1214,7 @@ button.chip::after{display:none}
   <label>Web app URL<input name="url" type="url" inputmode="url" autocomplete="off" placeholder="https://script.google.com/macros/s/…/exec"></label>
   <label>Token<input name="token" autocomplete="off"></label>
   <p class="syncmsg" id="syncMsg" role="status"></p>
-  <div class="syncextra"><button type="button" class="link" id="syncCopy">Link for another device</button><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
+  <div class="syncextra"><button type="button" class="link" id="syncCopy">Link for another device</button><button type="button" class="link" id="syncPull">Load slots from the Sheet</button><button type="button" class="link" id="syncCals">Other calendars</button><button type="button" class="link" id="syncOff">Disconnect</button></div>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Close</button><button class="btn pri" type="button" id="syncTest">Test and save</button></div>
 </form></dialog>
 
@@ -1261,6 +1275,14 @@ button.chip::after{display:none}
   <button type="button" class="btn wide" id="fiFill" hidden></button>
   <div class="dbtns"><button type="button" class="link" data-act="focusopen">Adjust the dials</button><span></span>
     <button class="btn pri" value="save">Close</button></div>
+</form></dialog>
+
+<dialog id="caldlg"><form method="dialog" id="calfrm">
+  <h2>Other calendars</h2>
+  <p class="hint">Tick the calendars the app may read. Their events show on Today and on each day in the Calendar, greyed out, and "Put the missing sessions in the calendar" works around them. The app never changes them.</p>
+  <div id="calList" class="callist"></div>
+  <p class="syncmsg" id="calMsg" role="status"></p>
+  <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" type="button" id="calSave">Save</button></div>
 </form></dialog>
 
 <dialog id="focusdlg"><form method="dialog" id="focusfrm">
@@ -1417,7 +1439,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='124';
+const BUILD='125';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2352,7 +2374,55 @@ function cleanDuplicates(){
   drop.forEach(x=>{delete S.planRefs[x.id];delete S.runMeta[x.id]});save();
   scheduleFlush(300);render();return drop.length;
 }
+/* ── Your other calendars, read-only. The app only reads the ones you tick,
+      keeps a copy on this phone for offline, and never writes to them. ── */
+const AKEY='tpg:agenda';
+const calPicks=()=>(((S.settings||{}).cals)||[]).filter(c=>c&&c.id);
+const agendaStore=()=>lsGet(AKEY,{at:0,ids:'',events:[]});
+let agendaBusy=false;
+async function pullAgenda(force){
+  const picks=calPicks();
+  if(!picks.length){if(agendaStore().events.length)lsSet(AKEY,{at:0,ids:'',events:[]});return}
+  if(!connected()||agendaBusy)return;
+  const ids=picks.map(c=>c.id),key=ids.join('|'),st=agendaStore();
+  if(!force&&st.ids===key&&Date.now()-st.at<10*60e3)return;      // at most every ten minutes
+  agendaBusy=true;
+  try{const now=new Date();
+    const j=await api({action:'agenda',from:dayOf(addDays(now,-7)),to:dayOf(addDays(now,60)),ids});
+    lsSet(AKEY,{at:Date.now(),ids:key,events:(j.events||[]).slice(0,400),old:false});
+    if(cur==='history'||cur==='today')render()}
+  catch(e){if(/Unknown action/i.test(e.message))lsSet(AKEY,{...st,old:true})}
+  finally{agendaBusy=false}
+}
+// what else is on a given day, clipped to that day
+function agendaOn(ds){
+  if(!calPicks().length)return [];
+  return (agendaStore().events||[]).filter(e=>{
+    const end=e.endDate||e.date;
+    if(ds<e.date||ds>end)return false;
+    return !(!e.allDay&&ds===end&&ds>e.date&&e.end==='00:00');      // ended at midnight: not this day
+  }).map(e=>{const end=e.endDate||e.date,cont=ds>e.date,more=ds<end;
+    return {title:e.title||'Busy',cal:e.cal||'',allDay:!!e.allDay||(cont&&more),
+      from:e.allDay||cont?'':e.start,to:e.allDay||more?'':e.end,
+      s:e.allDay||cont?'00:00':e.start,e:e.allDay||more?'24:00':e.end,
+      label:e.allDay||(cont&&more)?'all day':cont?`until ${e.end}`:`${e.start}–${e.end}`}
+  }).sort((a,b)=>a.s.localeCompare(b.s));
+}
+const hm2min=t=>+t.slice(0,2)*60+ +t.slice(3,5);
+const min2hm=m=>pad2(Math.floor(m/60))+':'+pad2(m%60);
+/* A start time on that day that does not sit on top of something in your calendar.
+   All-day entries do not block: a birthday is not a reason to skip a run. */
+function clearStart(ds,start,minutes){
+  const busy=agendaOn(ds).filter(b=>!b.allDay).map(b=>[hm2min(b.s),b.e==='24:00'?1440:hm2min(b.e)]);
+  const fits=s=>s>=hm2min(EARLIEST())&&s+minutes<=22*60&&!busy.some(([a,z])=>s<z+30&&s+minutes>a-30);
+  const want=hm2min(start);
+  if(fits(want))return start;
+  const tries=[hm2min(EARLIEST()),...busy.map(([a])=>a-30-minutes),...busy.map(([,z])=>z+30)]
+    .map(m=>Math.round(m/15)*15).filter(fits).sort((x,y)=>Math.abs(x-want)-Math.abs(y-want));
+  return tries.length?min2hm(tries[0]):null;
+}
 async function pullPlans(){
+  pullAgenda();
   if(!connected())return;
   const m=calMonth||monthStart(new Date());
   const from=dayOf(new Date(m.getFullYear(),m.getMonth(),-6)),to=dayOf(new Date(m.getFullYear(),m.getMonth()+1,7));
@@ -2461,6 +2531,8 @@ function renderHistory(){
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
+      ${(()=>{const bz=agendaOn(calSel);return bz.length?`<div class="busylist">${bz.map(ev=>
+        `<div class="busyrow"><span>${esc(ev.label)}</span><b>${esc(ev.title)}</b><em>${esc(ev.cal)}</em></div>`).join('')}</div>`:''})()}
       ${dayPlans.map(planRow).join('')}
       ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
@@ -2554,10 +2626,14 @@ function renderToday(){
   const todayLogs=(logBy[todayS]||[]).filter(r=>r.result!=='skipped'&&!DOTLESS.includes(tabName(r.tab))&&!r.plan_id);
   const dayItems=[
     ...todayPlans.map(p=>({t:p.start||'',kind:isDone(p)?'done':'plan',p})),
-    ...todayLogs.map(r=>({t:r.time||'',kind:'log',r}))
+    ...todayLogs.map(r=>({t:r.time||'',kind:'log',r})),
+    ...agendaOn(todayS).map(ev=>({t:ev.allDay?'00:00':ev.s,kind:'busy',ev}))
   ].sort((a,b)=>(a.t||'99').localeCompare(b.t||'99'));
   const nowPos=dayItems.filter(x=>(x.t||'99')<=nowHM).length;
   const dayRow=(x)=>{
+    if(x.kind==='busy'){const ev=x.ev;
+      return `<li class="tl-item busy"><span class="tl-time">${esc(ev.label)}</span>
+        <div class="tl-card thin busy"><b>${esc(ev.title)}</b><span>${esc(ev.cal)}</span></div></li>`}
     if(x.kind==='log'){const r=x.r;
       return `<li class="tl-item logged" style="--tc:${colOf(tabName(r.tab))}">
         <span class="tl-time">${esc(r.time||'')}</span>
@@ -2580,7 +2656,7 @@ function renderToday(){
     ${dayItems.slice(0,nowPos).map(dayRow).join('')}
     <li class="tl-item now"><span class="tl-time">now · ${esc(nowHM)}</span></li>
     ${dayItems.slice(nowPos).map(dayRow).join('')}
-    ${dayItems.length?'':`<li class="tl-item ghost"><div class="tl-ghost">Nothing on today.${next?'':' Plan something, or log what you did.'}</div></li>`}
+    ${dayItems.some(x=>x.kind!=='busy')?'':`<li class="tl-item ghost"><div class="tl-ghost">${dayItems.length?'No training today.':'Nothing on today.'}${next?'':' Plan something, or log what you did.'}</div></li>`}
   </ol>`;
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
   const days=[...Array(7)].map((_,i)=>{const d=new Date(wk.getFullYear(),wk.getMonth(),wk.getDate()+i),ds=dayOf(d);
@@ -3318,9 +3394,14 @@ function fillWeek(){
     const ds=dayOf(d);if(!taken[ds])free.push(ds)}
   let made=0;
   gaps.forEach(g=>{for(let i=0;i<g.n;i++){
-    const day=free.shift();if(!day)return;
     const spec=SESSPLAN[g.key],id=uid();
-    const plan={id,date:day,start:notTooEarly(tabStart(spec.tab)||(spec.tab==='Run'?'11:00':'17:00')),
+    const want=notTooEarly(tabStart(spec.tab)||(spec.tab==='Run'?'11:00':'17:00'));
+    // the first free day with room for it around whatever else is in your calendar
+    let day=null,start=null;
+    for(let k=0;k<free.length;k++){const st=clearStart(free[k],want,spec.min);
+      if(st){day=free[k];start=st;free.splice(k,1);break}}
+    if(!day)return;
+    const plan={id,date:day,start,
       minutes:spec.min,title:spec.title,tab:spec.tab,items:[],status:'planned'};
     if(spec.train)S.planRefs[id]=spec.train.map(r=>`${r}|e`);
     if(spec.kind)S.kinds={...(S.kinds||{}),[id]:spec.kind};
@@ -4713,7 +4794,29 @@ function importData(){
     catch(e){lsSet(SYKEY,old);msg.textContent='Could not connect: '+e.message;msg.className='syncmsg bad'}
   });
   document.getElementById('syncOff').addEventListener('click',()=>{ask('Disconnect the Sheet?','Your history stays on this phone and in the Sheet. New entries stay on this phone.','Disconnect',true)
-    .then(ok=>{if(!ok)return;lsSet(SYKEY,{});lsSet(QKEY,[]);d.close();refresh()})});
+    .then(ok=>{if(!ok)return;lsSet(SYKEY,{});lsSet(QKEY,[]);lsSet(AKEY,{at:0,ids:'',events:[]});d.close();refresh()})});
+  document.getElementById('syncCals').addEventListener('click',async()=>{
+    if(!connected()){msg.textContent='Test and save first.';msg.className='syncmsg bad';return}
+    const cd=document.getElementById('caldlg'),box=document.getElementById('calList'),cm=document.getElementById('calMsg');
+    const have=new Set(calPicks().map(c=>c.id));
+    box.innerHTML='<p class="hint">Reading your calendars…</p>';cm.textContent='';cm.className='syncmsg';
+    cd.showModal();
+    try{const j=await api({action:'calendars'});
+      box.innerHTML=(j.calendars||[]).map(c=>`<label class="calrow"><input type="checkbox" value="${esc(c.id)}" data-name="${esc(c.name)}"${have.has(c.id)?' checked':''}>
+        <i style="background:${esc(c.color||'var(--rule)')}"></i><span>${esc(c.name)}${c.primary?' <small>your main calendar</small>':''}</span></label>`).join('')
+        ||'<p class="hint">No other calendars found on this Google account.</p>'}
+    catch(e){box.innerHTML='';
+      cm.textContent=/Unknown action/i.test(e.message)?'The script in your Sheet is older than this app. Paste the new Code.gs into Apps Script, deploy it as a new version, then try again.':'Could not read your calendars: '+e.message;
+      cm.className='syncmsg bad'}
+  });
+  document.getElementById('calSave').addEventListener('click',()=>{
+    const picks=[...document.querySelectorAll('#calList input:checked')].map(i=>({id:i.value,name:i.dataset.name||''}));
+    S.settings={...S.settings,cals:picks};save();
+    lsSet(AKEY,{at:0,ids:'',events:[]});
+    document.getElementById('caldlg').close();
+    msg.textContent=picks.length?`Reading ${picks.map(p=>p.name).join(', ')}.`:'Not reading any other calendar.';msg.className='syncmsg good';
+    pullAgenda(true).then(()=>refresh());
+  });
   document.getElementById('syncPull').addEventListener('click',async()=>{
     if(!connected()){msg.textContent='Test and save first.';msg.className='syncmsg bad';return}
     try{const j=await api({action:'loadState'});if(!j.state){msg.textContent='Nothing saved in the Sheet yet.';return}
