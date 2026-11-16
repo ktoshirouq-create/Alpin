@@ -539,12 +539,11 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .ds-hrs{position:relative;height:15px;margin-top:5px;font-size:11px;color:var(--far)}
 .ds-hrs span{position:absolute;transform:translateX(-50%)}
 .ds-hrs span:first-child{transform:none}.ds-hrs span.end{right:0;transform:none}
-.cd.wk{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 17%,transparent) 0 6px,color-mix(in srgb,var(--muted) 6%,transparent) 6px 12px)}
+.cd.wk{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 8%,transparent) 0 6px,transparent 6px 12px)}
 dialog label.calas{flex-direction:row;align-items:center;gap:9px;padding:0 0 12px 33px;font-weight:500;font-size:13.5px;color:var(--muted)}
 dialog label.calas[hidden]{display:none}
 dialog label.calas input{flex:0 1 150px;min-width:0;padding:7px 10px;font-size:14.5px}
-.busylist{margin:2px 0 10px}
-.busyrow{display:flex;align-items:baseline;gap:10px;padding:8px 12px;border:1px dashed var(--rule);border-radius:12px;margin-bottom:6px;color:var(--muted)}
+.busyrow{display:flex;align-items:baseline;gap:10px;padding:8px 12px;border:1px dashed var(--rule);border-radius:12px;margin-bottom:8px;color:var(--muted)}
 .busyrow span{font:600 12px Barlow,sans-serif;letter-spacing:.04em;white-space:nowrap}
 .busyrow b{flex:1;font-weight:600;font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .busyrow em{font-style:normal;font-size:12px;color:var(--far);white-space:nowrap}
@@ -1454,7 +1453,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='126';
+const BUILD='127';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2394,11 +2393,15 @@ function cleanDuplicates(){
 const AKEY='tpg:agenda';
 const calPicks=()=>(((S.settings||{}).cals)||[]).filter(c=>c&&c.id);
 const agendaStore=()=>lsGet(AKEY,{at:0,ids:'',events:[]});
+const agendaEvents=()=>{const st=agendaStore();return ((st.past&&st.past.events)||[]).concat(st.events||[])};
+// how far back to read: to your first logged session, or the start of the Nepal prep
+function agendaStart(){let d=NS().prepStart;localLog().forEach(r=>{if(r.date&&r.date<d)d=r.date});
+  const floor=dayOf(addDays(new Date(),-400));return d<floor?floor:d}
 // your own name for a calendar's events ("Work"), if you gave it one
 const calAs=name=>{const c=calPicks().find(c=>c.name===name);return c&&c.as?String(c.as):''};
 // days something timed starts in one of your other calendars
 function busyDays(){const o={};if(!calPicks().length)return o;
-  (agendaStore().events||[]).forEach(e=>{if(!e.allDay)o[e.date]=1});return o}
+  agendaEvents().forEach(e=>{if(!e.allDay)o[e.date]=1});return o}
 let agendaBusy=false;
 async function pullAgenda(force){
   const picks=calPicks();
@@ -2408,16 +2411,29 @@ async function pullAgenda(force){
   if(!force&&st.ids===key&&Date.now()-st.at<10*60e3)return;      // at most every ten minutes
   agendaBusy=true;
   try{const now=new Date();
-    const j=await api({action:'agenda',from:dayOf(addDays(now,-35)),to:dayOf(addDays(now,60)),ids});
-    lsSet(AKEY,{at:Date.now(),ids:key,events:(j.events||[]).slice(0,400),old:false});
-    if(cur==='history'||cur==='today')render()}
+    const from=dayOf(addDays(now,-35));
+    const j=await api({action:'agenda',from,to:dayOf(addDays(now,60)),ids});
+    let past=st.ids===key?st.past:null;
+    lsSet(AKEY,{at:Date.now(),ids:key,events:(j.events||[]).slice(0,400),old:false,past});
+    if(cur==='history'||cur==='today')render();
+    // older than that only changes when you look further back: read it once, top it up weekly
+    const start=agendaStart(),upto=dayOf(addDays(now,-36));
+    if(start<=upto&&(!past||past.from>start||past.to<dayOf(addDays(now,-43)))){
+      const got=[],seen={};let a=parseDay(start);
+      while(dayOf(a)<=upto){const z=addDays(a,89),zs=dayOf(z)>upto?upto:dayOf(z);
+        const r=await api({action:'agenda',from:dayOf(a),to:zs,ids});
+        (r.events||[]).forEach(e=>{const k=[e.cal,e.date,e.start,e.title].join('|');
+          if(e.date<from&&!seen[k]){seen[k]=1;got.push(e)}});
+        a=addDays(z,1)}
+      lsSet(AKEY,{...agendaStore(),past:{from:start,to:upto,events:got.slice(0,1500)}});
+      if(cur==='history')render()}}
   catch(e){if(/Unknown action/i.test(e.message))lsSet(AKEY,{...st,old:true})}
   finally{agendaBusy=false}
 }
 // what else is on a given day, clipped to that day
 function agendaOn(ds){
   if(!calPicks().length)return [];
-  return (agendaStore().events||[]).filter(e=>{
+  return agendaEvents().filter(e=>{
     const end=e.endDate||e.date;
     if(ds<e.date||ds>end)return false;
     return !(!e.allDay&&ds===end&&ds>e.date&&e.end==='00:00');      // ended at midnight: not this day
@@ -2453,7 +2469,7 @@ function dayStrip(ds,nowHM,plans,isDone){
   </div><div class="ds-hrs">${ticks.map(h=>`<span style="left:${pc(h*60)}%">${pad2(h)}</span>`).join('')}<span class="end">00</span></div></div>`;
 }
 // when a shift that runs past midnight really ends
-function agendaEnd(ds,b){const e=(agendaStore().events||[]).find(e=>e.date===ds&&e.start===b.from&&(calAs(e.cal)||e.title||'Busy')===b.title);return e?e.end:''}
+function agendaEnd(ds,b){const e=agendaEvents().find(e=>e.date===ds&&e.start===b.from&&(calAs(e.cal)||e.title||'Busy')===b.title);return e?e.end:''}
 function clearStart(ds,start,minutes){
   const busy=agendaOn(ds).filter(b=>!b.allDay).map(b=>[hm2min(b.s),b.e==='24:00'?1440:hm2min(b.e)]);
   const fits=s=>s>=hm2min(EARLIEST())&&s+minutes<=22*60&&!busy.some(([a,z])=>s<z+30&&s+minutes>a-30);
@@ -2573,9 +2589,8 @@ function renderHistory(){
       ${objOn(calSel).map(o=>{const n=Math.round((parseDay(calSel)-parseDay(o.date))/864e5)+1,tot=Math.round((parseDay(o.end)-parseDay(o.date))/864e5)+1;
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
-      ${(()=>{const bz=agendaOn(calSel);return bz.length?`<div class="busylist">${bz.map(ev=>
-        `<div class="busyrow"><span>${esc(ev.label)}</span><b>${esc(ev.title)}</b>${ev.cal?`<em>${esc(ev.cal)}</em>`:''}</div>`).join('')}</div>`:''})()}
-      ${dayPlans.map(planRow).join('')}
+      ${[...agendaOn(calSel).map(ev=>({t:ev.allDay?'':ev.s,h:`<div class="busyrow"><span>${esc(ev.label)}</span><b>${esc(ev.title)}</b>${ev.cal?`<em>${esc(ev.cal)}</em>`:''}</div>`})),
+         ...dayPlans.map(p=>({t:p.start||'',h:planRow(p)}))].sort((a,b)=>a.t.localeCompare(b.t)).map(x=>x.h).join('')}
       ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
       <div class="planbtns"><button class="add${dayPlans.length||dayLog.length?' slim':''}" data-act="plannew">+ Plan a session${calSel>todayS?' on '+esc(niceDay(calSel)):' today'}</button>
