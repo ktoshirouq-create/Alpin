@@ -528,6 +528,21 @@ body[data-view="obj"] .facts div{border-left:2px solid color-mix(in srgb,var(--o
 .tl-item.busy::before{border-color:var(--far);background:var(--bg);border-style:dashed}
 .tl-card.thin.busy{border-left-color:var(--far);border-left-style:dashed;background:none;border:1px dashed var(--rule);opacity:1}
 .tl-card.thin.busy b{color:var(--muted);font-weight:600}
+.daystrip{margin:0 0 16px}
+.ds-bar{position:relative;height:38px;border-radius:10px;background:var(--panel);overflow:hidden}
+.ds-blk{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding-left:8px;font:600 12px Barlow,sans-serif;
+  white-space:nowrap;overflow:hidden;background:color-mix(in srgb,var(--tc) 36%,var(--panel));border-left:3px solid var(--tc)}
+.ds-blk.done{opacity:.55}
+.ds-blk.busy{--tc:var(--muted);color:var(--ink);
+  background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 30%,var(--panel)) 0 7px,color-mix(in srgb,var(--muted) 15%,var(--panel)) 7px 14px)}
+.ds-now{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--acc)}
+.ds-hrs{position:relative;height:15px;margin-top:5px;font-size:11px;color:var(--far)}
+.ds-hrs span{position:absolute;transform:translateX(-50%)}
+.ds-hrs span:first-child{transform:none}.ds-hrs span.end{right:0;transform:none}
+.cd.wk{background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--muted) 17%,transparent) 0 6px,color-mix(in srgb,var(--muted) 6%,transparent) 6px 12px)}
+dialog label.calas{flex-direction:row;align-items:center;gap:9px;padding:0 0 12px 33px;font-weight:500;font-size:13.5px;color:var(--muted)}
+dialog label.calas[hidden]{display:none}
+dialog label.calas input{flex:0 1 150px;min-width:0;padding:7px 10px;font-size:14.5px}
 .busylist{margin:2px 0 10px}
 .busyrow{display:flex;align-items:baseline;gap:10px;padding:8px 12px;border:1px dashed var(--rule);border-radius:12px;margin-bottom:6px;color:var(--muted)}
 .busyrow span{font:600 12px Barlow,sans-serif;letter-spacing:.04em;white-space:nowrap}
@@ -1279,7 +1294,7 @@ button.chip::after{display:none}
 
 <dialog id="caldlg"><form method="dialog" id="calfrm">
   <h2>Other calendars</h2>
-  <p class="hint">Tick the calendars the app may read. Their events show on Today and on each day in the Calendar, greyed out, and "Put the missing sessions in the calendar" works around them. The app never changes them.</p>
+  <p class="hint">Tick the calendars the app may read. Their events show on Today and in the Calendar, and "Put the missing sessions in the calendar" works around them. Give one a name, like Work, and its events are shown under that name. The app never changes them.</p>
   <div id="calList" class="callist"></div>
   <p class="syncmsg" id="calMsg" role="status"></p>
   <div class="dbtns"><span></span><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn pri" type="button" id="calSave">Save</button></div>
@@ -1439,7 +1454,7 @@ button.chip::after{display:none}
   <div class="fabtns"><button class="btn" id="faPrev">Back</button><button class="btn pri" id="faGo">Start</button><button class="btn" id="faNext">Next</button></div>
 </div>
 <script>
-const BUILD='125';
+const BUILD='126';
 /* ---------- drawing ---------- */
 const L1=28,L2=28,T=38,UA=20,FA=18;
 const rad=d=>d*Math.PI/180;
@@ -2379,6 +2394,11 @@ function cleanDuplicates(){
 const AKEY='tpg:agenda';
 const calPicks=()=>(((S.settings||{}).cals)||[]).filter(c=>c&&c.id);
 const agendaStore=()=>lsGet(AKEY,{at:0,ids:'',events:[]});
+// your own name for a calendar's events ("Work"), if you gave it one
+const calAs=name=>{const c=calPicks().find(c=>c.name===name);return c&&c.as?String(c.as):''};
+// days something timed starts in one of your other calendars
+function busyDays(){const o={};if(!calPicks().length)return o;
+  (agendaStore().events||[]).forEach(e=>{if(!e.allDay)o[e.date]=1});return o}
 let agendaBusy=false;
 async function pullAgenda(force){
   const picks=calPicks();
@@ -2388,7 +2408,7 @@ async function pullAgenda(force){
   if(!force&&st.ids===key&&Date.now()-st.at<10*60e3)return;      // at most every ten minutes
   agendaBusy=true;
   try{const now=new Date();
-    const j=await api({action:'agenda',from:dayOf(addDays(now,-7)),to:dayOf(addDays(now,60)),ids});
+    const j=await api({action:'agenda',from:dayOf(addDays(now,-35)),to:dayOf(addDays(now,60)),ids});
     lsSet(AKEY,{at:Date.now(),ids:key,events:(j.events||[]).slice(0,400),old:false});
     if(cur==='history'||cur==='today')render()}
   catch(e){if(/Unknown action/i.test(e.message))lsSet(AKEY,{...st,old:true})}
@@ -2401,8 +2421,8 @@ function agendaOn(ds){
     const end=e.endDate||e.date;
     if(ds<e.date||ds>end)return false;
     return !(!e.allDay&&ds===end&&ds>e.date&&e.end==='00:00');      // ended at midnight: not this day
-  }).map(e=>{const end=e.endDate||e.date,cont=ds>e.date,more=ds<end;
-    return {title:e.title||'Busy',cal:e.cal||'',allDay:!!e.allDay||(cont&&more),
+  }).map(e=>{const end=e.endDate||e.date,cont=ds>e.date,more=ds<end,as=calAs(e.cal);
+    return {title:as||e.title||'Busy',cal:as?'':(e.cal||''),cont,more,allDay:!!e.allDay||(cont&&more),
       from:e.allDay||cont?'':e.start,to:e.allDay||more?'':e.end,
       s:e.allDay||cont?'00:00':e.start,e:e.allDay||more?'24:00':e.end,
       label:e.allDay||(cont&&more)?'all day':cont?`until ${e.end}`:`${e.start}–${e.end}`}
@@ -2412,6 +2432,28 @@ const hm2min=t=>+t.slice(0,2)*60+ +t.slice(3,5);
 const min2hm=m=>pad2(Math.floor(m/60))+':'+pad2(m%60);
 /* A start time on that day that does not sit on top of something in your calendar.
    All-day entries do not block: a birthday is not a reason to skip a run. */
+/* The day as one strip: your sessions and what else is in your calendar, with now marked.
+   Only drawn when another calendar has something timed today. */
+function dayStrip(ds,nowHM,plans,isDone){
+  const busy=agendaOn(ds).filter(b=>!b.allDay).map(b=>({a:hm2min(b.s),z:b.e==='24:00'?1440:hm2min(b.e),b}));
+  let lo=hm2min(EARLIEST());
+  const live=busy.filter(x=>!(x.b.cont&&x.z<=lo));          // last night's shift is over: leave it out
+  if(!live.length)return '';
+  const ps=plans.filter(p=>p.start).map(p=>({a:hm2min(p.start),z:Math.min(1440,hm2min(p.start)+(+p.minutes||30)),p}));
+  [...live.filter(x=>!x.b.cont),...ps].forEach(x=>{lo=Math.min(lo,Math.floor(x.a/60)*60)});
+  const span=1440-lo,pc=m=>Math.round((Math.max(lo,Math.min(1440,m))-lo)/span*1000)/10;
+  const blk=(a,z)=>`left:${pc(a)}%;width:${Math.max(1.6,Math.round((pc(z)-pc(a))*10)/10)}%`;
+  const step=span>15*60?4:3,ticks=[];for(let h=lo/60;h<=22;h+=step)ticks.push(h);
+  const now=hm2min(nowHM);
+  return `<div class="daystrip"><div class="ds-bar">
+    ${live.map(x=>{const w=pc(x.z)-pc(x.a),tail=x.b.more?'':` · until ${x.b.to}`;
+      return `<span class="ds-blk busy" style="${blk(x.a,x.z)}">${w>14?esc(x.b.title)+(w>38?esc(x.b.more?` · until ${agendaEnd(ds,x.b)}`:tail):''):''}</span>`}).join('')}
+    ${ps.map(x=>`<span class="ds-blk${isDone(x.p)?' done':''}" style="${blk(x.a,x.z)};--tc:${colOf(tabName(x.p.tab))}"></span>`).join('')}
+    ${now>=lo?`<i class="ds-now" style="left:${pc(now)}%"></i>`:''}
+  </div><div class="ds-hrs">${ticks.map(h=>`<span style="left:${pc(h*60)}%">${pad2(h)}</span>`).join('')}<span class="end">00</span></div></div>`;
+}
+// when a shift that runs past midnight really ends
+function agendaEnd(ds,b){const e=(agendaStore().events||[]).find(e=>e.date===ds&&e.start===b.from&&(calAs(e.cal)||e.title||'Busy')===b.title);return e?e.end:''}
 function clearStart(ds,start,minutes){
   const busy=agendaOn(ds).filter(b=>!b.allDay).map(b=>[hm2min(b.s),b.e==='24:00'?1440:hm2min(b.e)]);
   const fits=s=>s>=hm2min(EARLIEST())&&s+minutes<=22*60&&!busy.some(([a,z])=>s<z+30&&s+minutes>a-30);
@@ -2469,7 +2511,7 @@ function renderHistory(){
   plans.forEach(p=>{(planBy[p.date]=planBy[p.date]||[]).push(p)});
   const y=calMonth.getFullYear(),m=calMonth.getMonth(),lead=(new Date(y,m,1).getDay()+6)%7,nd=new Date(y,m+1,0).getDate(),weeks=Math.ceil((lead+nd)/7);
   const wd=[...Array(7)].map((_,i)=>new Date(2024,0,1+i).toLocaleDateString(undefined,{weekday:'narrow'}));
-  let cells='';
+  let cells='';const bzD=busyDays();
   for(let i=0;i<weeks*7;i++){
     const d=new Date(y,m,1-lead+i),ds=dayOf(d),inM=d.getMonth()===m;
     const dl=(logBy[ds]||[]).filter(r=>r.result!=='skipped'&&!DOTLESS.includes(tabName(r.tab)));
@@ -2485,7 +2527,7 @@ function renderHistory(){
       ...doneTrain.slice(0,2).map(t=>`<i class="small" style="background:${colOf(t)}"></i>`),
       ...planTabs.slice(0,2).map(t=>`<i class="ring" style="border-color:${colOf(t)}"></i>`)].slice(0,4).join('');
     const ob=objOn(ds)[0]||(()=>{const t=tripOn(ds);return t?{col:colOf(t.kind||'Hike'),date:t.start,end:t.end,id:t.id,name:t.name,icon:'',go:null,trip:t}:null})();
-    cells+=`<button type="button" style="${ob?'--oc:'+ob.col:''}" class="cd${ob?' trip'+(ds===ob.date?' tstart':'')+(ds===ob.end?' tend':''):''}${inM?'':' out'}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
+    cells+=`<button type="button" style="${ob?'--oc:'+ob.col:''}" class="cd${ob?' trip'+(ds===ob.date?' tstart':'')+(ds===ob.end?' tend':''):''}${inM?'':' out'}${bzD[ds]?' wk':''}${ds===todayS?' today':''}${ds===calSel?' sel':''}" data-act="calday" data-d="${ds}" aria-label="${esc(niceDay(ds,true))}"><span>${d.getDate()}</span><em>${dots}</em></button>`;
   }
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));const wkStart=dayOf(wk);
   const week=all.filter(r=>r.date>=wkStart&&r.result!=='skipped'),secs=week.reduce((a,r)=>a+(parseInt(r.seconds,10)||0),0);
@@ -2532,7 +2574,7 @@ function renderHistory(){
         const tkd=o.id==='toubkal'?TK.days.find(x=>calSel>=x.d&&calSel<=(x.to||x.d)):null;
         return `<button class="tripbar" data-act="objopen" data-go="${o.go}" style="--oc:${o.col}"><b>${o.icon} ${esc(o.name)}</b><span>${tot>1?`day ${n} of ${tot}`:'race day'}${tkd?' · '+esc(tkd.t):''}</span></button>`}).join('')}
       ${(()=>{const bz=agendaOn(calSel);return bz.length?`<div class="busylist">${bz.map(ev=>
-        `<div class="busyrow"><span>${esc(ev.label)}</span><b>${esc(ev.title)}</b><em>${esc(ev.cal)}</em></div>`).join('')}</div>`:''})()}
+        `<div class="busyrow"><span>${esc(ev.label)}</span><b>${esc(ev.title)}</b>${ev.cal?`<em>${esc(ev.cal)}</em>`:''}</div>`).join('')}</div>`:''})()}
       ${dayPlans.map(planRow).join('')}
       ${poolLogs(dayLog.filter(r=>!pairs.claimed[r.id])).map(g=>g.pool&&g.rows.length>1?poolRow(g.rows):logRow(g.rows[0])).join('')}
       ${!dayPlans.length&&!dayLog.length?`<p class="empty">${calSel<todayS?'Nothing logged this day.':'Nothing planned yet.'}</p>`:''}
@@ -2627,13 +2669,13 @@ function renderToday(){
   const dayItems=[
     ...todayPlans.map(p=>({t:p.start||'',kind:isDone(p)?'done':'plan',p})),
     ...todayLogs.map(r=>({t:r.time||'',kind:'log',r})),
-    ...agendaOn(todayS).map(ev=>({t:ev.allDay?'00:00':ev.s,kind:'busy',ev}))
+    ...agendaOn(todayS).filter(ev=>ev.allDay).map(ev=>({t:'00:00',kind:'busy',ev}))
   ].sort((a,b)=>(a.t||'99').localeCompare(b.t||'99'));
   const nowPos=dayItems.filter(x=>(x.t||'99')<=nowHM).length;
   const dayRow=(x)=>{
     if(x.kind==='busy'){const ev=x.ev;
       return `<li class="tl-item busy"><span class="tl-time">${esc(ev.label)}</span>
-        <div class="tl-card thin busy"><b>${esc(ev.title)}</b><span>${esc(ev.cal)}</span></div></li>`}
+        <div class="tl-card thin busy"><b>${esc(ev.title)}</b>${ev.cal?`<span>${esc(ev.cal)}</span>`:''}</div></li>`}
     if(x.kind==='log'){const r=x.r;
       return `<li class="tl-item logged" style="--tc:${colOf(tabName(r.tab))}">
         <span class="tl-time">${esc(r.time||'')}</span>
@@ -2645,18 +2687,20 @@ function renderToday(){
       <div class="tl-card${done?' thin':''}">
         ${done?`<b>${esc(cleanTitle(p.title))}</b><span>done</span>`
         :`<h4>${esc(cleanTitle(p.title))}</h4>
-          ${(p.items||[]).length?`<p>${esc((p.items||[])[0])}</p>`:''}
+          ${(()=>{const nm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+            const it=(p.items||[]).find(x=>nm(x)!==nm(cleanTitle(p.title)));return it?`<p>${esc(it)}</p>`:''})()}
           <div class="tl-acts">
             ${refs(p).length?`<button class="go sm" data-act="pstart" data-id="${esc(p.id)}">${playIcon}Start</button>`
               :`<button class="go sm" data-act="pdone" data-id="${esc(p.id)}">✓ Done</button>`}
             <button class="link" data-act="pedit" data-id="${esc(p.id)}">Change</button>
           </div>`}
       </div></li>`};
-  const dayTL=`<ol class="tl">
+  const strip=dayStrip(todayS,nowHM,todayPlans,isDone);
+  const dayTL=`${strip}<ol class="tl">
     ${dayItems.slice(0,nowPos).map(dayRow).join('')}
     <li class="tl-item now"><span class="tl-time">now · ${esc(nowHM)}</span></li>
     ${dayItems.slice(nowPos).map(dayRow).join('')}
-    ${dayItems.some(x=>x.kind!=='busy')?'':`<li class="tl-item ghost"><div class="tl-ghost">${dayItems.length?'No training today.':'Nothing on today.'}${next?'':' Plan something, or log what you did.'}</div></li>`}
+    ${dayItems.some(x=>x.kind!=='busy')?'':`<li class="tl-item ghost"><div class="tl-ghost">${dayItems.length||strip?'No training today.':'Nothing on today.'}${next?'':' Plan something, or log what you did.'}</div></li>`}
   </ol>`;
   const wk=new Date(now);wk.setDate(now.getDate()-((now.getDay()+6)%7));
   const days=[...Array(7)].map((_,i)=>{const d=new Date(wk.getFullYear(),wk.getMonth(),wk.getDate()+i),ds=dayOf(d);
@@ -4535,7 +4579,7 @@ function actCalendar(b,act,p,art){
     document.getElementById('askT').textContent='What the dots mean';
     document.getElementById('askB').innerHTML=`<span class="legend2">${base.map(t=>`<span><i style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}</span>
       <span class="legend2 small">${TRAINTABS.filter(t=>!DOTLESS.includes(t)).map(t=>`<span><i class="small" style="background:${colOf(t)}"></i>${esc(t)}</span>`).join('')}<span><i class="ring"></i>planned</span></span>
-      <span class="legnote">Big dots are sessions you went out and did. Small dots are training. A ring means planned.</span>`;
+      <span class="legnote">Big dots are sessions you went out and did. Small dots are training. A ring means planned.${calPicks().length?' Striped days have something in your other calendars.':''}</span>`;
     const d=document.getElementById('ask'),y=document.getElementById('askYes'),n=document.getElementById('askNo');
     y.textContent='Close';y.classList.remove('danger-fill');n.style.display='none';
     y.onclick=()=>{n.style.display='';document.getElementById('askB').textContent='';d.close()};
@@ -4803,14 +4847,20 @@ function importData(){
     cd.showModal();
     try{const j=await api({action:'calendars'});
       box.innerHTML=(j.calendars||[]).map(c=>`<label class="calrow"><input type="checkbox" value="${esc(c.id)}" data-name="${esc(c.name)}"${have.has(c.id)?' checked':''}>
-        <i style="background:${esc(c.color||'var(--rule)')}"></i><span>${esc(c.name)}${c.primary?' <small>your main calendar</small>':''}</span></label>`).join('')
+        <i style="background:${esc(c.color||'var(--rule)')}"></i><span>${esc(c.name)}${c.primary?' <small>your main calendar</small>':''}</span></label>
+        <label class="calas"${have.has(c.id)?'':' hidden'}>Show as <input type="text" maxlength="24" placeholder="its own titles" data-for="${esc(c.id)}" value="${esc((calPicks().find(x=>x.id===c.id)||{}).as||'')}"></label>`).join('')
         ||'<p class="hint">No other calendars found on this Google account.</p>'}
     catch(e){box.innerHTML='';
       cm.textContent=/Unknown action/i.test(e.message)?'The script in your Sheet is older than this app. Paste the new Code.gs into Apps Script, deploy it as a new version, then try again.':'Could not read your calendars: '+e.message;
       cm.className='syncmsg bad'}
   });
+  document.getElementById('calList').addEventListener('change',ev=>{const i=ev.target;
+    if(i.type!=='checkbox')return;const nx=i.closest('.calrow').nextElementSibling;
+    if(nx&&nx.classList.contains('calas'))nx.hidden=!i.checked});
   document.getElementById('calSave').addEventListener('click',()=>{
-    const picks=[...document.querySelectorAll('#calList input:checked')].map(i=>({id:i.value,name:i.dataset.name||''}));
+    const picks=[...document.querySelectorAll('#calList input[type=checkbox]:checked')].map(i=>{
+      const f=[...document.querySelectorAll('#calList .calas input')].find(x=>x.dataset.for===i.value),as=f?f.value.trim():'';
+      return as?{id:i.value,name:i.dataset.name||'',as}:{id:i.value,name:i.dataset.name||''}});
     S.settings={...S.settings,cals:picks};save();
     lsSet(AKEY,{at:0,ids:'',events:[]});
     document.getElementById('caldlg').close();
